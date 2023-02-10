@@ -36,7 +36,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\FluentFTP\FluentFTP.csproj" />
+      <ProjectReference Include="..\..\FluentFTP\FluentFTP\FluentFTP.csproj" />
     </ItemGroup>
 
     <ItemGroup>
