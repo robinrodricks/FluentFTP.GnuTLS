@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net50</TargetFramework>
+		<OutputType>Library</OutputType>
+		<LangVersion>latest</LangVersion>
+		<ApplicationIcon />
+		<StartupObject />
+		<Platforms>AnyCPU;x64</Platforms>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\FluentFTP.GnuTLS\FluentFTP.GnuTLS.csproj" />
+		<ProjectReference Include="..\FluentFTP\FluentFTP.csproj" />
+	</ItemGroup>
+
+</Project>
