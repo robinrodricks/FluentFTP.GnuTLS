@@ -48,13 +48,39 @@ namespace FluentFTP.GnuTLS.Core {
 		[DllImport("Libs/libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_global_deinit")]
 		private static extern void gnutls_global_deinit();
 
+		// FREE WORKAROUND
+
+		[DllImport("Kernel32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+		private static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
+		[DllImport("Kernel32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+		private static extern IntPtr GetProcAddress(IntPtr hModule, [MarshalAs(UnmanagedType.LPStr)] string lpProcName);
+		[DllImport("Kernel32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+
+		internal static extern bool FreeLibrary(IntPtr hModule);
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate void freeFuncDelegate(IntPtr ptr);
+
 		public static void Free(IntPtr ptr) {
-			gnutls_free(ptr);
+			if (GnuTlsInternalStream.hDLL == IntPtr.Zero) {
+				GnuTlsInternalStream.hDLL = LoadLibrary("Libs/libgnutls-30.dll");
+				if (GnuTlsInternalStream.hDLL == IntPtr.Zero) {
+					throw new GnuTlsException("LoadLibrary for Libs/libgnutls-30.dll failed.");
+				}
+			}
+
+			IntPtr freeFuncExpPtr = (IntPtr)GetProcAddress(GnuTlsInternalStream.hDLL, "gnutls_free");
+			IntPtr freeFuncPtr = (IntPtr)Marshal.PtrToStructure(freeFuncExpPtr, typeof(IntPtr));
+			freeFuncDelegate freeFunc = Marshal.GetDelegateForFunctionPointer<freeFuncDelegate>(freeFuncPtr);
+
+			freeFunc(ptr);
 		}
 		// void gnutls_free(* ptr)
 		[DllImport("Libs/libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_free")]
 		public static extern void gnutls_free(IntPtr ptr);
 
+		//
 
 		// S e s s i o n
 
@@ -108,7 +134,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 			IntPtr descPtr = gnutls_session_get_desc(sess.ptr);
 			string desc = Marshal.PtrToStringAnsi(descPtr);
-			//gnutls_free(descPtr);
+			Free(descPtr);
 
 			return desc;
 		}
@@ -122,7 +148,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 			IntPtr namePtr = gnutls_protocol_get_name(version);
 			string name = Marshal.PtrToStringAnsi(namePtr);
-			//Static.gnutls_free(namePtr);
+			//Free(namePtr);
+
 			return name;
 		}
 		// const char * gnutls_protocol_get_name (gnutls_protocol_t version)
