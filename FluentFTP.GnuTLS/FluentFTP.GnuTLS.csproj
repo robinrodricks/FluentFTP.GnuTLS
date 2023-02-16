@@ -12,7 +12,7 @@
         <SignAssembly>True</SignAssembly>
         <AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
         <Version>1.0.0</Version>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
         <PackageIcon>logo-nuget.png</PackageIcon>
         <LangVersion>10.0</LangVersion>
     </PropertyGroup>
@@ -29,14 +29,14 @@
         <Pack>True</Pack>
         <PackagePath>\</PackagePath>
       </None>
-        <None Include="..\LICENSE.TXT">
+        <None Include="..\LICENSE">
             <Pack>True</Pack>
             <PackagePath></PackagePath>
         </None>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\FluentFTP\FluentFTP\FluentFTP.csproj" />
+      <PackageReference Include="FluentFTP" Version="45.0.1" />
     </ItemGroup>
 
     <ItemGroup>
