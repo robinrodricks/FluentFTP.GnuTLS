@@ -42,24 +42,38 @@
     <ItemGroup>
       <None Update="Libs\libgcc_s_seh-1.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Pack>True</Pack>
+        <PackagePath>lib\$(TargetFramework)</PackagePath>
       </None>
       <None Update="Libs\libgmp-10.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Pack>True</Pack>
+        <PackagePath>lib\$(TargetFramework)</PackagePath>
       </None>
       <None Update="Libs\libgnutls-30.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Pack>True</Pack>
+        <PackagePath>lib\$(TargetFramework)</PackagePath>
       </None>
       <None Update="Libs\libhogweed-6.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Pack>True</Pack>
+        <PackagePath>lib\$(TargetFramework)</PackagePath>
       </None>
       <None Update="Libs\libnettle-8.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Pack>True</Pack>
+        <PackagePath>lib\$(TargetFramework)</PackagePath>
       </None>
       <None Update="Libs\libwinpthread-1.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Pack>True</Pack>
+        <PackagePath>lib\$(TargetFramework)</PackagePath>
       </None>
       <None Update="Libs\zlib1.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Pack>True</Pack>
+        <PackagePath>lib\$(TargetFramework)</PackagePath>
       </None>
     </ItemGroup>
 
