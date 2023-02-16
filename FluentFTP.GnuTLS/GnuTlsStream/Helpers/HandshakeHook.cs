@@ -53,7 +53,7 @@ namespace FluentFTP.GnuTLS {
 						Logging.LogGnuFunc(GnuMessage.Handshake, "Retrieved session data with new session ticket");
 
 						Core.GnuTls.SessionSetData(session, resumeDataTLS);
-						//GnuTls.GnuFree(resumeDataTLS.ptr);
+						Core.GnuTls.Free(resumeDataTLS.ptr);
 					}
 				}
 

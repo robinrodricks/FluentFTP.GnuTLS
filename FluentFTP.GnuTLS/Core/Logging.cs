@@ -81,7 +81,7 @@ namespace FluentFTP.GnuTLS.Core {
 			}
 
 			string logMsg = "Internal: " + s;
-			//Static.Free(msg);
+			//Core.GnuTls.Free(msg);
 			Log(lvl, logMsg, true);
 		}
 

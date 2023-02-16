@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
@@ -78,6 +79,9 @@ namespace FluentFTP.GnuTLS {
 		// * re-used, therefore static
 		private static DatumT resumeDataTLS = new();
 
+		// Handle for Libs/gnutls-30.dll
+		internal static IntPtr hDLL = IntPtr.Zero;
+
 		//
 		// Constructor
 		//
@@ -113,7 +117,7 @@ namespace FluentFTP.GnuTLS {
 
 				int bitsNeeded = 64;
 				int bits = IntPtr.Size * 8;
-				string versionNeeded = "3.7.7";
+				string versionNeeded = "3.7.8";
 				string version = Core.GnuTls.CheckVersion(null);
 
 				Logging.Log("GnuTLS " + version + " (x" + bits + ")");
@@ -162,15 +166,11 @@ namespace FluentFTP.GnuTLS {
 
 			// Setup Session Resume
 			if (streamToResume != null) {
-				GCHandle gcHandle = GCHandle.Alloc(resumeDataTLS, GCHandleType.Pinned);
-
 				Core.GnuTls.SessionGetData2(streamToResume.sess, out resumeDataTLS);
 
 				Logging.LogGnuFunc(GnuMessage.Handshake, "Setting up session resume from control connection");
 				Core.GnuTls.SessionSetData(sess, resumeDataTLS);
-				//GnuTls.Free(resumeDataTLS.ptr);
-
-				gcHandle.Free();
+				Core.GnuTls.Free(resumeDataTLS.ptr);
 			}
 
 			DisableNagle();
@@ -210,6 +210,7 @@ namespace FluentFTP.GnuTLS {
 			if (ctorCount <= 1) {
 				cred.Dispose();
 				Core.GnuTls.GlobalDeInit();
+				Core.GnuTls.FreeLibrary(GnuTlsInternalStream.hDLL);
 			}
 
 			ctorCount--;
