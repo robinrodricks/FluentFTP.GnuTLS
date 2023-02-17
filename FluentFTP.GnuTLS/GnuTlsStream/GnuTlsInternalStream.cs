@@ -229,6 +229,8 @@ namespace FluentFTP.GnuTLS {
 			maxCount = Math.Min(maxCount, MaxRecordSize);
 
 			int result;
+			bool needRepeat;
+			int repeatCount = 0;
 
 			do {
 				result = Core.GnuTls.gnutls_record_recv(sess.ptr, buffer, maxCount);
@@ -236,11 +238,18 @@ namespace FluentFTP.GnuTLS {
 				if (result >= (int)EC.en.GNUTLS_E_SUCCESS) {
 					break;
 				}
-				if (result == (int)EC.en.GNUTLS_E_AGAIN ||
-					result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-					result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
-					result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED) {
-					Logging.LogGnuFunc(GnuMessage.Read, "FtpGnuStream.Read repeat due to " + Enum.GetName(typeof(EC.en), result));
+
+				needRepeat = (repeatCount < 50) &&	
+							 (result == (int)EC.en.GNUTLS_E_AGAIN ||
+							  result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+							  result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+							  result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED);
+
+				if (needRepeat) {
+					repeatCount++;
+
+					Logging.LogGnuFunc(GnuMessage.Read, "FtpGnuStream.Read repeat #" + repeatCount + " due to " + Enum.GetName(typeof(EC.en), result));
+
 					switch (result) {
 						case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
 							Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + Core.GnuTls.AlertGetName(Core.GnuTls.AlertGet(sess)));
@@ -252,10 +261,7 @@ namespace FluentFTP.GnuTLS {
 							break;
 					}
 				}
-			} while (result == (int)EC.en.GNUTLS_E_AGAIN ||
-					 result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-					 result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
-					 result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED);
+			} while (needRepeat);
 
 			GnuUtils.Check("FtpGnuStream.Read", result);
 
@@ -275,6 +281,8 @@ namespace FluentFTP.GnuTLS {
 			Array.Copy(buffer, offset, buf, 0, count);
 
 			int result = int.MaxValue;
+			bool needRepeat;
+			int repeatCount = 0;
 
 			while (result > 0) {
 				do {
@@ -282,11 +290,18 @@ namespace FluentFTP.GnuTLS {
 					if (result >= (int)EC.en.GNUTLS_E_SUCCESS) {
 						break;
 					}
-					if (result == (int)EC.en.GNUTLS_E_AGAIN ||
-						result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-						result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
-						result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED) {
-						Logging.LogGnuFunc(GnuMessage.Write, "FtpGnuStream.Write repeat due to " + Enum.GetName(typeof(EC.en), result));
+
+					needRepeat = (repeatCount < 50) &&
+								 (result == (int)EC.en.GNUTLS_E_AGAIN ||
+								  result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+								  result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+								  result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED);
+
+					if (needRepeat) {
+						repeatCount++;
+
+						Logging.LogGnuFunc(GnuMessage.Read, "FtpGnuStream.Write repeat #" + repeatCount + " due to " + Enum.GetName(typeof(EC.en), result));
+
 						switch (result) {
 							case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
 								Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + Core.GnuTls.AlertGetName(Core.GnuTls.AlertGet(sess)));
@@ -298,10 +313,7 @@ namespace FluentFTP.GnuTLS {
 								break;
 						}
 					}
-				} while (result == (int)EC.en.GNUTLS_E_AGAIN ||
-						 result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-						 result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
-						 result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED);
+				} while (needRepeat);
 
 				int newLength = buf.Length - result;
 				if (newLength <= 0) {
