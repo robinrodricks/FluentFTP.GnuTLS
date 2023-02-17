@@ -239,11 +239,7 @@ namespace FluentFTP.GnuTLS {
 					break;
 				}
 
-				needRepeat = (repeatCount < 50) &&	
-							 (result == (int)EC.en.GNUTLS_E_AGAIN ||
-							  result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-							  result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
-							  result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED);
+				needRepeat = GnuUtils.NeedRdWrRepeat(result, repeatCount);
 
 				if (needRepeat) {
 					repeatCount++;
@@ -291,11 +287,7 @@ namespace FluentFTP.GnuTLS {
 						break;
 					}
 
-					needRepeat = (repeatCount < 50) &&
-								 (result == (int)EC.en.GNUTLS_E_AGAIN ||
-								  result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-								  result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
-								  result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED);
+					needRepeat = GnuUtils.NeedRdWrRepeat(result, repeatCount);
 
 					if (needRepeat) {
 						repeatCount++;
