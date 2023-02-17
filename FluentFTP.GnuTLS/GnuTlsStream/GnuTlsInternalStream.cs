@@ -96,7 +96,7 @@ namespace FluentFTP.GnuTLS {
 			int handshakeTimeout,
 			GnuStreamLogCBFunc elog,
 			int logMaxLevel,
-			GnuMessage logDebugInformationMessages, 
+			GnuMessage logDebugInformationMessages,
 			int logQueueMaxSize) {
 
 			socket = socketDescriptor;
@@ -236,16 +236,21 @@ namespace FluentFTP.GnuTLS {
 				if (result >= (int)EC.en.GNUTLS_E_SUCCESS) {
 					break;
 				}
-				Logging.LogGnuFunc(GnuMessage.Read, "FtpGnuStream.Read repeat due to " + Enum.GetName(typeof(EC.en), result));
-				switch (result) {
-					case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
-						Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + Core.GnuTls.AlertGetName(Core.GnuTls.AlertGet(sess)));
-						break;
-					case (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED:
-						Logging.LogGnuFunc(GnuMessage.Alert, "Fatal alert received: " + Core.GnuTls.AlertGetName(Core.GnuTls.AlertGet(sess)));
-						break;
-					default:
-						break;
+				if (result == (int)EC.en.GNUTLS_E_AGAIN ||
+					result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+					result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+					result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED) {
+					Logging.LogGnuFunc(GnuMessage.Read, "FtpGnuStream.Read repeat due to " + Enum.GetName(typeof(EC.en), result));
+					switch (result) {
+						case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
+							Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + Core.GnuTls.AlertGetName(Core.GnuTls.AlertGet(sess)));
+							break;
+						case (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED:
+							Logging.LogGnuFunc(GnuMessage.Alert, "Fatal alert received: " + Core.GnuTls.AlertGetName(Core.GnuTls.AlertGet(sess)));
+							break;
+						default:
+							break;
+					}
 				}
 			} while (result == (int)EC.en.GNUTLS_E_AGAIN ||
 					 result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
@@ -277,16 +282,21 @@ namespace FluentFTP.GnuTLS {
 					if (result >= (int)EC.en.GNUTLS_E_SUCCESS) {
 						break;
 					}
-					Logging.LogGnuFunc(GnuMessage.Write, "FtpGnuStream.Write repeat due to " + Enum.GetName(typeof(EC.en), result));
-					switch (result) {
-						case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
-							Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + Core.GnuTls.AlertGetName(Core.GnuTls.AlertGet(sess)));
-							break;
-						case (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED:
-							Logging.LogGnuFunc(GnuMessage.Alert, "Fatal alert received: " + Core.GnuTls.AlertGetName(Core.GnuTls.AlertGet(sess)));
-							break;
-						default:
-							break;
+					if (result == (int)EC.en.GNUTLS_E_AGAIN ||
+						result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+						result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+						result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED) {
+						Logging.LogGnuFunc(GnuMessage.Write, "FtpGnuStream.Write repeat due to " + Enum.GetName(typeof(EC.en), result));
+						switch (result) {
+							case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
+								Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + Core.GnuTls.AlertGetName(Core.GnuTls.AlertGet(sess)));
+								break;
+							case (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED:
+								Logging.LogGnuFunc(GnuMessage.Alert, "Fatal alert received: " + Core.GnuTls.AlertGetName(Core.GnuTls.AlertGet(sess)));
+								break;
+							default:
+								break;
+						}
 					}
 				} while (result == (int)EC.en.GNUTLS_E_AGAIN ||
 						 result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
