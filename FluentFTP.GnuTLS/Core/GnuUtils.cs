@@ -6,7 +6,7 @@ namespace FluentFTP.GnuTLS.Core {
 	internal class GnuUtils {
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		internal static string GetCurrentMethod() {
+		public static string GetCurrentMethod() {
 
 			var st = new StackTrace();
 			var sf = st.GetFrame(1);
@@ -14,7 +14,7 @@ namespace FluentFTP.GnuTLS.Core {
 			return "*" + sf.GetMethod().Name + "(...)";
 		}
 
-		internal static int Check(string methodName, int result, params int[] resultsAllowed) {
+		public static int Check(string methodName, int result, params int[] resultsAllowed) {
 
 			if (result >= 0) {
 				return result;
@@ -46,12 +46,12 @@ namespace FluentFTP.GnuTLS.Core {
 			throw ex;
 		}
 
-		internal static string GnuTlsErrorText(int errorCode) {
+		public static string GnuTlsErrorText(int errorCode) {
 			if (!EC.ec.TryGetValue(errorCode, out string errText)) errText = "Unknown error";
 			return errText;
 		}
 
-		internal static bool NeedRdWrRepeat(int rslt, int rpCnt) {
+		public static bool NeedRdWrRepeat(int rslt, int rpCnt) {
 			return (rpCnt < 50) &&
 				   (rslt == (int)EC.en.GNUTLS_E_AGAIN ||
 					rslt == (int)EC.en.GNUTLS_E_INTERRUPTED ||
