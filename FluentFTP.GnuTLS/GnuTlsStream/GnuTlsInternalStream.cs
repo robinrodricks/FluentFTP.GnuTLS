@@ -238,9 +238,9 @@ namespace FluentFTP.GnuTLS {
 					break;
 				}
 
-				needRepeat = GnuUtils.NeedRdWrRepeat(result, repeatCount);
+				needRepeat = GnuUtils.NeedRdWrRepeat(result);
 
-				if (needRepeat) {
+				if ((repeatCount < 5) && needRepeat) {
 					repeatCount++;
 
 					Logging.LogGnuFunc(GnuMessage.Read, "FtpGnuStream.Read repeat #" + repeatCount + " due to " + Enum.GetName(typeof(EC.en), result));
@@ -286,9 +286,9 @@ namespace FluentFTP.GnuTLS {
 						break;
 					}
 
-					needRepeat = GnuUtils.NeedRdWrRepeat(result, repeatCount);
+					needRepeat = GnuUtils.NeedRdWrRepeat(result);
 
-					if (needRepeat) {
+					if ((repeatCount < 5) && needRepeat) {
 						repeatCount++;
 
 						Logging.LogGnuFunc(GnuMessage.Read, "FtpGnuStream.Write repeat #" + repeatCount + " due to " + Enum.GetName(typeof(EC.en), result));

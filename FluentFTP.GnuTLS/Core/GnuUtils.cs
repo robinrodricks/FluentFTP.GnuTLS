@@ -51,12 +51,11 @@ namespace FluentFTP.GnuTLS.Core {
 			return errText;
 		}
 
-		public static bool NeedRdWrRepeat(int rslt, int rpCnt) {
-			return (rpCnt < 50) &&
-				   (rslt == (int)EC.en.GNUTLS_E_AGAIN ||
-					rslt == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-					rslt == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
-					rslt == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED);
+		public static bool NeedRdWrRepeat(int rslt) {
+			return rslt == (int)EC.en.GNUTLS_E_AGAIN ||
+				   rslt == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+				   rslt == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+				   rslt == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED;
 		}
 
 	}
