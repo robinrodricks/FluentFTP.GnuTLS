@@ -50,5 +50,13 @@ namespace FluentFTP.GnuTLS.Core {
 			if (!EC.ec.TryGetValue(errorCode, out string errText)) errText = "Unknown error";
 			return errText;
 		}
+
+		public static bool NeedRdWrRepeat(int rslt) {
+			return rslt == (int)EC.en.GNUTLS_E_AGAIN ||
+				   rslt == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+				   rslt == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+				   rslt == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED;
+		}
+
 	}
 }

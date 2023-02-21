@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace FluentFTP.GnuTLS.Core {
-	public static class EC {
+	internal static class EC {
 
 		public enum en : int {
 			GNUTLS_E_SUCCESS = 0,
