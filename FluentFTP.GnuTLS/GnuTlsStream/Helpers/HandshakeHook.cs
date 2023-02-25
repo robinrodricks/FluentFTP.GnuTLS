@@ -47,13 +47,13 @@ namespace FluentFTP.GnuTLS {
 				// TLS1.3 : A session ticket appeared
 				//
 				if (description == (uint)HandshakeDescriptionT.GNUTLS_HANDSHAKE_NEW_SESSION_TICKET) {
-					SessionFlagsT flags = Core.GnuTls.SessionGetFlags(session);
+					SessionFlagsT flags = GnuTls.SessionGetFlags(session);
 					if (flags.HasFlag(SessionFlagsT.GNUTLS_SFLAGS_SESSION_TICKET)) {
-						Core.GnuTls.SessionGetData2(session, out resumeDataTLS);
+						GnuTls.SessionGetData2(session, out resumeDataTLS);
 						Logging.LogGnuFunc(GnuMessage.Handshake, "Retrieved session data with new session ticket");
 
-						Core.GnuTls.SessionSetData(session, resumeDataTLS);
-						Core.GnuTls.Free(resumeDataTLS.ptr);
+						GnuTls.SessionSetData(session, resumeDataTLS);
+						GnuTls.Free(resumeDataTLS.ptr);
 					}
 				}
 

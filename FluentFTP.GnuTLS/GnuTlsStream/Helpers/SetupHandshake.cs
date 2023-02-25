@@ -10,32 +10,32 @@ namespace FluentFTP.GnuTLS {
 		private void SetupHandshake() {
 
 			// Stangely, one reads that this also somehow influences maximum TLS session time
-			Core.GnuTls.DbSetCacheExpiration(sess, 100000000);
+			GnuTls.DbSetCacheExpiration(sess, 100000000);
 
 			// Handle the different ways Config could pass a priority string to here
 			if (priority == string.Empty) {
 				// None given, so use GnuTLS default
-				Core.GnuTls.SetDefaultPriority(sess);
+				GnuTls.SetDefaultPriority(sess);
 			}
 			else if (priority.StartsWith("+") || priority.StartsWith("-")) {
 				// Add or subtract from default
-				Core.GnuTls.SetDefaultPriorityAppend(sess, priority);
+				GnuTls.SetDefaultPriorityAppend(sess, priority);
 			}
 			else {
 				// Use verbatim
-				Core.GnuTls.PrioritySetDirect(sess, priority);
+				GnuTls.PrioritySetDirect(sess, priority);
 			}
 
 			// Bits for Diffie-Hellman prime
-			Core.GnuTls.DhSetPrimeBits(sess, 1024);
+			GnuTls.DhSetPrimeBits(sess, 1024);
 
 			// Allocate and link credential object
-			Core.GnuTls.CredentialsSet(cred, sess);
+			GnuTls.CredentialsSet(cred, sess);
 
 			// Application Layer Protocol Negotiation (ALPN)
 			// (alway AFTER credential allocation and setup
 			if (!string.IsNullOrEmpty(alpn)) {
-				Core.GnuTls.AlpnSetProtocols(sess, alpn);
+				GnuTls.AlpnSetProtocols(sess, alpn);
 			}
 
 			// Tell GnuTLS how to send and receive: Use already open socket
@@ -43,10 +43,10 @@ namespace FluentFTP.GnuTLS {
 			if (!SocketUsable(socket, out string reason)) {
 				throw new GnuTlsException("Socket is unusable " + reason);
 			}
-			Core.GnuTls.TransportSetInt(sess, (int)socket.Handle);
+			GnuTls.TransportSetInt(sess, (int)socket.Handle);
 
 			// Set the timeout for the handshake process
-			Core.GnuTls.HandshakeSetTimeout(sess, (uint)timeout);
+			GnuTls.HandshakeSetTimeout(sess, (uint)timeout);
 
 			// Any client certificate for presentation to server?
 			SetupClientCertificates();
