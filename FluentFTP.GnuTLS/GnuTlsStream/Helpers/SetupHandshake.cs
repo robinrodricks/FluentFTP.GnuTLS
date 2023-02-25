@@ -43,7 +43,6 @@ namespace FluentFTP.GnuTLS {
 			if (!SocketUsable(socket, out string reason)) {
 				throw new GnuTlsException("Socket is unusable" + reason);
 			}
-
 			Core.GnuTls.TransportSetInt(sess, (int)socket.Handle);
 
 			// Set the timeout for the handshake process
