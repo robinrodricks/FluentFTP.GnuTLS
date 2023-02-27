@@ -22,12 +22,12 @@ namespace FluentFTP.GnuTLS {
 
 			// You could set these flags programmatically here, to overide the priority mechanism,
 			// if you uncomment this statement:
-			// Native.CertificateSetVerifyFlags(cred, (CertificateVerifyFlagsT)0x00FFFFFF);
+			// Native.GnuTlsCertificateSetVerifyFlags(cred, (CertificateVerifyFlagsT)0x00FFFFFF);
 
 			//
 			// Perform the GnuTls internal validation, it is part of the handshake process
 			//
-			GnuTls.CertificateVerifyPeers3(sess, hostname, out serverCertificateStatus);
+			GnuTls.GnuTlsCertificateVerifyPeers3(sess, hostname, out serverCertificateStatus);
 
 			string serverCertificateStatusText = serverCertificateStatus.ToString("G");
 			if (serverCertificateStatusText == "0") {
@@ -47,7 +47,7 @@ namespace FluentFTP.GnuTLS {
 			// Determine the type of the servers certificate(s)/key and get the data out
 			// from them.
 			//
-			CertificateTypeT certificateType = GnuTls.CertificateTypeGet2(sess, CtypeTargetT.GNUTLS_CTYPE_PEERS);
+			CertificateTypeT certificateType = GnuTls.GnuTlsCertificateTypeGet2(sess, CtypeTargetT.GNUTLS_CTYPE_PEERS);
 
 			string serverCertificate = string.Empty;
 
@@ -117,7 +117,7 @@ namespace FluentFTP.GnuTLS {
 				uint numData = 0;
 
 				// Get the servers list of X.509 certificates, these will be in DER format
-				data = GnuTls.CertificateGetPeers(sess, ref numData);
+				data = GnuTls.GnuTlsCertificateGetPeers(sess, ref numData);
 				if (numData == 0) {
 					Logging.LogGnuFunc(GnuMessage.X509, "No certificates found");
 					return;
@@ -135,13 +135,13 @@ namespace FluentFTP.GnuTLS {
 
 					int result;
 
-					result = GnuTls.X509CrtInit(ref cert);
+					result = GnuTls.GnuTlsX509CrtInit(ref cert);
 					if (result < 0) {
 						Logging.LogGnuFunc(GnuMessage.X509, "Error allocating Memory");
 						return;
 					}
 
-					result = GnuTls.X509CrtImport(cert, ref data[i], X509CrtFmtT.GNUTLS_X509_FMT_DER);
+					result = GnuTls.GnuTlsX509CrtImport(cert, ref data[i], X509CrtFmtT.GNUTLS_X509_FMT_DER);
 					if (result < 0) {
 						Logging.LogGnuFunc(GnuMessage.X509, "Error decoding: " + GnuUtils.GnuTlsErrorText(result));
 						return;
@@ -150,24 +150,24 @@ namespace FluentFTP.GnuTLS {
 					if (ctorCount < 2) {
 
 						CertificatePrintFormatsT flag = CertificatePrintFormatsT.GNUTLS_CRT_PRINT_FULL;
-						result = GnuTls.X509CrtPrint(cert, flag, ref pinfo);
+						result = GnuTls.GnuTlsX509CrtPrint(cert, flag, ref pinfo);
 						if (result == 0) {
 							string pOutput = Marshal.PtrToStringAnsi(pinfo.ptr);
 							Logging.LogGnuFunc(GnuMessage.ShowClientCertificateInfo, pOutput);
-							GnuTls.Free(cinfo.ptr);
+							GnuTls.GnuTlsFree(cinfo.ptr);
 						}
 
-						result = GnuTls.X509CrtExport2(cert, X509CrtFmtT.GNUTLS_X509_FMT_PEM, ref cinfo);
+						result = GnuTls.GnuTlsX509CrtExport2(cert, X509CrtFmtT.GNUTLS_X509_FMT_PEM, ref cinfo);
 						if (result == 0) {
 							string cOutput = Marshal.PtrToStringAnsi(cinfo.ptr);
 							pCertS = cOutput;
 							Logging.LogGnuFunc(GnuMessage.ShowClientCertificatePEM, "X.509 Certificate (PEM)" + Environment.NewLine + cOutput);
-							GnuTls.Free(pinfo.ptr);
+							GnuTls.GnuTlsFree(pinfo.ptr);
 						}
 
 					}
 
-					GnuTls.X509CrtDeinit(cert);
+					GnuTls.GnuTlsX509CrtDeinit(cert);
 
 				}
 
@@ -186,7 +186,7 @@ namespace FluentFTP.GnuTLS {
 				uint numData = 0;
 
 				// Get the servers list of Raw Public Key certificates, these will be in DER format
-				data = GnuTls.CertificateGetPeers(sess, ref numData);
+				data = GnuTls.GnuTlsCertificateGetPeers(sess, ref numData);
 				if (numData == 0) {
 					Logging.LogGnuFunc(GnuMessage.RAWPK, "No certificates found");
 					return;
@@ -200,7 +200,7 @@ namespace FluentFTP.GnuTLS {
 
 				int result;
 
-				result = GnuTls.PcertImportRawpkRaw(cert, ref data[0], X509CrtFmtT.GNUTLS_X509_FMT_DER, 0, 0);
+				result = GnuTls.GnuTlsPcertImportRawpkRaw(cert, ref data[0], X509CrtFmtT.GNUTLS_X509_FMT_DER, 0, 0);
 				if (result < 0) {
 					Logging.LogGnuFunc(GnuMessage.RAWPK, "Error decoding: " + GnuUtils.GnuTlsErrorText(result));
 					return;
