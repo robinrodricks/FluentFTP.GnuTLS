@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.2
+ - Attempt to fix DLL packaging issues
+
 #### 1.0.1
  - Fix: Check Socket for validity before using
  - Rename GnuTls methods for more consistency

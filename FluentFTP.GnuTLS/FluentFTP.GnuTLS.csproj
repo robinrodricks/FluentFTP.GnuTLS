@@ -8,10 +8,10 @@
         <PackageProjectUrl>https://github.com/robinrodricks/FluentFTP</PackageProjectUrl>
         <Copyright>Copyright (c) 2015 Robin Rodricks and FluentFTP Contributors</Copyright>
         <PackageTags>log,logger,logging,interface,connector,mela</PackageTags>
-        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\FluentFTP.xml</DocumentationFile>
+        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\FluentFTP.GnuTLS.xml</DocumentationFile>
         <SignAssembly>True</SignAssembly>
         <AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
-        <Version>1.0.1</Version>
+        <Version>1.0.2</Version>
         <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
         <PackageIcon>logo-nuget.png</PackageIcon>
         <LangVersion>10.0</LangVersion>
@@ -23,6 +23,27 @@
         <RepositoryUrl>https://github.com/robinrodricks/FluentFTP</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Content Include="Libs\libgcc_s_seh-1.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Libs\libgmp-10.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Libs\libgnutls-30.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Libs\libhogweed-6.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Libs\libnettle-8.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Libs\libwinpthread-1.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
 
     <ItemGroup>
       <None Include="..\.github\logo-nuget.png">
@@ -37,44 +58,6 @@
 
     <ItemGroup>
       <PackageReference Include="FluentFTP" Version="45.0.1" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="Libs\libgcc_s_seh-1.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <Pack>True</Pack>
-        <PackagePath>lib\$(TargetFramework)</PackagePath>
-      </None>
-      <None Update="Libs\libgmp-10.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <Pack>True</Pack>
-        <PackagePath>lib\$(TargetFramework)</PackagePath>
-      </None>
-      <None Update="Libs\libgnutls-30.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <Pack>True</Pack>
-        <PackagePath>lib\$(TargetFramework)</PackagePath>
-      </None>
-      <None Update="Libs\libhogweed-6.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <Pack>True</Pack>
-        <PackagePath>lib\$(TargetFramework)</PackagePath>
-      </None>
-      <None Update="Libs\libnettle-8.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <Pack>True</Pack>
-        <PackagePath>lib\$(TargetFramework)</PackagePath>
-      </None>
-      <None Update="Libs\libwinpthread-1.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <Pack>True</Pack>
-        <PackagePath>lib\$(TargetFramework)</PackagePath>
-      </None>
-      <None Update="Libs\zlib1.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <Pack>True</Pack>
-        <PackagePath>lib\$(TargetFramework)</PackagePath>
-      </None>
     </ItemGroup>
 
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
