@@ -114,19 +114,7 @@ namespace FluentFTP.GnuTLS {
 
 				Logging.InitLogging(elog, logMaxLevel, logDebugInformationMessages, logQueueMaxSize);
 
-				int bitsNeeded = 64;
-				int bits = IntPtr.Size * 8;
-				string versionNeeded = "3.7.8";
-				string version = GnuTls.GnuTlsCheckVersion(null);
-
-				Logging.Log("GnuTLS " + version + " (x" + bits + ")");
-
-				if (bits != bitsNeeded) {
-					throw new GnuTlsException("GnuTlsStream needs to run as 64bit process");
-				}
-				if (version != versionNeeded) {
-					throw new GnuTlsException("GnuTLS library version must be " + versionNeeded);
-				}
+				ValidateLibrary(true);
 
 				// GnuTlsStreams are organized as
 				// TLS 1.2:
@@ -184,6 +172,27 @@ namespace FluentFTP.GnuTLS {
 
 			ValidateServerCertificates(customRemoteCertificateValidation);
 
+		}
+
+		public static bool ValidateLibrary(bool log) {
+
+			int bitsNeeded = 64;
+			int bits = IntPtr.Size * 8;
+			string versionNeeded = "3.7.8";
+			string version = GnuTls.GnuTlsCheckVersion(null);
+
+			if (log) {
+				Logging.Log("GnuTLS " + version + " (x" + bits + ")");
+			}
+
+			if (bits != bitsNeeded) {
+				throw new GnuTlsException("GnuTlsStream needs to run as 64bit process");
+			}
+			if (version != versionNeeded) {
+				throw new GnuTlsException("GnuTLS library version must be " + versionNeeded);
+			}
+
+			return true;
 		}
 
 		// Destructor
