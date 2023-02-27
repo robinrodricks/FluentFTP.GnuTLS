@@ -13,7 +13,7 @@
     <EmbeddedResource Remove="testdata\**" />
     <None Remove="testdata\**" />
   </ItemGroup>
-
+    
   <ItemGroup>
     <PackageReference Include="FluentFTP" Version="45.2.0" />
     <PackageReference Include="FluentFTP.GnuTLS" Version="1.0.3" />
