@@ -148,7 +148,6 @@ namespace FluentFTP.GnuTLS.Core {
 
 			IntPtr namePtr = gnutls_protocol_get_name(version);
 			string name = Marshal.PtrToStringAnsi(namePtr);
-			//GnuTlsFree(namePtr);
 
 			return name;
 		}
