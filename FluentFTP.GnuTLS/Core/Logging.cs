@@ -101,8 +101,8 @@ namespace FluentFTP.GnuTLS.Core {
 			Logging.logDebugInformation = logDebugInformation;
 			Logging.logQueueMaxSize = logQueueMaxSize;
 
-			GnuTls.GlobalSetLogFunction(gnuTlsLogCBFunc);
-			GnuTls.GlobalSetLogLevel(99);
+			GnuTls.GnuTlsGlobalSetLogFunction(gnuTlsLogCBFunc);
+			GnuTls.GnuTlsGlobalSetLogLevel(99);
 		}
 	}
 }

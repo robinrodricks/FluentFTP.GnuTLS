@@ -117,7 +117,7 @@ namespace FluentFTP.GnuTLS {
 				int bitsNeeded = 64;
 				int bits = IntPtr.Size * 8;
 				string versionNeeded = "3.7.8";
-				string version = GnuTls.CheckVersion(null);
+				string version = GnuTls.GnuTlsCheckVersion(null);
 
 				Logging.Log("GnuTLS " + version + " (x" + bits + ")");
 
@@ -140,7 +140,7 @@ namespace FluentFTP.GnuTLS {
 				}
 
 				// Setup the GnuTLS infrastructure
-				GnuTls.GlobalInit();
+				GnuTls.GnuTlsGlobalInit();
 
 				// Setup/Allocate certificate credentials for this first session
 				cred = new();
@@ -159,22 +159,22 @@ namespace FluentFTP.GnuTLS {
 			SetupHandshake();
 
 			// Setup handshake hook
-			GnuTls.HandshakeSetHookFunction(sess, (uint)HandshakeDescriptionT.GNUTLS_HANDSHAKE_ANY, (int)HandshakeHookT.GNUTLS_HOOK_BOTH, handshakeHookFunc);
+			GnuTls.GnuTlsHandshakeSetHookFunction(sess, (uint)HandshakeDescriptionT.GNUTLS_HANDSHAKE_ANY, (int)HandshakeHookT.GNUTLS_HOOK_BOTH, handshakeHookFunc);
 
 			IsSessionOk = true;
 
 			// Setup Session Resume
 			if (streamToResume != null) {
-				GnuTls.SessionGetData2(streamToResume.sess, out resumeDataTLS);
+				GnuTls.GnuTlsSessionGetData2(streamToResume.sess, out resumeDataTLS);
 
 				Logging.LogGnuFunc(GnuMessage.Handshake, "Setting up session resume from control connection");
-				GnuTls.SessionSetData(sess, resumeDataTLS);
-				GnuTls.Free(resumeDataTLS.ptr);
+				GnuTls.GnuTlsSessionSetData(sess, resumeDataTLS);
+				GnuTls.GnuTlsFree(resumeDataTLS.ptr);
 			}
 
 			DisableNagle();
 
-			GnuTls.HandShake(sess);
+			GnuTls.GnuTlsHandShake(sess);
 
 			ReEnableNagle();
 
@@ -196,19 +196,19 @@ namespace FluentFTP.GnuTLS {
 		public void Dispose() {
 			if (sess != null) {
 				if (IsSessionOk) {
-					int count = GnuTls.RecordCheckPending(sess);
+					int count = GnuTls.GnuTlsRecordCheckPending(sess);
 					if (count > 0) {
 						byte[] buf = new byte[count];
 						this.Read(buf, 0, count);
 					}
-					GnuTls.Bye(sess, CloseRequestT.GNUTLS_SHUT_RDWR);
+					GnuTls.GnuTlsBye(sess, CloseRequestT.GNUTLS_SHUT_RDWR);
 				}
 				sess.Dispose();
 			}
 
 			if (ctorCount <= 1) {
 				cred.Dispose();
-				GnuTls.GlobalDeInit();
+				GnuTls.GnuTlsGlobalDeInit();
 				GnuTls.FreeLibrary(GnuTlsInternalStream.hDLL);
 			}
 
@@ -247,10 +247,10 @@ namespace FluentFTP.GnuTLS {
 
 					switch (result) {
 						case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
-							Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + GnuTls.AlertGetName(GnuTls.AlertGet(sess)));
+							Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + GnuTls.GnuTlsAlertGetName(GnuTls.GnuTlsAlertGet(sess)));
 							break;
 						case (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED:
-							Logging.LogGnuFunc(GnuMessage.Alert, "Fatal alert received: " + GnuTls.AlertGetName(GnuTls.AlertGet(sess)));
+							Logging.LogGnuFunc(GnuMessage.Alert, "Fatal alert received: " + GnuTls.GnuTlsAlertGetName(GnuTls.GnuTlsAlertGet(sess)));
 							break;
 						default:
 							break;
@@ -295,10 +295,10 @@ namespace FluentFTP.GnuTLS {
 
 						switch (result) {
 							case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
-								Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + GnuTls.AlertGetName(GnuTls.AlertGet(sess)));
+								Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + GnuTls.GnuTlsAlertGetName(GnuTls.GnuTlsAlertGet(sess)));
 								break;
 							case (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED:
-								Logging.LogGnuFunc(GnuMessage.Alert, "Fatal alert received: " + GnuTls.AlertGetName(GnuTls.AlertGet(sess)));
+								Logging.LogGnuFunc(GnuMessage.Alert, "Fatal alert received: " + GnuTls.GnuTlsAlertGetName(GnuTls.GnuTlsAlertGet(sess)));
 								break;
 							default:
 								break;

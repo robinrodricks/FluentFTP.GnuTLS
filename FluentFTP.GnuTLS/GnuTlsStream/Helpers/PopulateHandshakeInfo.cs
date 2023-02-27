@@ -12,7 +12,7 @@ namespace FluentFTP.GnuTLS {
 
 			// This will be the GnuTLS format of the protocol name
 			// TLS1.2, TLS1.3 or other
-			ProtocolName = GnuTls.ProtocolGetName(GnuTls.ProtocolGetVersion(sess));
+			ProtocolName = GnuTls.GnuTlsProtocolGetName(GnuTls.GnuTlsProtocolGetVersion(sess));
 
 			// Try to "back-translate" to SslStream / System.Net.Security 
 			if (ProtocolName == "TLS1.2") {
@@ -32,17 +32,17 @@ namespace FluentFTP.GnuTLS {
 
 			// (TLS1.2)-(ECDHE-SECP384R1)-(ECDSA-SHA384)-(AES-256-GCM)
 			// (TLS1.3)-(ECDHE-SECP256R1)-(ECDSA-SECP256R1-SHA256)-(AES-256-GCM)
-			CipherSuite = GnuTls.SessionGetDesc(sess);
+			CipherSuite = GnuTls.GnuTlsSessionGetDesc(sess);
 
 			// ftp / ftp-data
-			AlpnProtocol = GnuTls.AlpnGetSelectedProtocol(sess);
+			AlpnProtocol = GnuTls.GnuTlsAlpnGetSelectedProtocol(sess);
 
 			// Maximum record size
-			MaxRecordSize = GnuTls.RecordGetMaxSize(sess);
+			MaxRecordSize = GnuTls.GnuTlsRecordGetMaxSize(sess);
 			Logging.LogGnuFunc(GnuMessage.Handshake, "Maximum record size: " + MaxRecordSize);
 
 			// Is this session a resume one?
-			IsResumed = GnuTls.SessionIsResumed(sess);
+			IsResumed = GnuTls.GnuTlsSessionIsResumed(sess);
 			if (IsResumed) {
 				Logging.LogGnuFunc(GnuMessage.Handshake, "Session is resumed from control connection");
 			}

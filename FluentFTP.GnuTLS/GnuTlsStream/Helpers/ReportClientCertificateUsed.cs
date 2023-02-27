@@ -9,7 +9,7 @@ namespace FluentFTP.GnuTLS {
 
 		private void ReportClientCertificateUsed() {
 
-			if (GnuTls.CertificateClientGetRequestStatus(sess)) {
+			if (GnuTls.GnuTlsCertificateClientGetRequestStatus(sess)) {
 				Logging.LogGnuFunc(GnuMessage.Handshake, "Server requested client certificate");
 			}
 			else {

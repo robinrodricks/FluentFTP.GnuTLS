@@ -24,7 +24,7 @@ namespace FluentFTP.GnuTLS.Core {
 				return result;
 			}
 
-			// Consider also checking GnuTls.ErrorIsFatal(result)
+			// Consider also checking GnuTls.GnuTlsErrorIsFatal(result)
 
 			GnuTlsException ex;
 

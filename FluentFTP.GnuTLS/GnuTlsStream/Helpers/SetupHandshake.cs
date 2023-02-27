@@ -10,32 +10,32 @@ namespace FluentFTP.GnuTLS {
 		private void SetupHandshake() {
 
 			// Stangely, one reads that this also somehow influences maximum TLS session time
-			GnuTls.DbSetCacheExpiration(sess, 100000000);
+			GnuTls.GnuTlsDbSetCacheExpiration(sess, 100000000);
 
 			// Handle the different ways Config could pass a priority string to here
 			if (priority == string.Empty) {
 				// None given, so use GnuTLS default
-				GnuTls.SetDefaultPriority(sess);
+				GnuTls.GnuTlsSetDefaultPriority(sess);
 			}
 			else if (priority.StartsWith("+") || priority.StartsWith("-")) {
 				// Add or subtract from default
-				GnuTls.SetDefaultPriorityAppend(sess, priority);
+				GnuTls.GnuTlsSetDefaultPriorityAppend(sess, priority);
 			}
 			else {
 				// Use verbatim
-				GnuTls.PrioritySetDirect(sess, priority);
+				GnuTls.GnuTlsPrioritySetDirect(sess, priority);
 			}
 
 			// Bits for Diffie-Hellman prime
-			GnuTls.DhSetPrimeBits(sess, 1024);
+			GnuTls.GnuTlsDhSetPrimeBits(sess, 1024);
 
 			// Allocate and link credential object
-			GnuTls.CredentialsSet(cred, sess);
+			GnuTls.GnuTlsCredentialsSet(cred, sess);
 
 			// Application Layer Protocol Negotiation (ALPN)
 			// (alway AFTER credential allocation and setup
 			if (!string.IsNullOrEmpty(alpn)) {
-				GnuTls.AlpnSetProtocols(sess, alpn);
+				GnuTls.GnuTlsAlpnSetProtocols(sess, alpn);
 			}
 
 			// Tell GnuTLS how to send and receive: Use already open socket
@@ -43,10 +43,14 @@ namespace FluentFTP.GnuTLS {
 			if (!SocketUsable(socket, out string reason)) {
 				throw new GnuTlsException("Socket is unusable " + reason);
 			}
-			GnuTls.TransportSetInt(sess, (int)socket.Handle);
+
+			//Both of these **should** be equivalent:
+			//GnuTls.GnuTlsTransportSetPtr(sess, socket.Handle);
+			//GnuTls.GnuTlsTransportSetInt2(sess, (int)socket.Handle, (int)socket.Handle);
+			GnuTls.GnuTlsTransportSetPtr(sess, socket.Handle);
 
 			// Set the timeout for the handshake process
-			GnuTls.HandshakeSetTimeout(sess, (uint)timeout);
+			GnuTls.GnuTlsHandshakeSetTimeout(sess, (uint)timeout);
 
 			// Any client certificate for presentation to server?
 			SetupClientCertificates();
