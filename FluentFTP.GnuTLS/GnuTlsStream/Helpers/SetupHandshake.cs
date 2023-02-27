@@ -43,7 +43,11 @@ namespace FluentFTP.GnuTLS {
 			if (!SocketUsable(socket, out string reason)) {
 				throw new GnuTlsException("Socket is unusable " + reason);
 			}
-			GnuTls.GnuTlsTransportSetPtr(sess, (int)socket.Handle);
+
+			//Both of these **should** be equivalent:
+			//GnuTls.GnuTlsTransportSetPtr(sess, socket.Handle);
+			//GnuTls.GnuTlsTransportSetInt2(sess, (int)socket.Handle, (int)socket.Handle);
+			GnuTls.GnuTlsTransportSetInt2(sess, (int)socket.Handle, (int)socket.Handle);
 
 			// Set the timeout for the handshake process
 			GnuTls.GnuTlsHandshakeSetTimeout(sess, (uint)timeout);
