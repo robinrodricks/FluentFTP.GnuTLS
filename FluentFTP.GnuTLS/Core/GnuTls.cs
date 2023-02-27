@@ -318,25 +318,25 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// Transport
 
-		public static int GnuTlsTransportSetInt2(Session sess, int socketDescriptorRecv, int socketDescriptorSend) {
+		public static void GnuTlsTransportSetPtr(Session sess, IntPtr socketDescriptor) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
 
-			return GnuUtils.Check(gcm, gnutls_transport_set_int2(sess.ptr, socketDescriptorRecv, socketDescriptorSend));
+			gnutls_transport_set_ptr(sess.ptr, socketDescriptor);
+		}
+		// void gnutls_transport_set_ptr (gnutls_session_t session, gnutls_transport_ptr_t fd) (= void * fd)
+		[DllImport("Libs/libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_transport_set_ptr")]
+		private static extern void gnutls_transport_set_ptr(IntPtr session, IntPtr fd);
+
+		public static void GnuTlsTransportSetInt2(Session sess, int socketDescriptorRecv, int socketDescriptorSend) {
+			string gcm = GnuUtils.GetCurrentMethod();
+			Logging.LogGnuFunc(gcm);
+
+			gnutls_transport_set_int2(sess.ptr, socketDescriptorRecv, socketDescriptorSend));
 		}
 		// void gnutls_transport_set_int (gnutls_session_t session, int recv_fd, int send_fd)
 		[DllImport("Libs/libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_transport_set_int2")]
-		private static extern int gnutls_transport_set_int2(IntPtr session, int recv_fd, int send_fd);
-
-		public static int GnuTlsTransportSetPtr(Session sess, IntPtr socketDescriptor) {
-			string gcm = GnuUtils.GetCurrentMethod();
-			Logging.LogGnuFunc(gcm);
-
-			return GnuUtils.Check(gcm, gnutls_transport_set_ptr(sess.ptr, socketDescriptor));
-		}
-		// void gnutls_transport_set_int (gnutls_session_t session, int fd)
-		[DllImport("Libs/libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_transport_set_ptr")]
-		private static extern int gnutls_transport_set_ptr(IntPtr session, IntPtr fd);
+		private static extern void gnutls_transport_set_int2(IntPtr session, int recv_fd, int send_fd);
 
 		// ssize_t gnutls_record_recv (gnutls_session_t session, void * data, size_t data_size)
 		[DllImport("Libs/libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_record_recv")]
