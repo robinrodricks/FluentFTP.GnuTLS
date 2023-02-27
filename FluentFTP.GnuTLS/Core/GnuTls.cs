@@ -332,7 +332,7 @@ namespace FluentFTP.GnuTLS.Core {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
 
-			gnutls_transport_set_int2(sess.ptr, socketDescriptorRecv, socketDescriptorSend));
+			gnutls_transport_set_int2(sess.ptr, socketDescriptorRecv, socketDescriptorSend);
 		}
 		// void gnutls_transport_set_int (gnutls_session_t session, int recv_fd, int send_fd)
 		[DllImport("Libs/libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_transport_set_int2")]
