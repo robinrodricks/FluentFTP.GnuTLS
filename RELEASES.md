@@ -1,7 +1,10 @@
 # Release Notes
 
+#### 1.0.3
+ - Attempt to fix DLL packaging issues (DLLs correctly marked Copy-To-Output)
+
 #### 1.0.2
- - Attempt to fix DLL packaging issues
+ - Attempt to fix DLL packaging issues (DLLs correctly added to host project)
 
 #### 1.0.1
  - Fix: Check Socket for validity before using

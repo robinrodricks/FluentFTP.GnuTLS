@@ -29,4 +29,25 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="C:\Users\Robin\.nuget\packages\fluentftp.gnutls\1.0.2\contentFiles\any\netstandard2.0\Libs\libgcc_s_seh-1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="C:\Users\Robin\.nuget\packages\fluentftp.gnutls\1.0.2\contentFiles\any\netstandard2.0\Libs\libgmp-10.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="C:\Users\Robin\.nuget\packages\fluentftp.gnutls\1.0.2\contentFiles\any\netstandard2.0\Libs\libgnutls-30.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="C:\Users\Robin\.nuget\packages\fluentftp.gnutls\1.0.2\contentFiles\any\netstandard2.0\Libs\libhogweed-6.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="C:\Users\Robin\.nuget\packages\fluentftp.gnutls\1.0.2\contentFiles\any\netstandard2.0\Libs\libnettle-8.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="C:\Users\Robin\.nuget\packages\fluentftp.gnutls\1.0.2\contentFiles\any\netstandard2.0\Libs\libwinpthread-1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
