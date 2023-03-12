@@ -44,7 +44,10 @@ namespace FluentFTP.GnuTLS {
 		private string hostname;
 
 		// The Handshake Timeout to be honored on handshake
-		private int timeout;
+		private int htimeout;
+
+		// The Poll Timeout to use for connectivity test
+		private int ptimeout;
 
 		//
 		// For our own inside use
@@ -93,6 +96,7 @@ namespace FluentFTP.GnuTLS {
 			GnuTlsInternalStream streamToResume,
 			string priorityString,
 			int handshakeTimeout,
+			int pollTimeout,
 			GnuStreamLogCBFunc elog,
 			int logMaxLevel,
 			GnuMessage logDebugInformationMessages,
@@ -102,7 +106,8 @@ namespace FluentFTP.GnuTLS {
 			alpn = alpnString;
 			priority = priorityString;
 			hostname = targetHostString;
-			timeout = handshakeTimeout;
+			htimeout = handshakeTimeout;
+			ptimeout = pollTimeout;
 
 			if (ctorCount < 1) {
 
