@@ -40,7 +40,7 @@ namespace FluentFTP.GnuTLS {
 
 			// Tell GnuTLS how to send and receive: Use already open socket
 			// Need to check for connectivity on this socket, cannot just blithely use it
-			if (!SocketUsable(socket, out string reason)) {
+			if (!SocketUsable(socket, ptimeout, out string reason)) {
 				throw new GnuTlsException("Socket is unusable " + reason);
 			}
 
@@ -50,15 +50,15 @@ namespace FluentFTP.GnuTLS {
 			GnuTls.GnuTlsTransportSetPtr(sess, socket.Handle);
 
 			// Set the timeout for the handshake process
-			GnuTls.GnuTlsHandshakeSetTimeout(sess, (uint)timeout);
+			GnuTls.GnuTlsHandshakeSetTimeout(sess, (uint)htimeout);
 
 			// Any client certificate for presentation to server?
 			SetupClientCertificates();
 
 		}
 
-		private static bool SocketUsable(Socket sock, out string rsn) {
-			try {
+		private static bool SocketUsable(Socket sock, int ptmo, out string rsn) {
+
 				if (sock == null) {
 					rsn = "sock == null";
 					return false;
@@ -74,12 +74,18 @@ namespace FluentFTP.GnuTLS {
 					return false;
 				}
 
+				if (ptmo == 0) {
+					rsn = string.Empty;
+					return true;
+				}
+
+			try {
 				// Poll (SelectRead) returns true if:
 				// Listen has been called and connection is pending (cannot be the case)
 				// Data is available for reading
 				// Connection has been closed, reset or terminated <--- this is the one we want
 				// The ordering in the if-statement is important: Available is updated by the Poll
-				if (sock.Poll(500000, SelectMode.SelectRead) && sock.Available == 0) {
+				if (sock.Poll(ptmo, SelectMode.SelectRead) && sock.Available == 0) {
 					rsn = "sock closed/reset/terminated";
 					return false;
 				}
@@ -95,6 +101,7 @@ namespace FluentFTP.GnuTLS {
 
 			rsn = string.Empty;
 			return true;
+
 		}
 
 		// An alternative would be (c/o MSDN)

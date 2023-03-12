@@ -31,9 +31,16 @@ namespace FluentFTP.GnuTLS {
 		public IList<GnuAdvanced> AdvancedOptions { get; set; } = null;
 
 		/// <summary>
-		/// How long to wait for a handshake before giving up, in MS. Set to zero to disable.
+		/// How long to wait for a handshake before giving up, in milliseconds.
+		/// Set to zero to disable.
 		/// </summary>
 		public int HandshakeTimeout { get; set; } = 5000;
+
+		/// <summary>
+		/// How long to wait for a connectivity socket poll, in milliseconds.
+		/// Set to zero to disable.
+		/// </summary>
+		public int PollTimeout { get; set; } = 500;
 
 		/// <summary>
 		/// Select the maximum verbosity of the GnuTLS messages which are logged with serverity "verbose".
