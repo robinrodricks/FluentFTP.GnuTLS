@@ -191,11 +191,21 @@ namespace FluentFTP.GnuTLS {
 				throw new GnuTlsException("GnuTlsStream needs to run as 64bit process");
 			}
 
+			string applicationVersion = Assembly.GetAssembly(MethodBase.GetCurrentMethod().DeclaringType).GetName().Version.ToString();
 			string versionNeeded = "3.7.8";
-			string version = GnuTls.GnuTlsCheckVersion(null);
+			string version;
+
+			try {
+				version = GnuTls.GnuTlsCheckVersion(null);
+			}
+			catch (Exception ex) {
+				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
+				Logging.Log("GnuTLS library validation error");
+				Logging.Log(ex.Message);
+				throw new GnuTlsException("GnuTLS library validation error", ex);
+			}
 
 			if (log) {
-				string applicationVersion = Assembly.GetAssembly(MethodBase.GetCurrentMethod().DeclaringType).GetName().Version.ToString();
 				Logging.Log("FluentFTP.GnuTLS " + applicationVersion + " / GnuTLS " + version + " (x" + bits + ")");
 			}
 
