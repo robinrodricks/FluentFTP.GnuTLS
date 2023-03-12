@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using FluentFTP.GnuTLS.Core;
@@ -183,16 +184,19 @@ namespace FluentFTP.GnuTLS {
 
 			int bitsNeeded = 64;
 			int bits = IntPtr.Size * 8;
-			string versionNeeded = "3.7.8";
-			string version = GnuTls.GnuTlsCheckVersion(null);
-
-			if (log) {
-				Logging.Log("GnuTLS " + version + " (x" + bits + ")");
-			}
 
 			if (bits != bitsNeeded) {
 				throw new GnuTlsException("GnuTlsStream needs to run as 64bit process");
 			}
+
+			string versionNeeded = "3.7.8";
+			string version = GnuTls.GnuTlsCheckVersion(null);
+
+			if (log) {
+				string applicationVersion = Assembly.GetAssembly(MethodBase.GetCurrentMethod().DeclaringType).GetName().Version.ToString();
+				Logging.Log("FluentFTP.GnuTLS " + applicationVersion + " / GnuTLS " + version + " (x" + bits + ")");
+			}
+
 			if (version != versionNeeded) {
 				throw new GnuTlsException("GnuTLS library version must be " + versionNeeded);
 			}
