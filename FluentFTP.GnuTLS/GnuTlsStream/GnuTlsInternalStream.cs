@@ -120,7 +120,7 @@ namespace FluentFTP.GnuTLS {
 
 				Logging.InitLogging(elog, logMaxLevel, logDebugInformationMessages, logQueueMaxSize);
 
-				ValidateLibrary(true);
+				Validate(true);
 
 				Logging.AttachGnuTlsLogging();
 
@@ -182,35 +182,35 @@ namespace FluentFTP.GnuTLS {
 
 		}
 
-		public static bool ValidateLibrary(bool log) {
+		public static bool Validate(bool log) {
 
-			int bitsNeeded = 64;
-			int bits = IntPtr.Size * 8;
-
-			if (bits != bitsNeeded) {
-				throw new GnuTlsException("GnuTlsStream needs to run as 64bit process");
-			}
+			string gnuTlsVersionNeeded = "3.7.8";
 
 			string applicationVersion = Assembly.GetAssembly(MethodBase.GetCurrentMethod().DeclaringType).GetName().Version.ToString();
-			string versionNeeded = "3.7.8";
-			string version;
+
+			if (!Environment.Is64BitProcess) {
+				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
+				Exception nex = new GnuTlsException("GnuTlsStream needs to be run as a 64bit process");
+				throw new GnuTlsException("Process validation error", nex);
+			}
+
+			string gnuTlsVersion;
 
 			try {
-				version = GnuTls.GnuTlsCheckVersion(null);
+				gnuTlsVersion = GnuTls.GnuTlsCheckVersion(null);
 			}
 			catch (Exception ex) {
 				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
-				Logging.Log("GnuTLS library validation error");
-				Logging.Log(ex.Message);
-				throw new GnuTlsException("GnuTLS library validation error", ex);
+				throw new GnuTlsException("GnuTLS .dll load/call validation error", ex);
 			}
 
 			if (log) {
-				Logging.Log("FluentFTP.GnuTLS " + applicationVersion + " / GnuTLS " + version + " (x" + bits + ")");
+				Logging.Log("FluentFTP.GnuTLS " + applicationVersion + " / GnuTLS " + gnuTlsVersion);
 			}
 
-			if (version != versionNeeded) {
-				throw new GnuTlsException("GnuTLS library version must be " + versionNeeded);
+			if (gnuTlsVersion != gnuTlsVersionNeeded) {
+				Exception nex = new GnuTlsException("GnuTLS library version must be " + gnuTlsVersionNeeded);
+				throw new GnuTlsException("GnuTLS .dll version validation error", nex);
 			}
 
 			return true;

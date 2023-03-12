@@ -58,7 +58,7 @@ namespace FluentFTP.GnuTLS {
 		}
 
 		public bool Validate() {
-			return GnuTlsInternalStream.ValidateLibrary(false);
+			return GnuTlsInternalStream.Validate(false);
 		}
 
 		public Stream GetBaseStream() {
