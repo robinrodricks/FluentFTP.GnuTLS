@@ -92,7 +92,7 @@ namespace FluentFTP.GnuTLS.Core {
 		// Avoid garbage collection failure of this callback
 		private static GnuTlsLogCBFunc gnuTlsLogCBFunc = Log;
 
-		// Setup logging
+		// Setup logging overall
 		public static void InitLogging(GnuStreamLogCBFunc logCBFunc, int logMaxLevel, GnuMessage logDebugInformation, int logQueueMaxSize) {
 			logQueue = new Queue<string>();
 
@@ -101,6 +101,10 @@ namespace FluentFTP.GnuTLS.Core {
 			Logging.logDebugInformation = logDebugInformation;
 			Logging.logQueueMaxSize = logQueueMaxSize;
 
+		}
+
+		// Setup GnuTls logging to overall log
+		public static void AttachGnuTlsLogging() {
 			GnuTls.GnuTlsGlobalSetLogFunction(gnuTlsLogCBFunc);
 			GnuTls.GnuTlsGlobalSetLogLevel(99);
 		}

@@ -1,17 +1,12 @@
-﻿using System.Diagnostics;
-using System.Linq;
+﻿using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace FluentFTP.GnuTLS.Core {
 	internal class GnuUtils {
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		public static string GetCurrentMethod() {
-
-			var st = new StackTrace();
-			var sf = st.GetFrame(1);
-
-			return "*" + sf.GetMethod().Name + "(...)";
+		public static string GetCurrentMethod([CallerMemberName] string memberName = "") {
+			return "*" + memberName + "(...)";
 		}
 
 		public static int Check(string methodName, int result, params int[] resultsAllowed) {

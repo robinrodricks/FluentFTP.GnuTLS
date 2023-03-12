@@ -49,6 +49,7 @@ namespace FluentFTP.GnuTLS {
 				isControl ? null : (controlConnStream as GnuTlsStream).BaseStream,
 				priority,
 				config.HandshakeTimeout,
+				config.PollTimeout,
 				fluentFtpLog,
 				config.LogLevel,
 				config.LogMessages,
@@ -57,7 +58,7 @@ namespace FluentFTP.GnuTLS {
 		}
 
 		public bool Validate() {
-			return GnuTlsInternalStream.ValidateLibrary(false);
+			return GnuTlsInternalStream.Validate(false);
 		}
 
 		public Stream GetBaseStream() {

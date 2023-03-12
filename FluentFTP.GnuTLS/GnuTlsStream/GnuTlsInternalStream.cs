@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using FluentFTP.GnuTLS.Core;
@@ -44,7 +45,10 @@ namespace FluentFTP.GnuTLS {
 		private string hostname;
 
 		// The Handshake Timeout to be honored on handshake
-		private int timeout;
+		private int htimeout;
+
+		// The Poll Timeout to use for connectivity test
+		private int ptimeout;
 
 		//
 		// For our own inside use
@@ -93,6 +97,7 @@ namespace FluentFTP.GnuTLS {
 			GnuTlsInternalStream streamToResume,
 			string priorityString,
 			int handshakeTimeout,
+			int pollTimeout,
 			GnuStreamLogCBFunc elog,
 			int logMaxLevel,
 			GnuMessage logDebugInformationMessages,
@@ -102,7 +107,8 @@ namespace FluentFTP.GnuTLS {
 			alpn = alpnString;
 			priority = priorityString;
 			hostname = targetHostString;
-			timeout = handshakeTimeout;
+			htimeout = handshakeTimeout;
+			ptimeout = pollTimeout;
 
 			if (ctorCount < 1) {
 
@@ -114,7 +120,9 @@ namespace FluentFTP.GnuTLS {
 
 				Logging.InitLogging(elog, logMaxLevel, logDebugInformationMessages, logQueueMaxSize);
 
-				ValidateLibrary(true);
+				Validate(true);
+
+				Logging.AttachGnuTlsLogging();
 
 				// GnuTlsStreams are organized as
 				// TLS 1.2:
@@ -174,22 +182,35 @@ namespace FluentFTP.GnuTLS {
 
 		}
 
-		public static bool ValidateLibrary(bool log) {
+		public static bool Validate(bool log) {
 
-			int bitsNeeded = 64;
-			int bits = IntPtr.Size * 8;
-			string versionNeeded = "3.7.8";
-			string version = GnuTls.GnuTlsCheckVersion(null);
+			string gnuTlsVersionNeeded = "3.7.8";
+
+			string applicationVersion = Assembly.GetAssembly(MethodBase.GetCurrentMethod().DeclaringType).GetName().Version.ToString();
+
+			if (!Environment.Is64BitProcess) {
+				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
+				Exception nex = new GnuTlsException("GnuTlsStream needs to be run as a 64bit process");
+				throw new GnuTlsException("Process validation error", nex);
+			}
+
+			string gnuTlsVersion;
+
+			try {
+				gnuTlsVersion = GnuTls.GnuTlsCheckVersion(null);
+			}
+			catch (Exception ex) {
+				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
+				throw new GnuTlsException("GnuTLS .dll load/call validation error", ex);
+			}
 
 			if (log) {
-				Logging.Log("GnuTLS " + version + " (x" + bits + ")");
+				Logging.Log("FluentFTP.GnuTLS " + applicationVersion + " / GnuTLS " + gnuTlsVersion);
 			}
 
-			if (bits != bitsNeeded) {
-				throw new GnuTlsException("GnuTlsStream needs to run as 64bit process");
-			}
-			if (version != versionNeeded) {
-				throw new GnuTlsException("GnuTLS library version must be " + versionNeeded);
+			if (gnuTlsVersion != gnuTlsVersionNeeded) {
+				Exception nex = new GnuTlsException("GnuTLS library version must be " + gnuTlsVersionNeeded);
+				throw new GnuTlsException("GnuTLS .dll version validation error", nex);
 			}
 
 			return true;
