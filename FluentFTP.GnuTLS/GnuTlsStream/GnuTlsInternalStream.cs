@@ -122,6 +122,8 @@ namespace FluentFTP.GnuTLS {
 
 				ValidateLibrary(true);
 
+				Logging.AttachGnuTlsLogging();
+
 				// GnuTlsStreams are organized as
 				// TLS 1.2:
 				// First one: Creates/Initializes the GnuTls infrastructure, cannot resume
