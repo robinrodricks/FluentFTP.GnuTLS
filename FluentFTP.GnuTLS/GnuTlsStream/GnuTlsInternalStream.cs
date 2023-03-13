@@ -82,7 +82,7 @@ namespace FluentFTP.GnuTLS {
 		// * re-used, therefore static
 		private static DatumT resumeDataTLS = new();
 
-		// Handle for Libs/gnutls-30.dll
+		// Handle for gnutls-30.dll
 		internal static IntPtr hDLL = IntPtr.Zero;
 
 		//
