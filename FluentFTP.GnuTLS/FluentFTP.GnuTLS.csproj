@@ -1,108 +1,80 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <PackageId>FluentFTP.GnuTLS</PackageId>
-        <Title>FluentFTP.GnuTLS</Title>
-        <Description>Adds support for TLS1.3 streams into FluentFTP using a .NET wrapper of GnuTLS.</Description>
-        <Authors>Michael Stiemke, Robin Rodricks, FluentFTP Contributors</Authors>
-        <PackageProjectUrl>https://github.com/robinrodricks/FluentFTP</PackageProjectUrl>
-        <Copyright>Copyright (c) 2015 Robin Rodricks and FluentFTP Contributors</Copyright>
-        <PackageTags>log,logger,logging,interface,connector,mela</PackageTags>
-        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\FluentFTP.GnuTLS.xml</DocumentationFile>
-        <SignAssembly>True</SignAssembly>
-        <AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
-        <Version>1.0.3</Version>
-        <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
-        <PackageIcon>logo-nuget.png</PackageIcon>
-        <LangVersion>10.0</LangVersion>
-    </PropertyGroup>
+	<PropertyGroup>
+		<PackageId>FluentFTP.GnuTLS</PackageId>
+		<Title>FluentFTP.GnuTLS</Title>
+		<Description>Adds support for TLS1.3 streams into FluentFTP using a .NET wrapper of GnuTLS.</Description>
+		<Authors>Michael Stiemke, Robin Rodricks, FluentFTP Contributors</Authors>
+		<PackageProjectUrl>https://github.com/robinrodricks/FluentFTP</PackageProjectUrl>
+		<Copyright>Copyright (c) 2015 Robin Rodricks and FluentFTP Contributors</Copyright>
+		<PackageTags>log,logger,logging,interface,connector,mela</PackageTags>
+		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\FluentFTP.GnuTLS.xml</DocumentationFile>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
+		<Version>1.0.4</Version>
+		<PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
+		<PackageIcon>logo-nuget.png</PackageIcon>
+		<LangVersion>10.0</LangVersion>
+	</PropertyGroup>
 
-    <PropertyGroup>
-        <TargetFrameworks>net60;net50;net472;net462;netstandard2.0;netstandard2.1</TargetFrameworks>
-        <LangVersion>10.0</LangVersion>
-        <RepositoryUrl>https://github.com/robinrodricks/FluentFTP</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
-    </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net50;net462;netstandard2.0</TargetFrameworks>
+		<LangVersion>10.0</LangVersion>
+		<RepositoryUrl>https://github.com/robinrodricks/FluentFTP</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+	</PropertyGroup>
 
-    <ItemGroup>
-     <ContentWithTargetPath Include="Libs\Win64\libgcc_s_seh-1.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <PackageCopyToOutput>true</PackageCopyToOutput>
-        <TargetPath>libgcc_s_seh-1.dll</TargetPath>
-     </ContentWithTargetPath>
-     <None Include="Libs/Win64\libgcc_s_seh-1.dll">
-       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-       <PackageCopyToOutput>false</PackageCopyToOutput>
-     </None>
+	<ItemGroup>
+		
+		<Content Include="libgcc_s_seh-1.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+		</Content>
 
-     <ContentWithTargetPath Include="Libs\Win64\libgmp-10.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <PackageCopyToOutput>true</PackageCopyToOutput>
-        <TargetPath>libgmp-10.dll</TargetPath>
-     </ContentWithTargetPath>
-     <None Include="Libs/Win64\libgmp-10.dll">
-       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-         <PackageCopyToOutput>false</PackageCopyToOutput>
-     </None>
+		<Content Include="libgmp-10.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+		</Content>
 
-     <ContentWithTargetPath Include="Libs\Win64\libgnutls-30.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <PackageCopyToOutput>true</PackageCopyToOutput>
-        <TargetPath>libgnutls-30.dll</TargetPath>
-     </ContentWithTargetPath>
-     <None Include="Libs/Win64\libgnutls-30.dll">
-       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-         <PackageCopyToOutput>false</PackageCopyToOutput>
-     </None>
+		<Content Include="libgnutls-30.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+		</Content>
 
-     <ContentWithTargetPath Include="Libs\Win64\libhogweed-6.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <PackageCopyToOutput>true</PackageCopyToOutput>
-        <TargetPath>libhogweed-6.dll</TargetPath>
-     </ContentWithTargetPath>
-     <None Include="Libs/Win64\libhogweed-6.dll">
-       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-         <PackageCopyToOutput>false</PackageCopyToOutput>
-     </None>
+		<Content Include="libhogweed-6.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+		</Content>
 
-     <ContentWithTargetPath Include="Libs\Win64\libnettle-8.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <PackageCopyToOutput>true</PackageCopyToOutput>
-        <TargetPath>libnettle-8.dll</TargetPath>
-     </ContentWithTargetPath>
-     <None Include="Libs/Win64\libnettle-8.dll">
-       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-         <PackageCopyToOutput>false</PackageCopyToOutput>
-     </None>
+		<Content Include="libnettle-8.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+		</Content>
 
-     <ContentWithTargetPath Include="Libs\Win64\libwinpthread-1.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <PackageCopyToOutput>true</PackageCopyToOutput>
-        <TargetPath>libwinpthread-1.dll</TargetPath>
-     </ContentWithTargetPath>
-     <None Include="Libs/Win64\libwinpthread-1.dll">
-       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-         <PackageCopyToOutput>false</PackageCopyToOutput>
-     </None>
-    </ItemGroup>
+		<Content Include="libwinpthread-1.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+		</Content>
+        
+	</ItemGroup>
 
-    <ItemGroup>
-      <None Include="..\.github\logo-nuget.png">
-        <Pack>True</Pack>
-        <PackagePath>\</PackagePath>
-      </None>
-        <None Include="..\LICENSE">
-            <Pack>True</Pack>
-            <PackagePath></PackagePath>
-        </None>
-    </ItemGroup>
+	<ItemGroup>
+		<None Include="..\.github\logo-nuget.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="FluentFTP" Version="45.0.1" />
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="FluentFTP" Version="45.0.1" />
+	</ItemGroup>
 
-    <PropertyGroup Condition="'$(Configuration)'=='Release'">
-        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	</PropertyGroup>
 
 </Project>
