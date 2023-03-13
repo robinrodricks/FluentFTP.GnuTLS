@@ -4,8 +4,8 @@
  - Package: Multitarget: `net50`, `net462`, `netstandard2.0`
  - Package: Prepare for Win/Linux/64bit/32bit: change paths and copy-to-output handling
  - Improved: logging and diagnosis on validation errors
- - Fix: Overly long poll timeout delay - added config parameter for this
- - Fix: `GetCurrentMethod` - incorrect output value
+ - Fix: Overly long poll timeout delay: added config parameter for this
+ - Fix: `GetCurrentMethod`: incorrect output value
 
 #### 1.0.3
  - Attempt to fix DLL packaging issues (DLLs correctly marked Copy-To-Output)
