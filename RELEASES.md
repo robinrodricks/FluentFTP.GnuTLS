@@ -1,5 +1,10 @@
 # Release Notes
 
+#### 1.0.5
+ - Package: Multitarget: `net50`, `net60`, `net462`, `net472`, `netstandard2.0`, `netstandard2.1`
+ - Package: Prepare for Win/Linux/64bit/32bit: change paths and copy-to-output handling again
+ - Package: Smaller .dll files - stripped symbols and debug information
+
 #### 1.0.4
  - Package: Multitarget: `net50`, `net462`, `netstandard2.0`
  - Package: Prepare for Win/Linux/64bit/32bit: change paths and copy-to-output handling

@@ -7,11 +7,11 @@
 		<Authors>Michael Stiemke, Robin Rodricks, FluentFTP Contributors</Authors>
 		<PackageProjectUrl>https://github.com/robinrodricks/FluentFTP</PackageProjectUrl>
 		<Copyright>Copyright (c) 2015 Robin Rodricks and FluentFTP Contributors</Copyright>
-		<PackageTags>log,logger,logging,interface,connector,mela</PackageTags>
+		<PackageTags>FluentFTP, ftp, tls13, gnutls</PackageTags>
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\FluentFTP.GnuTLS.xml</DocumentationFile>
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
-		<Version>1.0.4</Version>
+		<Version>1.0.5</Version>
 		<PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
 		<PackageIcon>logo-nuget.png</PackageIcon>
 		<LangVersion>10.0</LangVersion>
