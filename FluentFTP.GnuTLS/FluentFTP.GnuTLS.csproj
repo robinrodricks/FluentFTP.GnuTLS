@@ -22,7 +22,6 @@
         <LangVersion>10.0</LangVersion>
         <RepositoryUrl>https://github.com/robinrodricks/FluentFTP</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<ContentTargetFolders>contentFiles</ContentTargetFolders>
     </PropertyGroup>
 
