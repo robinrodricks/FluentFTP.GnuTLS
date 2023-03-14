@@ -27,15 +27,17 @@
 	<ContentTargetFolders>contentFiles</ContentTargetFolders>
 	<!--
 	    default: content;contentFiles
-	    Projects using packages.config use the contents directory
-		The will be copied to the wrong place on build, so don't help for .dll files
-	    Projects using PackageReference use the contentFiles directory.
+	    Projects using packages.config use the "contents" directory
+		These will be copied to the wrong place on build, so doesn't help for .dll files
+		and anyway it also refuses to reference foreign dll files correctly.
+	    Projects using PackageReference use the "contentFiles" directory.
 		These will be then copied to the folder location of the exe file on build.
 	-->
 
     </PropertyGroup>
 
     <!--
+	Build output folder:
         This copies the .dll files to the respective targetframework folders into
 	the root location where the main executable resides.
     -->
@@ -47,7 +49,8 @@
     </ItemGroup>
 
     <!--
-        This copies the .dll files to the package contentFiles folders
+	Nuget folder:
+	This copies the .dll files to the package "contentFiles" folders
 	(see comment for ContentTargetFolders above).
     -->
     <ItemGroup>
@@ -56,7 +59,8 @@
     </ItemGroup>
 
     <!--
-        This copies the .dll files to the package lib folders for packages.config projects,
+	Nuget folder:
+        This copies the .dll files to the package "content" folder for packages.config projects,
 	but without the path. This allows the FluentFTP.GnuTLS.targets file to remain constant
 	(see comment for ContentTargetFolders above).
     -->
@@ -68,8 +72,10 @@
     </ItemGroup>
 
     <!--
-	This magic causes MSBUILD on the install machine to copy in the .dlls on a build
+	Nuget folder:
+	This magic causes MSBUILD on the install machine to copy in the .dlls on a build.
 	We are moving a .target file (which contains the copy command) to the nuget package
+	build folder. The copy command will move the .dll files to the build output folder.
     -->
     <ItemGroup>
         <Content Include="Libs\Helpers\FluentFTP.GnuTLS.targets">
@@ -80,6 +86,7 @@
 
     <ItemGroup>
         <!--
+            Nuget folder:
             Logo file -> package
         -->
         <None Include="..\.github\logo-nuget.png">
@@ -87,6 +94,7 @@
             <PackagePath>\</PackagePath>
         </None>
         <!--
+            Nuget folder:
             License file -> package
         -->
 	<None Include="..\LICENSE">
