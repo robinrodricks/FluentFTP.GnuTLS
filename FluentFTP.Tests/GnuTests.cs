@@ -26,7 +26,7 @@ namespace FluentFTP.Tests {
 
 		[Fact]
 		public void ConnectTest() {
-			using (var conn = new FtpClient("127.0.0.1", "ftptest", "ftptest")) {
+			using (var conn = new FtpClient("ftps", "mike", "7u8i9o0p")) {
 
 
 				// enable GnuTLS streams for FTP client
@@ -57,7 +57,9 @@ namespace FluentFTP.Tests {
 
 
 				// connect using Explicit FTPS with TLS 1.3
+				conn.Config.ValidateAnyCertificate = true;
 				conn.Config.EncryptionMode = FtpEncryptionMode.Explicit;
+
 				conn.Connect();
 			}
 		}
@@ -65,7 +67,7 @@ namespace FluentFTP.Tests {
 		[Fact]
 		public async Task ConnectAsyncTest() {
 			var token = new CancellationToken();
-			using (var conn = new AsyncFtpClient("127.0.0.1", "ftptest", "ftptest")) {
+			using (var conn = new AsyncFtpClient("ftps", "mike", "7u8i9o0p")) {
 
 
 				// enable GnuTLS streams for FTP client
@@ -96,7 +98,9 @@ namespace FluentFTP.Tests {
 
 
 				// connect using Explicit FTPS with TLS 1.3
+				conn.Config.ValidateAnyCertificate = true;
 				conn.Config.EncryptionMode = FtpEncryptionMode.Explicit;
+
 				await conn.Connect(token);
 			}
 		}
