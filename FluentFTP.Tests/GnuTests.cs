@@ -57,7 +57,9 @@ namespace FluentFTP.Tests {
 
 
 				// connect using Explicit FTPS with TLS 1.3
+				conn.Config.ValidateAnyCertificate = true;
 				conn.Config.EncryptionMode = FtpEncryptionMode.Explicit;
+
 				conn.Connect();
 			}
 		}
@@ -96,7 +98,9 @@ namespace FluentFTP.Tests {
 
 
 				// connect using Explicit FTPS with TLS 1.3
+				conn.Config.ValidateAnyCertificate = true;
 				conn.Config.EncryptionMode = FtpEncryptionMode.Explicit;
+
 				await conn.Connect(token);
 			}
 		}
