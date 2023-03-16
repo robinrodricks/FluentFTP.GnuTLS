@@ -1,7 +1,7 @@
 # Release Notes
 
 #### 1.0.6
- - HotFix: AccessViolation exception due to cached gnutls_free handle.
+ - HotFix: `AccessViolation` exception due to cached `gnutls_free` handle
 
 #### 1.0.5
  - Package: Multitarget: `net50`, `net60`, `net462`, `net472`, `netstandard2.0`, `netstandard2.1`
