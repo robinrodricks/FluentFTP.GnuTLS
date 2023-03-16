@@ -110,6 +110,9 @@ namespace FluentFTP.GnuTLS {
 			htimeout = handshakeTimeout;
 			ptimeout = pollTimeout;
 
+			// Cached handle for gnutls_free only valid for life of this GnuTlsStream
+			hDLL = IntPtr.Zero;
+
 			if (ctorCount < 1) {
 
 				// On the first instance of GnuTlsStream, setup:
