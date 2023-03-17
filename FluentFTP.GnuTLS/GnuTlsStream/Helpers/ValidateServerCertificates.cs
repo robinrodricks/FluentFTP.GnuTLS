@@ -11,7 +11,7 @@ namespace FluentFTP.GnuTLS {
 
 	internal partial class GnuTlsInternalStream : Stream, IDisposable {
 
-		private void ValidateServerCertificates(CustomRemoteCertificateValidationCallback customRemoteCertificateValidation) {
+		private void ValidateServerCertificates(CustomRemoteCertificateValidationCallback customRemoteCertificateValidation, bool isResume) {
 
 			CertificateStatusT serverCertificateStatus;
 
@@ -147,8 +147,7 @@ namespace FluentFTP.GnuTLS {
 						return;
 					}
 
-					if (ctorCount < 2) {
-
+					if (!isResume) {
 						CertificatePrintFormatsT flag = CertificatePrintFormatsT.GNUTLS_CRT_PRINT_FULL;
 						result = GnuTls.GnuTlsX509CrtPrint(cert, flag, ref pinfo);
 						if (result == 0) {
@@ -156,10 +155,14 @@ namespace FluentFTP.GnuTLS {
 							Logging.LogGnuFunc(GnuMessage.ShowClientCertificateInfo, pOutput);
 							GnuTls.GnuTlsFree(cinfo.ptr);
 						}
+					}
 
 						result = GnuTls.GnuTlsX509CrtExport2(cert, X509CrtFmtT.GNUTLS_X509_FMT_PEM, ref cinfo);
 						if (result == 0) {
 							string cOutput = Marshal.PtrToStringAnsi(cinfo.ptr);
+						if (!isResume) {
+							Logging.LogGnuFunc(GnuMessage.ShowClientCertificatePEM, "X.509 Certificate (PEM)" + Environment.NewLine + cOutput);
+						}
 							pCertS = cOutput;
 							Logging.LogGnuFunc(GnuMessage.ShowClientCertificatePEM, "X.509 Certificate (PEM)" + Environment.NewLine + cOutput);
 							GnuTls.GnuTlsFree(pinfo.ptr);
