@@ -178,7 +178,7 @@ namespace FluentFTP.GnuTLS {
 
 			ReportClientCertificateUsed();
 
-			ValidateServerCertificates(customRemoteCertificateValidation);
+			ValidateServerCertificates(customRemoteCertificateValidation, streamToResume == null);
 
 		}
 
