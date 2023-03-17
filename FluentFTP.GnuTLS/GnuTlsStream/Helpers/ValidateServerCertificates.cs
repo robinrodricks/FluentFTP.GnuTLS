@@ -164,7 +164,6 @@ namespace FluentFTP.GnuTLS {
 							Logging.LogGnuFunc(GnuMessage.ShowClientCertificatePEM, "X.509 Certificate (PEM)" + Environment.NewLine + cOutput);
 						}
 							pCertS = cOutput;
-							Logging.LogGnuFunc(GnuMessage.ShowClientCertificatePEM, "X.509 Certificate (PEM)" + Environment.NewLine + cOutput);
 							GnuTls.GnuTlsFree(pinfo.ptr);
 						}
 
