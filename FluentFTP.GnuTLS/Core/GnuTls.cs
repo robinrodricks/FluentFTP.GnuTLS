@@ -63,11 +63,9 @@ namespace FluentFTP.GnuTLS.Core {
 		delegate void freeFuncDelegate(IntPtr ptr);
 
 		public static void GnuTlsFree(IntPtr ptr) {
+			GnuTlsInternalStream.hDLL = LoadLibrary("libgnutls-30.dll");
 			if (GnuTlsInternalStream.hDLL == IntPtr.Zero) {
-				GnuTlsInternalStream.hDLL = LoadLibrary("libgnutls-30.dll");
-				if (GnuTlsInternalStream.hDLL == IntPtr.Zero) {
-					throw new GnuTlsException("LoadLibrary for libgnutls-30.dll failed.");
-				}
+				throw new GnuTlsException("LoadLibrary for libgnutls-30.dll failed.");
 			}
 
 			IntPtr freeFuncExpPtr = (IntPtr)GetProcAddress(GnuTlsInternalStream.hDLL, "gnutls_free");
