@@ -157,21 +157,19 @@ namespace FluentFTP.GnuTLS {
 						}
 					}
 
-						result = GnuTls.GnuTlsX509CrtExport2(cert, X509CrtFmtT.GNUTLS_X509_FMT_PEM, ref cinfo);
-						if (result == 0) {
-							string cOutput = Marshal.PtrToStringAnsi(cinfo.ptr);
+					result = GnuTls.GnuTlsX509CrtExport2(cert, X509CrtFmtT.GNUTLS_X509_FMT_PEM, ref cinfo);
+					if (result == 0) {
+						string cOutput = Marshal.PtrToStringAnsi(cinfo.ptr);
 						if (!isResume) {
 							Logging.LogGnuFunc(GnuMessage.ShowClientCertificatePEM, "X.509 Certificate (PEM)" + Environment.NewLine + cOutput);
 						}
-							pCertS = cOutput;
-							GnuTls.GnuTlsFree(pinfo.ptr);
-						}
-
+						pCertS = cOutput;
+						GnuTls.GnuTlsFree(pinfo.ptr);
 					}
 
-					GnuTls.GnuTlsX509CrtDeinit(cert);
-
 				}
+
+				GnuTls.GnuTlsX509CrtDeinit(cert);
 
 				return;
 			}
