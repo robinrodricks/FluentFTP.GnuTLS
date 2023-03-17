@@ -62,9 +62,10 @@ namespace FluentFTP.GnuTLS {
 		internal GnuTlsHandshakeHookFunc handshakeHookFunc = HandshakeHook;
 
 		// Keep track: Is this the first instance or a subsequent one?
-		// We need to do a "GLobal Init" and a "Global DeInit" when the first
+		// We need to do a "Global Init" and a "Global DeInit" when the first
 		// instance is born or dies.
-		private static int ctorCount = 0;
+		private bool weAreRootStream = true;
+		private static bool weAreInitialized = false;
 
 		//
 
@@ -110,7 +111,9 @@ namespace FluentFTP.GnuTLS {
 			htimeout = handshakeTimeout;
 			ptimeout = pollTimeout;
 
-			if (ctorCount < 1) {
+			weAreRootStream = streamToResume == null;
+
+			if (!weAreInitialized) {
 
 				// On the first instance of GnuTlsStream, setup:
 				// 1. Logging
@@ -141,14 +144,8 @@ namespace FluentFTP.GnuTLS {
 				// Setup/Allocate certificate credentials for this first session
 				cred = new();
 
+				weAreInitialized = true;
 			}
-
-			// Further code runs on first and all subsequent instantiations of
-			// GnuTlsStream - for FTP, typically there is one control connection
-			// as the first instance, and one further instance that is born and then dies
-			// multiple times as a data connection.
-
-			ctorCount++;
 
 			sess = new(/*InitFlagsT.GNUTLS_NO_TICKETS_TLS12*/);
 
@@ -178,7 +175,7 @@ namespace FluentFTP.GnuTLS {
 
 			ReportClientCertificateUsed();
 
-			ValidateServerCertificates(customRemoteCertificateValidation, streamToResume == null);
+			ValidateServerCertificates(customRemoteCertificateValidation);
 
 		}
 
@@ -202,13 +199,12 @@ namespace FluentFTP.GnuTLS {
 				sess.Dispose();
 			}
 
-			if (ctorCount <= 1) {
+			if (weAreInitialized && weAreRootStream) {
 				cred.Dispose();
 				GnuTls.GnuTlsGlobalDeInit();
-				GnuTls.FreeLibrary(GnuTlsInternalStream.hDLL);
+				weAreInitialized = false;	
 			}
 
-			ctorCount--;
 		}
 
 		// Methods overriding base ( = System.IO.Stream )
