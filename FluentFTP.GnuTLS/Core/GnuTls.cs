@@ -56,26 +56,24 @@ namespace FluentFTP.GnuTLS.Core {
 		private static extern IntPtr GetProcAddress(IntPtr hModule, [MarshalAs(UnmanagedType.LPStr)] string lpProcName);
 		[DllImport("Kernel32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
 		[return: MarshalAs(UnmanagedType.Bool)]
-
-		internal static extern bool FreeLibrary(IntPtr hModule);
+		private static extern bool FreeLibrary(IntPtr hModule);
 
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate void freeFuncDelegate(IntPtr ptr);
 
 		public static void GnuTlsFree(IntPtr ptr) {
-			return;
 			IntPtr hDLL = LoadLibrary("libgnutls-30.dll");
 			if (hDLL == IntPtr.Zero) {
 				throw new GnuTlsException("LoadLibrary for libgnutls-30.dll failed.");
 			}
 
-			IntPtr freeFuncExpPtr = (IntPtr)GetProcAddress(hDLL, "gnutls_free");
+			IntPtr freeFuncExpPtr = GetProcAddress(hDLL, "gnutls_free");
 			IntPtr freeFuncPtr = (IntPtr)Marshal.PtrToStructure(freeFuncExpPtr, typeof(IntPtr));
 			freeFuncDelegate freeFunc = Marshal.GetDelegateForFunctionPointer<freeFuncDelegate>(freeFuncPtr);
 
 			freeFunc(ptr);
-			GnuTls.FreeLibrary(hDLL);
 
+			FreeLibrary(hDLL);
 		}
 		// void gnutls_free(* ptr)
 		[DllImport("libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_free")]
