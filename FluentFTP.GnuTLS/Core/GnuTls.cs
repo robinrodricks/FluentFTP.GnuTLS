@@ -67,10 +67,24 @@ namespace FluentFTP.GnuTLS.Core {
 				throw new GnuTlsException("LoadLibrary for libgnutls-30.dll failed.");
 			}
 
+			// gnutls_free is (for reasons beyond my comprehension) exported from libgnutls-30.dll
+			// marked as a value, not an entry point. Thus, DllImport would handle it incorrectly.
+
+			// The trick is to, step by step, do the following:
+
+			// Get the address of the exported variable named "gnutls_free".
 			IntPtr freeFuncExpPtr = GetProcAddress(hDLL, "gnutls_free");
+			if (freeFuncExpPtr == IntPtr.Zero) {
+				throw new GnuTlsException("GetProcAddress for libgnutls-30.dll/gnutls_free failed.");
+			}
+
+			// At this address, you will find the address of the real gnutls_free function.
 			IntPtr freeFuncPtr = (IntPtr)Marshal.PtrToStructure(freeFuncExpPtr, typeof(IntPtr));
+
+			// Using this address, you can setup the delegate
 			freeFuncDelegate freeFunc = Marshal.GetDelegateForFunctionPointer<freeFuncDelegate>(freeFuncPtr);
 
+			// And then you can actually invoke the gnutls_free function.
 			freeFunc(ptr);
 
 			FreeLibrary(hDLL);
