@@ -1,8 +1,8 @@
 # Release Notes
 
 #### 1.0.7
- - Fix: Further safety on cached .dll load address handle to avoid `AccessViolation` exceptions
- - Fix: Certificate details not available to validation on second, third etc. TLS handshake
+ - Fix: Further safety on cached `DLL` load address handle to avoid `AccessViolation` exceptions
+ - Fix: Certificate details not available to validation on subsequent TLS handshakes
  - Fix: Allow multiple TLS handshakes without disposing
 
 #### 1.0.6
