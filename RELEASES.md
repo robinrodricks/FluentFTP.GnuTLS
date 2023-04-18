@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.8
+ - Improved: Certificate validation failure exception text
+
 #### 1.0.7
  - Fix: Further safety on cached .dll load address handle to avoid `AccessViolation` exceptions
  - Fix: Certificate details not available to validation on second, third etc. TLS handshake
