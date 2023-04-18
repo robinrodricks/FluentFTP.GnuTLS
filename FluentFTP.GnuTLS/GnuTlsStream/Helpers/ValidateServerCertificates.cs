@@ -97,9 +97,10 @@ namespace FluentFTP.GnuTLS {
 			// Invoke any external user supplied validation callback
 			//
 			if (!customRemoteCertificateValidation(this, valCert, valChain, serverCertificateStatusText)) {
-				Logging.LogGnuFunc(GnuMessage.ClientCertificateValidation, "Error set by external server certificate validation function");
-				throw new AuthenticationException(serverCertificateStatusText);
-			};
+				string text = "The remote certificate was rejected by the provided RemoteCertificateValidationCallback.";
+				Logging.LogGnuFunc(GnuMessage.ClientCertificateValidation, text);
+				throw new AuthenticationException(text, new GnuTlsException("Certificate validation failure: " + serverCertificateStatusText));
+			}
 
 			// End of method here
 			// Local context functions:
@@ -147,14 +148,12 @@ namespace FluentFTP.GnuTLS {
 						return;
 					}
 
-					if (weAreRootStream) {
-						CertificatePrintFormatsT flag = CertificatePrintFormatsT.GNUTLS_CRT_PRINT_FULL;
-						result = GnuTls.GnuTlsX509CrtPrint(cert, flag, ref pinfo);
-						if (result == 0) {
+					CertificatePrintFormatsT flag = CertificatePrintFormatsT.GNUTLS_CRT_PRINT_FULL;
+					result = GnuTls.GnuTlsX509CrtPrint(cert, flag, ref pinfo);
+					if (result == 0) {
 							string pOutput = Marshal.PtrToStringAnsi(pinfo.ptr);
 							Logging.LogGnuFunc(GnuMessage.ShowClientCertificateInfo, pOutput);
-							GnuTls.GnuTlsFree(cinfo.ptr);
-						}
+						GnuTls.GnuTlsFree(cinfo.ptr);
 					}
 
 					result = GnuTls.GnuTlsX509CrtExport2(cert, X509CrtFmtT.GNUTLS_X509_FMT_PEM, ref cinfo);
