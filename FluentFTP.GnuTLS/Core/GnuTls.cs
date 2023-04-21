@@ -624,4 +624,33 @@ namespace FluentFTP.GnuTLS.Core {
 		private static extern int gnutls_pcert_import_rawpk_raw(IntPtr pcert, ref DatumT data, X509CrtFmtT format, uint key_usage, uint flags);
 
 	}
+
+
+	//	for .NET / Linux: TODO:
+
+	// DllImport("libgnutls-30.dll".... needs to be libgnutls-30.so
+
+	//	LoadLibrary:
+
+	//[DllImport("libdl", ExactSpelling = true)]
+	//	public static extern IntPtr dlopen(string filename, int flags);
+
+	//	GetProcAddress:
+
+	//[DllImport("libdl", ExactSpelling = true)]
+	//	public static extern IntPtr dlsym(IntPtr handle, string symbol);
+
+	//	FreeLibrary:
+
+	//[DllImport("libdl", ExactSpelling = true)]
+	//	public static extern int dlclose(IntPtr handle);
+
+	//	Sample usage:
+
+	//const int RTLD_NOW = 0x002;
+	//	IntPtr pDll = dlopen("ourdevice.so.0", RTLD_NOW);
+	//	IntPtr pAddressOfFunction = dlsym(pDll, "AdcOpen");
+	//	...
+	//	dlclose(pDll);
+
 }
