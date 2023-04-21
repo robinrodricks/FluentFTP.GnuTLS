@@ -1,5 +1,5 @@
 ﻿using System;
-
+// ReSharper disable all InconsistentNaming
 namespace FluentFTP.GnuTLS.Core {
 	internal abstract class Session : IDisposable {
 

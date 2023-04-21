@@ -8,7 +8,7 @@ using FluentFTP.GnuTLS.Core;
 using FluentFTP.GnuTLS.Enums;
 
 namespace FluentFTP.GnuTLS {
-
+// ReSharper disable all InconsistentNaming
 	/// <summary>
 	/// Adds support for GnuTLS TLS1.2 and TLS1.3 (with session resume capability)
 	/// for FluentFTP by using a .NET c# wrapper for GnuTLS.
@@ -202,7 +202,7 @@ namespace FluentFTP.GnuTLS {
 			if (weAreInitialized && weAreRootStream) {
 				cred.Dispose();
 				GnuTls.GnuTlsGlobalDeInit();
-				weAreInitialized = false;	
+				weAreInitialized = false;
 			}
 
 		}

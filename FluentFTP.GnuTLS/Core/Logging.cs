@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using FluentFTP.GnuTLS.Enums;
-
+// ReSharper disable all InconsistentNaming
 namespace FluentFTP.GnuTLS.Core {
 	internal class Logging {
 

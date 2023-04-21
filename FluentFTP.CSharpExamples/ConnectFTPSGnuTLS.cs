@@ -7,7 +7,7 @@ using FluentFTP;
 using FluentFTP.Client.BaseClient;
 using FluentFTP.GnuTLS;
 using FluentFTP.GnuTLS.Enums;
-
+// ReSharper disable all InconsistentNaming
 namespace Examples {
 	internal static class ConnectFTPSGnuTLSExample {
 

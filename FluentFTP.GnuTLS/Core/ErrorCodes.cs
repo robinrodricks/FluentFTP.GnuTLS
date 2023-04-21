@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-
+// ReSharper disable all InconsistentNaming
 namespace FluentFTP.GnuTLS.Core {
 	internal static class EC {
 

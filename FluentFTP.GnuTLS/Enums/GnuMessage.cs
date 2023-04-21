@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
+// ReSharper disable all InconsistentNaming
 namespace FluentFTP.GnuTLS.Enums {
 
 	[Flags]

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-
+// ReSharper disable all InconsistentNaming
 namespace FluentFTP.GnuTLS.Core {
 
 	[StructLayout(LayoutKind.Sequential)]
@@ -11,7 +11,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 	//
 	// Enums/Types gleaned from GnuTLS V 3.7.7 to help interop
-	// 
+	//
 
 	/**
 	* gnutls_init_flags_t:
@@ -391,12 +391,12 @@ namespace FluentFTP.GnuTLS.Core {
 	/**
 	 * gnutls_certificate_status_t:
 	 * @GNUTLS_CERT_INVALID: The certificate is not signed by one of the
-	 *   known authorities or the signature is invalid (deprecated by the flags 
+	 *   known authorities or the signature is invalid (deprecated by the flags
 	 *   %GNUTLS_CERT_SIGNATURE_FAILURE and %GNUTLS_CERT_SIGNER_NOT_FOUND).
 	 * @GNUTLS_CERT_SIGNATURE_FAILURE: The signature verification failed.
 	 * @GNUTLS_CERT_REVOKED: Certificate is revoked by its authority.  In X.509 this will be
 	 *   set only if CRLs are checked.
-	 * @GNUTLS_CERT_SIGNER_NOT_FOUND: The certificate's issuer is not known. 
+	 * @GNUTLS_CERT_SIGNER_NOT_FOUND: The certificate's issuer is not known.
 	 *   This is the case if the issuer is not included in the trusted certificate list.
 	 * @GNUTLS_CERT_SIGNER_NOT_CA: The certificate's signer was not a CA. This
 	 *   may happen if this was a version 1 certificate, which is common with
@@ -477,7 +477,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 * @GNUTLS_VERIFY_ALLOW_ANY_X509_V1_CA_CRT: Allow CA certificates that
 	 *   have version 1 (both root and intermediate). This might be
 	 *   dangerous since those haven't the basicConstraints
-	 *   extension. 
+	 *   extension.
 	 * @GNUTLS_VERIFY_ALLOW_SIGN_RSA_MD2: Allow certificates to be signed
 	 *   using the broken MD2 algorithm.
 	 * @GNUTLS_VERIFY_ALLOW_SIGN_RSA_MD5: Allow certificates to be signed

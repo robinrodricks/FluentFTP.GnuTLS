@@ -8,7 +8,7 @@ using FluentFTP.GnuTLS.Core;
 using FluentFTP.GnuTLS.Enums;
 
 namespace FluentFTP.GnuTLS {
-
+// ReSharper disable all InconsistentNaming
 	internal partial class GnuTlsInternalStream : Stream, IDisposable {
 
 		private void ValidateServerCertificates(CustomRemoteCertificateValidationCallback customRemoteCertificateValidation) {
