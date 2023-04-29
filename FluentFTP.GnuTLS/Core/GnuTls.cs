@@ -5,6 +5,24 @@ using System.Runtime.InteropServices;
 namespace FluentFTP.GnuTLS.Core {
 	internal static class GnuTls {
 
+		internal enum DllImportVariant {
+			Windows,
+			Linux,
+		}
+
+		internal static DllImportVariant useDllImportVariant;
+
+		static GnuTls() {
+			PlatformID platformID = Environment.OSVersion.Platform;
+
+			if ((int)platformID == 6 || (int)platformID == 4 || (int)platformID == 128) {
+				useDllImportVariant |= DllImportVariant.Linux;
+			}
+			else {
+				useDllImportVariant = DllImportVariant.Windows;
+			}
+		}
+
 		// G l o b a l
 
 		public static string GnuTlsCheckVersion(string reqVersion) {

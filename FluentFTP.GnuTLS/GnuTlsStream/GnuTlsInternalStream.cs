@@ -353,7 +353,7 @@ namespace FluentFTP.GnuTLS {
 
 			string gnuTlsVersionNeeded = "3.7.8";
 
-			string applicationVersion = GnuUtils.GetLibVersion() + "(" + GnuUtils.GetLibTarget() + ")";
+			string applicationVersion = GnuUtils.GetLibVersion() + "(" + GnuTls.useDllImportVariant.ToString() + "/" + GnuUtils.GetLibTarget() + ")";
 
 			if (!Environment.Is64BitProcess) {
 				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
