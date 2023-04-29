@@ -378,13 +378,19 @@ namespace FluentFTP.GnuTLS.Core {
 		[DllImport("libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_transport_set_int2")]
 		private static extern void gnutls_transport_set_int2(IntPtr session, int recv_fd, int send_fd);
 
+		public static int GnuTlsRecordRecv(IntPtr session, byte[] data, int data_size) {
+			return gnutls_record_recv(session, data, data_size);
+		}
 		// ssize_t gnutls_record_recv (gnutls_session_t session, void * data, size_t data_size)
 		[DllImport("libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_record_recv")]
-		internal static extern int gnutls_record_recv(IntPtr session, [Out()][MarshalAs(UnmanagedType.LPArray, SizeConst = 2048)] byte[] data, int data_size);
+		private static extern int gnutls_record_recv(IntPtr session, [Out()][MarshalAs(UnmanagedType.LPArray, SizeConst = 2048)] byte[] data, int data_size);
 
+		public static int GnuTlsRecordSend(IntPtr session, byte[] data, int data_size) {
+			return gnutls_record_send(session, data, data_size);
+		}
 		// ssize_t gnutls_record_send (gnutls_session_t session, const void * data, size_t data_size)
 		[DllImport("libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_record_send")]
-		internal static extern int gnutls_record_send(IntPtr session, [In()][MarshalAs(UnmanagedType.LPArray, SizeConst = 2048)] byte[] data, int data_size);
+		private static extern int gnutls_record_send(IntPtr session, [In()][MarshalAs(UnmanagedType.LPArray, SizeConst = 2048)] byte[] data, int data_size);
 
 		// Session Resume
 

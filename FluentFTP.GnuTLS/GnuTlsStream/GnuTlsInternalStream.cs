@@ -224,7 +224,7 @@ namespace FluentFTP.GnuTLS {
 			int repeatCount = 0;
 
 			do {
-				result = GnuTls.gnutls_record_recv(sess.ptr, buffer, maxCount);
+				result = GnuTls.GnuTlsRecordRecv(sess.ptr, buffer, maxCount);
 
 				if (result >= (int)EC.en.GNUTLS_E_SUCCESS) {
 					break;
@@ -273,7 +273,7 @@ namespace FluentFTP.GnuTLS {
 
 			while (result > 0) {
 				do {
-					result = GnuTls.gnutls_record_send(sess.ptr, buf, Math.Min(buf.Length, MaxRecordSize));
+					result = GnuTls.GnuTlsRecordSend(sess.ptr, buf, Math.Min(buf.Length, MaxRecordSize));
 					if (result >= (int)EC.en.GNUTLS_E_SUCCESS) {
 						break;
 					}
