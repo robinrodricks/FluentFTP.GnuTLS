@@ -9,7 +9,7 @@ namespace FluentFTP.GnuTLS.Core {
 			string gcm = GnuUtils.GetCurrentMethod() + ":Session";
 			Logging.LogGnuFunc(gcm);
 
-			_ = GnuUtils.Check(gcm, GnuTls.gnutls_init(ref ptr, flags));
+			_ = GnuUtils.Check(gcm, GnuTls.GnuTlsInit(ref ptr, flags));
 		}
 
 		public void Dispose() {
@@ -17,7 +17,7 @@ namespace FluentFTP.GnuTLS.Core {
 				string gcm = GnuUtils.GetCurrentMethod() + ":Session";
 				Logging.LogGnuFunc(gcm);
 
-				GnuTls.gnutls_deinit(ptr);
+				GnuTls.GnuTlsDeinit(ptr);
 				ptr = IntPtr.Zero;
 			}
 		}

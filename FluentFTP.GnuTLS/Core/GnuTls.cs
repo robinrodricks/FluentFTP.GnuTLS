@@ -102,10 +102,16 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// G N U T L S API calls for session init / deinit
 
+		public static int GnuTlsInit(ref IntPtr session, InitFlagsT flags) {
+			return gnutls_init(ref session, flags);
+		}
 		// int gnutls_init (gnutls_session_t * session, unsigned int flags)
 		[DllImport("libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_init")]
 		public static extern int gnutls_init(ref IntPtr session, InitFlagsT flags);
 
+		public static void GnuTlsDeinit(IntPtr session) {
+			gnutls_deinit(session);
+		}
 		// void gnutls_deinit (gnutls_session_t session)
 		[DllImport("libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_deinit")]
 		public static extern void gnutls_deinit(IntPtr session);
@@ -466,13 +472,19 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// G N U T L S API calls for certificate credentials init / deinit
 
+		public static int GnuTlsCertificateAllocateCredentials(ref IntPtr res) {
+			return gnutls_certificate_allocate_credentials(ref res);
+		}
 		// int gnutls_certificate_allocate_credentials (gnutls_certificate_credentials_t * res)
 		[DllImport("libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_certificate_allocate_credentials")]
-		public static extern int gnutls_certificate_allocate_credentials(ref IntPtr res);
+		private static extern int gnutls_certificate_allocate_credentials(ref IntPtr res);
 
+		public static void GnuTlsCertificateFreeCredentials(IntPtr sc) {
+			gnutls_certificate_free_credentials(sc);
+		}
 		// void gnutls_certificate_free_credentials(gnutls_certificate_credentials_t sc)
 		[DllImport("libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_certificate_free_credentials")]
-		public static extern void gnutls_certificate_free_credentials(IntPtr sc);
+		private static extern void gnutls_certificate_free_credentials(IntPtr sc);
 
 		// Set
 
