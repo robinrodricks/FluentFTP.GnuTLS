@@ -107,14 +107,14 @@ namespace FluentFTP.GnuTLS.Core {
 		}
 		// int gnutls_init (gnutls_session_t * session, unsigned int flags)
 		[DllImport("libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_init")]
-		public static extern int gnutls_init(ref IntPtr session, InitFlagsT flags);
+		private static extern int gnutls_init(ref IntPtr session, InitFlagsT flags);
 
 		public static void GnuTlsDeinit(IntPtr session) {
 			gnutls_deinit(session);
 		}
 		// void gnutls_deinit (gnutls_session_t session)
 		[DllImport("libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_deinit")]
-		public static extern void gnutls_deinit(IntPtr session);
+		private static extern void gnutls_deinit(IntPtr session);
 
 		public static IntPtr GnuTlsSessionGetPtr(Session sess) {
 			string gcm = GnuUtils.GetCurrentMethod();
