@@ -31,7 +31,7 @@ namespace FluentFTP.GnuTLS.Core {
 		// FREE WORKAROUND
 
 		// void gnutls_free(* ptr)
-		[DllImport("libgnutls-30.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_free")]
+		[DllImport(dllName, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_free")]
 		public static extern void gnutls_free(IntPtr ptr);
 
 		// S e s s i o n
