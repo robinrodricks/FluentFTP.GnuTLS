@@ -353,7 +353,15 @@ namespace FluentFTP.GnuTLS {
 
 			string gnuTlsVersionNeeded = "3.7.8";
 
-			string applicationVersion = GnuUtils.GetLibVersion() + "(" + GnuTls.useDllImportVariant.ToString() + "/" + GnuUtils.GetLibTarget() + ")";
+			PlatformID platformID = Environment.OSVersion.Platform;
+
+			string applicationVersion = GnuUtils.GetLibVersion() + "(" + platformID.ToString() + "/" + GnuUtils.GetLibTarget() + ")";
+
+			if ((int)platformID != 2 && (int)platformID != 4 && (int)platformID != 6 && (int)platformID != 128) {
+				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
+				Exception nex = new GnuTlsException("Unsupported platform: " + platformID.ToString());
+				throw new GnuTlsException("Environment validation error", nex);
+			}
 
 			if (!Environment.Is64BitProcess) {
 				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
