@@ -383,7 +383,9 @@ namespace FluentFTP.GnuTLS {
 				Logging.Log("FluentFTP.GnuTLS " + applicationVersion + " / GnuTLS " + gnuTlsVersion);
 			}
 
-			if (gnuTlsVersion != gnuTlsVersionNeeded) {
+			// Under windows, we need the explicitly built libgnutls.dll, whose version we know from our build chain
+			// Under linux, we ignore the version and take whatever the distro provides (and hope for the best)
+			if ((int)platformID == 2 && gnuTlsVersion != gnuTlsVersionNeeded) {
 				Exception nex = new GnuTlsException("GnuTLS library version must be " + gnuTlsVersionNeeded);
 				throw new GnuTlsException("GnuTLS .dll version validation error", nex);
 			}
