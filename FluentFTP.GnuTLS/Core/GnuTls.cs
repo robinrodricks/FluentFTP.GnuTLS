@@ -387,7 +387,7 @@ namespace FluentFTP.GnuTLS.Core {
 			var datumPtr = Marshal.AllocHGlobal(Marshal.SizeOf<DatumT>());
 			var valuePtr = Marshal.StringToHGlobalAnsi(protocols);
 
-			Marshal.StructureToPtr(new DatumT { ptr = valuePtr, size = (uint)protocols.Length }, datumPtr, true);
+			Marshal.StructureToPtr(new DatumT { ptr = valuePtr, size = (uint)protocols.Length + 1 }, datumPtr, true);
 
 			int result = GnuUtils.Check(gcm, linux ?
 				GnuTlsLin.gnutls_alpn_set_protocols(sess.ptr, datumPtr, 1, AlpnFlagsT.GNUTLS_ALPN_MANDATORY) :
