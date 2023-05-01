@@ -6,6 +6,7 @@ namespace FluentFTP.GnuTLS.Core {
 	internal static class GnuTlsWin {
 
 		private const string dllName = @"libgnutls-30.dll";
+		private const string dllNameFree = @"Kernel32.dll";
 
 		// G l o b a l
 
@@ -31,11 +32,11 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// FREE WORKAROUND
 
-		[DllImport("Kernel32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+		[DllImport(dllNameFree, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
 		internal static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
-		[DllImport("Kernel32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+		[DllImport(dllNameFree, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
 		internal static extern IntPtr GetProcAddress(IntPtr hModule, [MarshalAs(UnmanagedType.LPStr)] string lpProcName);
-		[DllImport("Kernel32.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+		[DllImport(dllNameFree, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool FreeLibrary(IntPtr hModule);
 
@@ -45,10 +46,10 @@ namespace FluentFTP.GnuTLS.Core {
 		public static void GnuTlsFree(IntPtr ptr) {
 			IntPtr hDLL = LoadLibrary(dllName);
 			if (hDLL == IntPtr.Zero) {
-				throw new GnuTlsException("LoadLibrary for libgnutls-30.dll failed.");
+				throw new GnuTlsException(dllNameFree + "/LoadLibrary for " + dllName + " failed.");
 			}
 
-			// gnutls_free is (for reasons beyond my comprehension) exported from libgnutls-30.dll
+			// gnutls_free is (for reasons beyond my comprehension) exported from libgnutls
 			// marked as a value, not an entry point. Thus, DllImport would handle it incorrectly.
 
 			// The trick is to, step by step, do the following:
@@ -56,7 +57,7 @@ namespace FluentFTP.GnuTLS.Core {
 			// Get the address of the exported variable named "gnutls_free".
 			IntPtr freeFuncExpPtr = GetProcAddress(hDLL, "gnutls_free");
 			if (freeFuncExpPtr == IntPtr.Zero) {
-				throw new GnuTlsException("GetProcAddress for libgnutls-30.dll/gnutls_free failed.");
+				throw new GnuTlsException(dllNameFree + "/GetProcAddress for " + dllName + "/gnutls_free failed.");
 			}
 
 			// At this address, you will find the address of the real gnutls_free function.

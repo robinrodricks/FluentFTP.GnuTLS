@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 namespace FluentFTP.GnuTLS.Core {
 	internal static class GnuTlsLin {
 		private const string dllName = @"libgnutls.so.30";
+		private const string dllNameFree = @"libdl.so.2";
 
 		// G l o b a l
 
@@ -30,9 +31,51 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// FREE WORKAROUND
 
+		[DllImport(dllNameFree, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "dlopen")]
+		internal static extern IntPtr dlopen([MarshalAs(UnmanagedType.LPStr)] string filename, int flags);
+		[DllImport(dllNameFree, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "dlsym")]
+		internal static extern IntPtr dlsym(IntPtr handle, [MarshalAs(UnmanagedType.LPStr)] string symbol);
+		[DllImport(dllNameFree, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "dlclose")]
+		internal static extern int dlclose(IntPtr handle);
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate void freeFuncDelegate(IntPtr ptr);
+
+		public static void GnuTlsFree(IntPtr ptr) {
+			const int flag_RTLD_NOW = 0x002;
+			IntPtr hDLL = dlopen(dllName, flag_RTLD_NOW);
+			if (hDLL == IntPtr.Zero) {
+				throw new GnuTlsException(dllNameFree + "/dlopen for " + dllName + " failed.");
+			}
+
+			// gnutls_free is (for reasons beyond my comprehension) exported from libgnutls
+			// marked as a value, not an entry point. Thus, DllImport would handle it incorrectly.
+
+			// The trick is to, step by step, do the following:
+
+			// Get the address of the exported variable named "gnutls_free".
+			IntPtr freeFuncExpPtr = dlsym(hDLL, "gnutls_free");
+			if (freeFuncExpPtr == IntPtr.Zero) {
+				throw new GnuTlsException(dllNameFree + "/dlsym for " + dllName + "/gnutls_free failed.");
+			}
+
+			// At this address, you will find the address of the real gnutls_free function.
+			IntPtr freeFuncPtr = (IntPtr)Marshal.PtrToStructure(freeFuncExpPtr, typeof(IntPtr));
+
+			// Using this address, you can setup the delegate
+			freeFuncDelegate freeFunc = Marshal.GetDelegateForFunctionPointer<freeFuncDelegate>(freeFuncPtr);
+
+			// And then you can actually invoke the gnutls_free function.
+			freeFunc(ptr);
+
+			_ = dlclose(hDLL);
+		}
+
+		/*
 		// void gnutls_free(* ptr)
 		[DllImport(dllName, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_free")]
 		public static extern void gnutls_free(IntPtr ptr);
+		*/
 
 		// S e s s i o n
 
@@ -251,30 +294,3 @@ namespace FluentFTP.GnuTLS.Core {
 
 	}
 }
-
-	//	for .NET / Linux: TODO:
-
-	// DllImport("libgnutls-30.dll".... needs to be libgnutls-30.so
-
-	//	LoadLibrary:
-
-	//[DllImport("libdl", ExactSpelling = true)]
-	//	public static extern IntPtr dlopen(string filename, int flags);
-
-	//	GetProcAddress:
-
-	//[DllImport("libdl", ExactSpelling = true)]
-	//	public static extern IntPtr dlsym(IntPtr handle, string symbol);
-
-	//	FreeLibrary:
-
-	//[DllImport("libdl", ExactSpelling = true)]
-	//	public static extern int dlclose(IntPtr handle);
-
-	//	Sample usage:
-
-	//const int RTLD_NOW = 0x002;
-	//	IntPtr pDll = dlopen("ourdevice.so.0", RTLD_NOW);
-	//	IntPtr pAddressOfFunction = dlsym(pDll, "AdcOpen");
-	//	...
-	//	dlclose(pDll);
