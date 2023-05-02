@@ -142,32 +142,32 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// const char * gnutls_check_version (const char * req_version)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate IntPtr gnutls_check_version_(string reqVersion);
-		private static gnutls_check_version_ gnutls_check_version_h;
+		public delegate IntPtr gnutls_check_version_(string reqVersion);
+		static gnutls_check_version_ gnutls_check_version_h;
 		public static string GnuTlsCheckVersion(string reqVersion) {
 			return Marshal.PtrToStringAnsi(gnutls_check_version_h(reqVersion));
 		}
 
 		// void gnutls_global_set_log_function (gnutls_log_func log_func)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate void gnutls_global_set_log_function_(Logging.GnuTlsLogCBFunc logCBFunc);
-		private static gnutls_global_set_log_function_ gnutls_global_set_log_function_h;
+		public delegate void gnutls_global_set_log_function_(Logging.GnuTlsLogCBFunc logCBFunc);
+		static gnutls_global_set_log_function_ gnutls_global_set_log_function_h;
 		public static void GnuTlsGlobalSetLogFunction(Logging.GnuTlsLogCBFunc logCBFunc) {
 			gnutls_global_set_log_function_h(logCBFunc);
 		}
 
 		// void gnutls_global_set_log_level (int level)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate void gnutls_global_set_log_level_(int level);
-		private static gnutls_global_set_log_level_ gnutls_global_set_log_level_h;
+		public delegate void gnutls_global_set_log_level_(int level);
+		static gnutls_global_set_log_level_ gnutls_global_set_log_level_h;
 		public static void GnuTlsGlobalSetLogLevel(int level) {
 			gnutls_global_set_log_level_h(level);
 		}
 
 		// int gnutls_global_init ()
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_global_init_();
-		private static gnutls_global_init_ gnutls_global_init_h;
+		public delegate int gnutls_global_init_();
+		static gnutls_global_init_ gnutls_global_init_h;
 		public static int GnuTlsGlobalInit() {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -177,8 +177,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// void gnutls_global_deinit ()
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_global_deinit_();
-		private static gnutls_global_deinit_ gnutls_global_deinit_h;
+		public delegate int gnutls_global_deinit_();
+		static gnutls_global_deinit_ gnutls_global_deinit_h;
 		public static void GnuTlsGlobalDeInit() {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -188,8 +188,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// void gnutls_free(* ptr)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate void gnutls_free_(IntPtr ptr);
-		private static gnutls_free_ gnutls_free_h;
+		public delegate void gnutls_free_(IntPtr ptr);
+		static gnutls_free_ gnutls_free_h;
 		public static void GnuTlsFree(IntPtr ptr) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -204,24 +204,24 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_init (gnutls_session_t * session, unsigned int flags)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_init_(ref IntPtr session, InitFlagsT flags);
-		private static gnutls_init_ gnutls_init_h;
+		public delegate int gnutls_init_(ref IntPtr session, InitFlagsT flags);
+		static gnutls_init_ gnutls_init_h;
 		public static int GnuTlsInit(ref IntPtr session, InitFlagsT flags) {
 			return gnutls_init_h(ref session, flags);
 		}
 
 		// void gnutls_deinit (gnutls_session_t session)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate void gnutls_deinit_(IntPtr session);
-		private static gnutls_deinit_ gnutls_deinit_h;
+		public delegate void gnutls_deinit_(IntPtr session);
+		static gnutls_deinit_ gnutls_deinit_h;
 		public static void GnuTlsDeinit(IntPtr session) {
 			gnutls_deinit_h(session);
 		}
 
 		// void gnutls_db_set_cache_expiration (gnutls_session_t session, int seconds)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate void gnutls_db_set_cache_expiration_(IntPtr sess, int seconds);
-		private static gnutls_db_set_cache_expiration_ gnutls_db_set_cache_expiration_h;
+		public delegate void gnutls_db_set_cache_expiration_(IntPtr sess, int seconds);
+		static gnutls_db_set_cache_expiration_ gnutls_db_set_cache_expiration_h;
 		public static void GnuTlsDbSetCacheExpiration(Session sess, int seconds) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -233,8 +233,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// char* gnutls_session_get_desc(gnutls_session_t session)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate IntPtr gnutls_session_get_desc_(IntPtr sess);
-		private static gnutls_session_get_desc_ gnutls_session_get_desc_h;
+		public delegate IntPtr gnutls_session_get_desc_(IntPtr sess);
+		static gnutls_session_get_desc_ gnutls_session_get_desc_h;
 		public static string GnuTlsSessionGetDesc(Session sess) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -248,8 +248,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// const char * gnutls_protocol_get_name (gnutls_protocol_t version)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate IntPtr gnutls_protocol_get_name_(ProtocolT version);
-		private static gnutls_protocol_get_name_ gnutls_protocol_get_name_h;
+		public delegate IntPtr gnutls_protocol_get_name_(ProtocolT version);
+		static gnutls_protocol_get_name_ gnutls_protocol_get_name_h;
 		public static string GnuTlsProtocolGetName(ProtocolT version) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -263,8 +263,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// gnutls_protocol_t gnutls_protocol_get_version (gnutls_session_t session)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate ProtocolT gnutls_protocol_get_version_(IntPtr sess);
-		private static gnutls_protocol_get_version_ gnutls_protocol_get_version_h;
+		public delegate ProtocolT gnutls_protocol_get_version_(IntPtr sess);
+		static gnutls_protocol_get_version_ gnutls_protocol_get_version_h;
 		public static ProtocolT GnuTlsProtocolGetVersion(Session sess) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -274,8 +274,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// size_t gnutls_record_get_max_size (gnutls_session_t session)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_record_get_max_size_(IntPtr sess);
-		private static gnutls_record_get_max_size_ gnutls_record_get_max_size_h;
+		public delegate int gnutls_record_get_max_size_(IntPtr sess);
+		static gnutls_record_get_max_size_ gnutls_record_get_max_size_h;
 		public static int GnuTlsRecordGetMaxSize(Session sess) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -285,8 +285,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// gnutls_alert_description_t gnutls_alert_get (gnutls_session_t session)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate AlertDescriptionT gnutls_alert_get_(IntPtr session);
-		private static gnutls_alert_get_ gnutls_alert_get_h;
+		public delegate AlertDescriptionT gnutls_alert_get_(IntPtr session);
+		static gnutls_alert_get_ gnutls_alert_get_h;
 		public static AlertDescriptionT GnuTlsAlertGet(Session sess) {
 		string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -296,16 +296,16 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// const char * gnutls_alert_get_name (gnutls_alert_description_t alert)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate IntPtr gnutls_alert_get_name_(AlertDescriptionT alert);
-		private static gnutls_alert_get_name_ gnutls_alert_get_name_h;
+		public delegate IntPtr gnutls_alert_get_name_(AlertDescriptionT alert);
+		static gnutls_alert_get_name_ gnutls_alert_get_name_h;
 		public static string GnuTlsAlertGetName(AlertDescriptionT alert) {
 			return Marshal.PtrToStringAnsi(gnutls_alert_get_name_h(alert));
 		}
 
 		// int gnutls_error_is_fatal (int error)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate bool gnutls_error_is_fatal_(int error);
-		private static gnutls_error_is_fatal_ gnutls_error_is_fatal_h;
+		public delegate bool gnutls_error_is_fatal_(int error);
+		static gnutls_error_is_fatal_ gnutls_error_is_fatal_h;
 		public static bool GnuTlsErrorIsFatal(int error) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -317,8 +317,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_handshake (gnutls_session_t session)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_handshake_(IntPtr session);
-		private static gnutls_handshake_ gnutls_handshake_h;
+		public delegate int gnutls_handshake_(IntPtr session);
+		static gnutls_handshake_ gnutls_handshake_h;
 		public static int GnuTlsHandShake(Session sess) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -338,8 +338,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// void gnutls_handshake_set_hook_function (gnutls_session_t session, unsigned int htype, int when, gnutls_handshake_hook_func func)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate void gnutls_handshake_set_hook_function_(IntPtr session, uint htype, int when, GnuTlsInternalStream.GnuTlsHandshakeHookFunc func);
-		private static gnutls_handshake_set_hook_function_ gnutls_handshake_set_hook_function_h;
+		public delegate void gnutls_handshake_set_hook_function_(IntPtr session, uint htype, int when, GnuTlsInternalStream.GnuTlsHandshakeHookFunc func);
+		static gnutls_handshake_set_hook_function_ gnutls_handshake_set_hook_function_h;
 		public static void GnuTlsHandshakeSetHookFunction(Session sess, uint htype, int when, GnuTlsInternalStream.GnuTlsHandshakeHookFunc handshakeHookFunc) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -349,8 +349,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_bye (gnutls_session_t session, gnutls_close_request_t how)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_bye_(IntPtr session, CloseRequestT how);
-		private static gnutls_bye_ gnutls_bye_h;
+		public delegate int gnutls_bye_(IntPtr session, CloseRequestT how);
+		static gnutls_bye_ gnutls_bye_h;
 		public static int GnuTlsBye(Session sess, CloseRequestT how) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -368,8 +368,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// void gnutls_handshake_set_timeout (gnutls_session_t session, unsigned int ms)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_record_check_pending_(IntPtr session);
-		private static gnutls_record_check_pending_ gnutls_record_check_pending_h;
+		public delegate int gnutls_record_check_pending_(IntPtr session);
+		static gnutls_record_check_pending_ gnutls_record_check_pending_h;
 		public static void GnuTlsHandshakeSetTimeout(Session sess, uint ms) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -379,8 +379,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// size_t gnutls_record_check_pending (gnutls_session_t session)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate void gnutls_handshake_set_timeout_(IntPtr session, uint ms);
-		private static gnutls_handshake_set_timeout_ gnutls_handshake_set_timeout_h;
+		public delegate void gnutls_handshake_set_timeout_(IntPtr session, uint ms);
+		static gnutls_handshake_set_timeout_ gnutls_handshake_set_timeout_h;
 		public static int GnuTlsRecordCheckPending(Session sess) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -392,8 +392,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_set_default_priority (gnutls_session_t session)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_set_default_priority_(IntPtr session);
-		private static gnutls_set_default_priority_ gnutls_set_default_priority_h;
+		public delegate int gnutls_set_default_priority_(IntPtr session);
+		static gnutls_set_default_priority_ gnutls_set_default_priority_h;
 		public static int GnuTlsSetDefaultPriority(Session sess) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -403,8 +403,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_priority_set_direct(gnutls_session_t session, const char* priorities, const char** err_pos)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_priority_set_direct_(IntPtr session, string priorities, out IntPtr err_pos);
-		private static gnutls_priority_set_direct_ gnutls_priority_set_direct_h;
+		public delegate int gnutls_priority_set_direct_(IntPtr session, string priorities, out IntPtr err_pos);
+		static gnutls_priority_set_direct_ gnutls_priority_set_direct_h;
 		public static int GnuTlsPrioritySetDirect(Session sess, string priorities) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -415,8 +415,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_set_default_priority_append (gnutls_session_t session, const char * add_prio, const char ** err_pos, unsigned flags)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_set_default_priority_append_(IntPtr session, string priorities, out IntPtr err_pos, uint flags);
-		private static gnutls_set_default_priority_append_ gnutls_set_default_priority_append_h;
+		public delegate int gnutls_set_default_priority_append_(IntPtr session, string priorities, out IntPtr err_pos, uint flags);
+		static gnutls_set_default_priority_append_ gnutls_set_default_priority_append_h;
 		public static int GnuTlsSetDefaultPriorityAppend(Session sess, string priorities) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -427,8 +427,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// void gnutls_dh_set_prime_bits (gnutls_session_t session, unsigned int bits)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_dh_set_prime_bits_(IntPtr session, uint bits);
-		private static gnutls_dh_set_prime_bits_ gnutls_dh_set_prime_bits_h;
+		public delegate int gnutls_dh_set_prime_bits_(IntPtr session, uint bits);
+		static gnutls_dh_set_prime_bits_ gnutls_dh_set_prime_bits_h;
 		public static int GnuTlsDhSetPrimeBits(Session sess, uint bits) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -440,8 +440,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// void gnutls_transport_set_ptr (gnutls_session_t session, gnutls_transport_ptr_t fd) (= void * fd)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate void gnutls_transport_set_ptr_(IntPtr session, IntPtr fd);
-		private static gnutls_transport_set_ptr_ gnutls_transport_set_ptr_h;
+		public delegate void gnutls_transport_set_ptr_(IntPtr session, IntPtr fd);
+		static gnutls_transport_set_ptr_ gnutls_transport_set_ptr_h;
 		public static void GnuTlsTransportSetPtr(Session sess, IntPtr socketDescriptor) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -451,16 +451,16 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// ssize_t gnutls_record_recv (gnutls_session_t session, void * data, size_t data_size)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_record_recv_(IntPtr session, byte[] data, int data_size);
-		private static gnutls_record_recv_ gnutls_record_recv_h;
+		public delegate int gnutls_record_recv_(IntPtr session, byte[] data, int data_size);
+		static gnutls_record_recv_ gnutls_record_recv_h;
 		public static int GnuTlsRecordRecv(IntPtr session, byte[] data, int data_size) {
 			return gnutls_record_recv_h(session, data, data_size);
 		}
 
 		// ssize_t gnutls_record_send (gnutls_session_t session, const void * data, size_t data_size)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_record_send_(IntPtr session, byte[] data, int data_size);
-		private static gnutls_record_send_ gnutls_record_send_h;
+		public delegate int gnutls_record_send_(IntPtr session, byte[] data, int data_size);
+		static gnutls_record_send_ gnutls_record_send_h;
 		public static int GnuTlsRecordSend(IntPtr session, byte[] data, int data_size) {
 			return gnutls_record_send_h(session, data, data_size);
 		}
@@ -469,16 +469,16 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_session_is_resumed (gnutls_session_t session)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate bool gnutls_session_is_resumed_(IntPtr session);
-		private static gnutls_session_is_resumed_ gnutls_session_is_resumed_h;
+		public delegate bool gnutls_session_is_resumed_(IntPtr session);
+		static gnutls_session_is_resumed_ gnutls_session_is_resumed_h;
 		public static bool GnuTlsSessionIsResumed(Session sess) {
 			return gnutls_session_is_resumed_h(sess.ptr);
 		}
 
 		// int gnutls_session_get_data2 (gnutls_session_t session, gnutls_datum_t * data)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_session_get_data2_(IntPtr session, out DatumT data);
-		private static gnutls_session_get_data2_ gnutls_session_get_data2_h;
+		public delegate int gnutls_session_get_data2_(IntPtr session, out DatumT data);
+		static gnutls_session_get_data2_ gnutls_session_get_data2_h;
 		public static int GnuTlsSessionGetData2(Session sess, out DatumT data) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -495,8 +495,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_session_set_data (gnutls_session_t session, const void * session_data, size_t session_data_size)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_session_set_data_(IntPtr session, IntPtr session_data, ulong session_data_size);
-		private static gnutls_session_set_data_ gnutls_session_set_data_h;
+		public delegate int gnutls_session_set_data_(IntPtr session, IntPtr session_data, ulong session_data_size);
+		static gnutls_session_set_data_ gnutls_session_set_data_h;
 		public static int GnuTlsSessionSetData(Session sess, DatumT data) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -513,8 +513,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// unsigned gnutls_session_get_flags(gnutls_session_t session)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate SessionFlagsT gnutls_session_get_flags_(IntPtr session);
-		private static gnutls_session_get_flags_ gnutls_session_get_flags_h;
+		public delegate SessionFlagsT gnutls_session_get_flags_(IntPtr session);
+		static gnutls_session_get_flags_ gnutls_session_get_flags_h;
 		public static SessionFlagsT GnuTlsSessionGetFlags(Session sess) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -533,8 +533,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_alpn_set_protocols (gnutls_session_t session, const gnutls_datum_t * protocols, unsigned protocols_size, unsigned int flags)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_alpn_set_protocols_(IntPtr session, IntPtr protocols, int protocols_size, AlpnFlagsT flags);
-		private static gnutls_alpn_set_protocols_ gnutls_alpn_set_protocols_h;
+		public delegate int gnutls_alpn_set_protocols_(IntPtr session, IntPtr protocols, int protocols_size, AlpnFlagsT flags);
+		static gnutls_alpn_set_protocols_ gnutls_alpn_set_protocols_h;
 		public static int GnuTlsAlpnSetProtocols(Session sess, string protocols) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -554,8 +554,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_alpn_get_selected_protocol (gnutls_session_t session, gnutls_datum_t * protocol)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_alpn_get_selected_protocol_(IntPtr session, DatumT data);
-		private static gnutls_alpn_get_selected_protocol_ gnutls_alpn_get_selected_protocol_h;
+		public delegate int gnutls_alpn_get_selected_protocol_(IntPtr session, DatumT data);
+		static gnutls_alpn_get_selected_protocol_ gnutls_alpn_get_selected_protocol_h;
 		public static string GnuTlsAlpnGetSelectedProtocol(Session sess) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -573,16 +573,16 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_certificate_allocate_credentials (gnutls_certificate_credentials_t * res)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_certificate_allocate_credentials_(ref IntPtr res);
-		private static gnutls_certificate_allocate_credentials_ gnutls_certificate_allocate_credentials_h;
+		public delegate int gnutls_certificate_allocate_credentials_(ref IntPtr res);
+		static gnutls_certificate_allocate_credentials_ gnutls_certificate_allocate_credentials_h;
 		public static int GnuTlsCertificateAllocateCredentials(ref IntPtr res) {
 			return gnutls_certificate_allocate_credentials_h(ref res);
 		}
 
 		// void gnutls_certificate_free_credentials(gnutls_certificate_credentials_t sc)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate void gnutls_certificate_free_credentials_(IntPtr sc);
-		private static gnutls_certificate_free_credentials_ gnutls_certificate_free_credentials_h;
+		public delegate void gnutls_certificate_free_credentials_(IntPtr sc);
+		static gnutls_certificate_free_credentials_ gnutls_certificate_free_credentials_h;
 		public static void GnuTlsCertificateFreeCredentials(IntPtr sc) {
 			gnutls_certificate_free_credentials_h(sc);
 		}
@@ -591,8 +591,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_credentials_set (gnutls_session_t session, gnutls_credentials_type_t type, void * cred)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_credentials_set_(IntPtr session, CredentialsTypeT type, IntPtr cred);
-		private static gnutls_credentials_set_ gnutls_credentials_set_h;
+		public delegate int gnutls_credentials_set_(IntPtr session, CredentialsTypeT type, IntPtr cred);
+		static gnutls_credentials_set_ gnutls_credentials_set_h;
 		public static int GnuTlsCredentialsSet(Credentials cred, Session sess) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -604,8 +604,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// unsigned gnutls_certificate_client_get_request_status(gnutls_session_t session)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate bool gnutls_certificate_client_get_request_status_(IntPtr session);
-		private static gnutls_certificate_client_get_request_status_ gnutls_certificate_client_get_request_status_h;
+		public delegate bool gnutls_certificate_client_get_request_status_(IntPtr session);
+		static gnutls_certificate_client_get_request_status_ gnutls_certificate_client_get_request_status_h;
 		public static bool GnuTlsCertificateClientGetRequestStatus(Session sess) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -617,8 +617,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_certificate_verify_peers3 (gnutls_session_t session, const char * hostname, unsigned int * status)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_certificate_verify_peers3_(IntPtr session, string hostname, out CertificateStatusT status);
-		private static gnutls_certificate_verify_peers3_ gnutls_certificate_verify_peers3_h;
+		public delegate int gnutls_certificate_verify_peers3_(IntPtr session, string hostname, out CertificateStatusT status);
+		static gnutls_certificate_verify_peers3_ gnutls_certificate_verify_peers3_h;
 		public static int GnuTlsCertificateVerifyPeers3(Session sess, string hostname, out CertificateStatusT status) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -634,8 +634,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// gnutls_certificate_type_t gnutls_certificate_type_get2 (gnutls_session_t session, gnutls_ctype_target_t target)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate CertificateTypeT gnutls_certificate_type_get2_(IntPtr session, CtypeTargetT target);
-		private static gnutls_certificate_type_get2_ gnutls_certificate_type_get2_h;
+		public delegate CertificateTypeT gnutls_certificate_type_get2_(IntPtr session, CtypeTargetT target);
+		static gnutls_certificate_type_get2_ gnutls_certificate_type_get2_h;
 		public static CertificateTypeT GnuTlsCertificateTypeGet2(Session sess, CtypeTargetT target) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -647,8 +647,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// const gnutls_datum_t * gnutls_certificate_get_peers (gnutls_session_t session, unsigned int * list_size)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate IntPtr gnutls_certificate_get_peers_(IntPtr session, ref uint list_size);
-		private static gnutls_certificate_get_peers_ gnutls_certificate_get_peers_h;
+		public delegate IntPtr gnutls_certificate_get_peers_(IntPtr session, ref uint list_size);
+		static gnutls_certificate_get_peers_ gnutls_certificate_get_peers_h;
 		public static DatumT[] GnuTlsCertificateGetPeers(Session sess, ref uint listSize) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -673,8 +673,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		//  int gnutls_x509_crt_init (gnutls_x509_crt_t * cert)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_x509_crt_init_(ref IntPtr cert);
-		private static gnutls_x509_crt_init_ gnutls_x509_crt_init_h;
+		public delegate int gnutls_x509_crt_init_(ref IntPtr cert);
+		static gnutls_x509_crt_init_ gnutls_x509_crt_init_h;
 		public static int GnuTlsX509CrtInit(ref IntPtr cert) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -684,8 +684,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		//  int gnutls_x509_crt_deinit (gnutls_x509_crt_t * cert)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_x509_crt_deinit_(IntPtr cert);
-		private static gnutls_x509_crt_deinit_ gnutls_x509_crt_deinit_h;
+		public delegate int gnutls_x509_crt_deinit_(IntPtr cert);
+		static gnutls_x509_crt_deinit_ gnutls_x509_crt_deinit_h;
 		public static int GnuTlsX509CrtDeinit(IntPtr cert) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -695,8 +695,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_x509_crt_import (gnutls_x509_crt_t cert, const gnutls_datum_t * data, gnutls_x509_crt_fmt_t format)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_x509_crt_import_(IntPtr cert, ref DatumT data, X509CrtFmtT format);
-		private static gnutls_x509_crt_import_ gnutls_x509_crt_import_h;
+		public delegate int gnutls_x509_crt_import_(IntPtr cert, ref DatumT data, X509CrtFmtT format);
+		static gnutls_x509_crt_import_ gnutls_x509_crt_import_h;
 		public static int GnuTlsX509CrtImport(IntPtr cert, ref DatumT data, X509CrtFmtT format) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -706,8 +706,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		//  int gnutls_x509_crt_print (gnutls_x509_crt_t cert, gnutls_certificate_print_formats_t format, gnutls_datum_t * out)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_x509_crt_print_(IntPtr cert, CertificatePrintFormatsT format, ref DatumT output);
-		private static gnutls_x509_crt_print_ gnutls_x509_crt_print_h;
+		public delegate int gnutls_x509_crt_print_(IntPtr cert, CertificatePrintFormatsT format, ref DatumT output);
+		static gnutls_x509_crt_print_ gnutls_x509_crt_print_h;
 		public static int GnuTlsX509CrtPrint(IntPtr cert, CertificatePrintFormatsT format, ref DatumT output) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -717,8 +717,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_x509_crt_export2(gnutls_x509_crt_t cert, gnutls_x509_crt_fmt_t format, gnutls_datum_t* out)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_x509_crt_export2_(IntPtr cert, X509CrtFmtT format, ref DatumT output);
-		private static gnutls_x509_crt_export2_ gnutls_x509_crt_export2_h;
+		public delegate int gnutls_x509_crt_export2_(IntPtr cert, X509CrtFmtT format, ref DatumT output);
+		static gnutls_x509_crt_export2_ gnutls_x509_crt_export2_h;
 		public static int GnuTlsX509CrtExport2(IntPtr cert, X509CrtFmtT format, ref DatumT output) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -728,8 +728,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		//  int gnutls_pcert_import_rawpk_raw (gnutls_pcert_st* pcert, const gnutls_datum_t* rawpubkey, gnutls_x509_crt_fmt_t format, unsigned int key_usage, unsigned int flags)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int gnutls_pcert_import_rawpk_raw_(IntPtr pcert, ref DatumT data, X509CrtFmtT format, uint key_usage, uint flags);
-		private static gnutls_pcert_import_rawpk_raw_ gnutls_pcert_import_rawpk_raw_h;
+		public delegate int gnutls_pcert_import_rawpk_raw_(IntPtr pcert, ref DatumT data, X509CrtFmtT format, uint key_usage, uint flags);
+		static gnutls_pcert_import_rawpk_raw_ gnutls_pcert_import_rawpk_raw_h;
 		public static int GnuTlsPcertImportRawpkRaw(IntPtr pcert, ref DatumT data, X509CrtFmtT format, uint keyUsage, uint flags) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
