@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using FluentFTP.GnuTLS.Core;
@@ -202,7 +203,6 @@ namespace FluentFTP.GnuTLS {
 				cred.Dispose();
 				GnuTls.GnuTlsGlobalDeInit();
 				weAreInitialized = false;	
-				GnuTls.Free();
 			}
 
 		}
