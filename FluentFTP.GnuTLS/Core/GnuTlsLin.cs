@@ -183,11 +183,11 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// ssize_t gnutls_record_recv (gnutls_session_t session, void * data, size_t data_size)
 		[DllImport(dllName, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_record_recv")]
-		internal static extern int gnutls_record_recv(IntPtr session, [Out()][MarshalAs(UnmanagedType.LPArray, SizeConst = 2048)] byte[] data, int data_size);
+		internal static extern int gnutls_record_recv(IntPtr session, [Out()][MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] byte[] data, int data_size);
 
 		// ssize_t gnutls_record_send (gnutls_session_t session, const void * data, size_t data_size)
 		[DllImport(dllName, CharSet = CharSet.Auto, CallingConvention = CallingConvention.Cdecl, EntryPoint = "gnutls_record_send")]
-		internal static extern int gnutls_record_send(IntPtr session, [In()][MarshalAs(UnmanagedType.LPArray, SizeConst = 2048)] byte[] data, int data_size);
+		internal static extern int gnutls_record_send(IntPtr session, [In()][MarshalAs(UnmanagedType.LPArray)] byte[] data, int data_size);
 
 		// Session Resume
 
