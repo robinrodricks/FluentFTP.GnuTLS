@@ -28,17 +28,6 @@ namespace FluentFTP.GnuTLS.Core {
 			else GnuTlsWin.gnutls_deinit(session);
 		}
 
-		public static int gnutls_certificate_allocate_credentials(ref IntPtr res) {
-			return linux ?
-				GnuTlsLin.gnutls_certificate_allocate_credentials(ref res) :
-				GnuTlsWin.gnutls_certificate_allocate_credentials(ref res);
-		}
-
-		public static void gnutls_certificate_free_credentials(IntPtr sc) {
-			if (linux) GnuTlsLin.gnutls_certificate_free_credentials(sc);
-			else GnuTlsWin.gnutls_certificate_free_credentials(sc);
-		}
-
 		public static string GnuTlsCheckVersion(string reqVersion) {
 			return Marshal.PtrToStringAnsi(linux ?
 				GnuTlsLin.gnutls_check_version(reqVersion) :
