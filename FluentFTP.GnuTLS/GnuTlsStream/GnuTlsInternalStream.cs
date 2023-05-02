@@ -376,7 +376,13 @@ namespace FluentFTP.GnuTLS {
 			}
 			catch (Exception ex) {
 				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
+				if (ex.InnerException != null) {
+					Exception nex = new GnuTlsException(ex.InnerException.Message);
+					throw new GnuTlsException("GnuTLS .dll load/call validation error", nex);
+				}
+				else {
 				throw new GnuTlsException("GnuTLS .dll load/call validation error", ex);
+				}
 			}
 
 			if (log) {
