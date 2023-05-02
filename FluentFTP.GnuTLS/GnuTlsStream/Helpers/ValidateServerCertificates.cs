@@ -151,8 +151,10 @@ namespace FluentFTP.GnuTLS {
 					CertificatePrintFormatsT flag = CertificatePrintFormatsT.GNUTLS_CRT_PRINT_FULL;
 					result = GnuTls.GnuTlsX509CrtPrint(cert, flag, ref pinfo);
 					if (result == 0) {
-							string pOutput = Marshal.PtrToStringAnsi(pinfo.ptr);
+						string pOutput = Marshal.PtrToStringAnsi(pinfo.ptr);
+						if (weAreRootStream) {
 							Logging.LogGnuFunc(GnuMessage.ShowClientCertificateInfo, pOutput);
+						}
 						GnuTls.GnuTlsFree(cinfo.ptr);
 					}
 
