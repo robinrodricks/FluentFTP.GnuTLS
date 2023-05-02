@@ -18,16 +18,6 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// G l o b a l
 
-		public static int GnuTlsInit(ref IntPtr session, InitFlagsT flags) {
-			return linux ?
-				GnuTlsLin.gnutls_init(ref session, flags) :
-				GnuTlsWin.gnutls_init(ref session, flags);
-		}
-		public static void GnuTlsDeinit(IntPtr session) {
-			if (linux) GnuTlsLin.gnutls_deinit(session);
-			else GnuTlsWin.gnutls_deinit(session);
-		}
-
 		public static string GnuTlsCheckVersion(string reqVersion) {
 			return Marshal.PtrToStringAnsi(linux ?
 				GnuTlsLin.gnutls_check_version(reqVersion) :
@@ -72,6 +62,17 @@ namespace FluentFTP.GnuTLS.Core {
 		// S e s s i o n
 
 		// G N U T L S API calls for session init / deinit
+
+		public static int GnuTlsInit(ref IntPtr session, InitFlagsT flags) {
+			return linux ?
+				GnuTlsLin.gnutls_init(ref session, flags) :
+				GnuTlsWin.gnutls_init(ref session, flags);
+		}
+
+		public static void GnuTlsDeinit(IntPtr session) {
+			if (linux) GnuTlsLin.gnutls_deinit(session);
+			else GnuTlsWin.gnutls_deinit(session);
+		}
 
 		public static IntPtr GnuTlsSessionGetPtr(Session sess) {
 			string gcm = GnuUtils.GetCurrentMethod();
@@ -416,6 +417,7 @@ namespace FluentFTP.GnuTLS.Core {
 				GnuTlsLin.gnutls_credentials_set(sess.ptr, CredentialsTypeT.GNUTLS_CRD_CERTIFICATE, cred.ptr) :
 				GnuTlsWin.gnutls_credentials_set(sess.ptr, CredentialsTypeT.GNUTLS_CRD_CERTIFICATE, cred.ptr));
 		}
+
 		// Info
 
 		public static bool GnuTlsCertificateClientGetRequestStatus(Session sess) {
