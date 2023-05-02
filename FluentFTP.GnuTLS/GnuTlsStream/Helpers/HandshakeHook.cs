@@ -7,7 +7,8 @@ namespace FluentFTP.GnuTLS {
 
 	internal partial class GnuTlsInternalStream : Stream, IDisposable {
 
-		internal static void HandshakeHook(IntPtr session, uint description, uint post, uint incoming) {
+		// handshake_hook_func(gnutls_session_t session, unsigned int htype, unsigned when, unsigned int incoming, const gnutls_datum_t* msg)
+		internal static void HandshakeHook(IntPtr session, uint htype, uint post, uint incoming, IntPtr msg) {
 
 			if (session == null) {
 				return;
@@ -33,9 +34,9 @@ namespace FluentFTP.GnuTLS {
 				action = post == 0 ? "received" : "processed";
 			}
 
-			Logging.LogGnuFunc(GnuMessage.Handshake, "Handshake " + action + " " + Enum.GetName(typeof(HandshakeDescriptionT), description));
+			Logging.LogGnuFunc(GnuMessage.Handshake, "Handshake " + action + " " + Enum.GetName(typeof(HandshakeDescriptionT), htype));
 
-			// Check for certain action/description combinations
+			// Check for certain action/htype combinations
 
 			if (incoming != 0 && post != 0) { // receive processed") 
 
@@ -46,7 +47,7 @@ namespace FluentFTP.GnuTLS {
 				//          or by using %NO_TICKETS_TLS12 in the priority string in config
 				// TLS1.3 : A session ticket appeared
 				//
-				if (description == (uint)HandshakeDescriptionT.GNUTLS_HANDSHAKE_NEW_SESSION_TICKET) {
+				if (htype == (uint)HandshakeDescriptionT.GNUTLS_HANDSHAKE_NEW_SESSION_TICKET) {
 					SessionFlagsT flags = GnuTls.GnuTlsSessionGetFlags(session);
 					if (flags.HasFlag(SessionFlagsT.GNUTLS_SFLAGS_SESSION_TICKET)) {
 						GnuTls.GnuTlsSessionGetData2(session, out resumeDataTLS);
