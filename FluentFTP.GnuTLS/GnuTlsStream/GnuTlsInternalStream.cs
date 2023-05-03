@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
+using System.Threading;
 using FluentFTP.GnuTLS.Core;
 using FluentFTP.GnuTLS.Enums;
 
@@ -58,7 +60,7 @@ namespace FluentFTP.GnuTLS {
 
 		// GnuTLS Handshake Hook function
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		internal delegate void GnuTlsHandshakeHookFunc(IntPtr session, uint htype, uint post, uint incoming);
+		internal delegate int GnuTlsHandshakeHookFunc(IntPtr session, uint htype, uint post, uint incoming, DatumT msg);
 		internal GnuTlsHandshakeHookFunc handshakeHookFunc = HandshakeHook;
 
 		// Keep track: Is this the first instance or a subsequent one?
@@ -202,7 +204,7 @@ namespace FluentFTP.GnuTLS {
 			if (weAreInitialized && weAreRootStream) {
 				cred.Dispose();
 				GnuTls.GnuTlsGlobalDeInit();
-				weAreInitialized = false;	
+				weAreInitialized = false;
 			}
 
 		}
@@ -211,31 +213,37 @@ namespace FluentFTP.GnuTLS {
 
 		public override int Read(byte[] buffer, int offset, int maxCount) {
 			if (maxCount <= 0) {
-				throw new ArgumentException("FtpGnuStream.Read: maxCount must be greater than zero");
+				throw new ArgumentException("GnuTlsInternalStream.Read: maxCount must be greater than zero");
 			}
 			if (offset + maxCount > buffer.Length) {
-				throw new ArgumentException("FtpGnuStream.Read: offset + maxCount go beyond buffer length");
+				throw new ArgumentException("GnuTlsInternalStream.Read: offset + maxCount go beyond buffer length");
 			}
 
 			maxCount = Math.Min(maxCount, MaxRecordSize);
 
 			int result;
 			bool needRepeat;
+			int msMax;
 			int repeatCount = 0;
 
+			var stopWatch = new Stopwatch();
+			stopWatch.Start();
+
 			do {
-				result = GnuTls.GnuTlsRecordRecv(sess.ptr, buffer, maxCount);
+				result = GnuTls.GnuTlsRecordRecv(sess, buffer, maxCount);
 
 				if (result >= (int)EC.en.GNUTLS_E_SUCCESS) {
 					break;
 				}
 
-				needRepeat = GnuUtils.NeedRdWrRepeat(result);
+				needRepeat = GnuUtils.NeedRepeat(GnuUtils.RepeatType.Read, result, out msMax);
 
-				if ((repeatCount < 5) && needRepeat) {
+				long msElapsed = stopWatch.ElapsedMilliseconds;
+
+				if ((msElapsed < msMax) && needRepeat) {
 					repeatCount++;
 
-					Logging.LogGnuFunc(GnuMessage.Read, "FtpGnuStream.Read repeat #" + repeatCount + " due to " + Enum.GetName(typeof(EC.en), result));
+					// if (repeatCount <= 2) Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
 
 					switch (result) {
 						case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
@@ -250,17 +258,20 @@ namespace FluentFTP.GnuTLS {
 				}
 			} while (needRepeat);
 
-			GnuUtils.Check("FtpGnuStream.Read", result);
+			// if (repeatCount > 2) Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(...) " + repeatCount + " repeats overall");
 
-			return result;
+			stopWatch.Stop();
+
+			return GnuUtils.Check("*GnuTlsRecordRecv(...)", result);
+
 		}
 
 		public override void Write(byte[] buffer, int offset, int count) {
 			if (count <= 0) {
-				throw new ArgumentException("FtpGnuStream.Write: count must be greater than zero");
+				throw new ArgumentException("GnuTlsInternalStream.Write: count must be greater than zero");
 			}
 			if (offset + count > buffer.Length) {
-				throw new ArgumentException("FtpGnuStream.Write: offset + count go beyond buffer length");
+				throw new ArgumentException("GnuTlsInternalStream.Write: offset + count go beyond buffer length");
 			}
 
 			byte[] buf = new byte[count];
@@ -269,21 +280,29 @@ namespace FluentFTP.GnuTLS {
 
 			int result = int.MaxValue;
 			bool needRepeat;
-			int repeatCount = 0;
+			int msMax;
+			int repeatCount;
+			var stopWatch = new Stopwatch();
+
+			repeatCount = 0;
+			stopWatch.Start();
 
 			while (result > 0) {
+
 				do {
-					result = GnuTls.GnuTlsRecordSend(sess.ptr, buf, Math.Min(buf.Length, MaxRecordSize));
+					result = GnuTls.GnuTlsRecordSend(sess, buf, Math.Min(buf.Length, MaxRecordSize));
 					if (result >= (int)EC.en.GNUTLS_E_SUCCESS) {
 						break;
 					}
 
-					needRepeat = GnuUtils.NeedRdWrRepeat(result);
+					needRepeat = GnuUtils.NeedRepeat(GnuUtils.RepeatType.Write, result, out msMax);
 
-					if ((repeatCount < 5) && needRepeat) {
+					long msElapsed = stopWatch.ElapsedMilliseconds;
+
+					if ((msElapsed < msMax) && needRepeat) {
 						repeatCount++;
 
-						Logging.LogGnuFunc(GnuMessage.Read, "FtpGnuStream.Write repeat #" + repeatCount + " due to " + Enum.GetName(typeof(EC.en), result));
+						// if (repeatCount <= 2) Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordSend(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
 
 						switch (result) {
 							case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
@@ -298,6 +317,7 @@ namespace FluentFTP.GnuTLS {
 					}
 				} while (needRepeat);
 
+
 				int newLength = buf.Length - result;
 				if (newLength <= 0) {
 					break;
@@ -306,9 +326,11 @@ namespace FluentFTP.GnuTLS {
 				Array.Resize(ref buf, buf.Length - result);
 			}
 
-			if (result < 0) {
-				GnuUtils.Check("FtpGnuStream.Write", result);
-			}
+			// if (repeatCount > 2) Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordSend(...) " + repeatCount + " repeats overall");
+
+			stopWatch.Stop();
+
+			GnuUtils.Check("*GnuTlsRecordSend(...)", result);
 		}
 
 		public override bool CanRead {
@@ -381,7 +403,7 @@ namespace FluentFTP.GnuTLS {
 					throw new GnuTlsException("GnuTLS .dll load/call validation error", nex);
 				}
 				else {
-				throw new GnuTlsException("GnuTLS .dll load/call validation error", ex);
+					throw new GnuTlsException("GnuTLS .dll load/call validation error", ex);
 				}
 			}
 

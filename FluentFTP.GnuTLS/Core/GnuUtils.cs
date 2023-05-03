@@ -6,11 +6,11 @@ namespace FluentFTP.GnuTLS.Core {
 	internal class GnuUtils {
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		public static string GetCurrentMethod([CallerMemberName] string memberName = "") {
+		internal static string GetCurrentMethod([CallerMemberName] string memberName = "") {
 			return "*" + memberName + "(...)";
 		}
 
-		public static int Check(string methodName, int result, params int[] resultsAllowed) {
+		internal static int Check(string methodName, int result, params int[] resultsAllowed) {
 
 			if (result >= 0) {
 				return result;
@@ -42,23 +42,57 @@ namespace FluentFTP.GnuTLS.Core {
 			throw ex;
 		}
 
-		public static string GnuTlsErrorText(int errorCode) {
+		internal static string GnuTlsErrorText(int errorCode) {
 			if (!EC.ec.TryGetValue(errorCode, out string errText)) errText = "Unknown error";
 			return errText;
 		}
 
-		public static bool NeedRdWrRepeat(int rslt) {
-			return rslt == (int)EC.en.GNUTLS_E_AGAIN ||
-				   rslt == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-				   rslt == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
-				   rslt == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED;
+		internal enum RepeatType {
+			Read,
+			Write,
+			Handshake,
+			Bye,
 		}
 
-		public static string GetLibVersion() {
+		internal static bool NeedRepeat(RepeatType type, int result, out int msMax) {
+			switch (type) {
+
+				case RepeatType.Read:
+					msMax = 30000;
+					return result == (int)EC.en.GNUTLS_E_AGAIN ||
+						   result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+						   result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+						   result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED;
+
+				case RepeatType.Write:
+					msMax = 30000;
+					return result == (int)EC.en.GNUTLS_E_AGAIN ||
+						   result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+						   result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+						   result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED;
+
+				case RepeatType.Handshake:
+					msMax = 30000;
+					return result == (int)EC.en.GNUTLS_E_AGAIN ||
+						   result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+					       result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+					       result == (int)EC.en.GNUTLS_E_GOT_APPLICATION_DATA;
+
+				case RepeatType.Bye:
+					msMax = 30000;
+					return result == (int)EC.en.GNUTLS_E_AGAIN ||
+						   result == (int)EC.en.GNUTLS_E_INTERRUPTED;
+			}
+
+			msMax = 30000;
+			return false;
+		}
+
+		internal static string GetLibVersion() {
 			return Assembly.GetAssembly(MethodBase.GetCurrentMethod().DeclaringType).GetName().Version.ToString();
 		}
 
-		public static string GetLibTarget() {
+		internal static string GetLibTarget() {
 			// Return the library target version chosen by the build process of
 			// the user of this library, useful when multitargeted Nuget package
 			// is accessed.

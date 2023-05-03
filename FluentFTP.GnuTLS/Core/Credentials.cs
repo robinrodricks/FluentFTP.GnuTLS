@@ -21,8 +21,7 @@ namespace FluentFTP.GnuTLS.Core {
 			string gcm = GnuUtils.GetCurrentMethod() + ":CertificateCredentials";
 			Logging.LogGnuFunc(gcm);
 
-			string errText = "CertificateCredentials()";
-			_ = GnuUtils.Check(errText + " : certificate_allocate_credentials", GnuTls.GnuTlsCertificateAllocateCredentials(ref ptr));
+			_ = GnuUtils.Check("*GnuTlsCertificateAllocateCredentials(...)", GnuTls.GnuTlsCertificateAllocateCredentials(ref ptr));
 		}
 
 		public void Dispose() {

@@ -1,6 +1,8 @@
 ﻿using FluentFTP.GnuTLS.Enums;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace FluentFTP.GnuTLS.Core {
 	internal static class GnuTls {
@@ -180,16 +182,45 @@ namespace FluentFTP.GnuTLS.Core {
 			Logging.LogGnuFunc(gcm);
 
 			int result;
+			bool needRepeat;
+			int msMax;
+			int repeatCount = 0;
+
+			var stopWatch = new Stopwatch();
+			stopWatch.Start();
+
 			do {
 				result = linux ?
 					GnuTlsLin.gnutls_handshake(sess.ptr) :
 					GnuTlsWin.gnutls_handshake(sess.ptr);
-				if (result >= (int)EC.en.GNUTLS_E_SUCCESS) { break; }
-				Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " repeat due to " + Enum.GetName(typeof(EC.en), result));
-			} while (result == (int)EC.en.GNUTLS_E_AGAIN ||
-					 result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-					 result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
-					 result == (int)EC.en.GNUTLS_E_GOT_APPLICATION_DATA);
+
+				if (result >= (int)EC.en.GNUTLS_E_SUCCESS) {
+					break;
+				}
+
+				needRepeat = GnuUtils.NeedRepeat(GnuUtils.RepeatType.Handshake, result, out msMax);
+
+				if ((stopWatch.ElapsedMilliseconds < msMax) && needRepeat) {
+					repeatCount++;
+
+					// if (repeatCount <= 2) Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " repeat due to " + Enum.GetName(typeof(EC.en), result));
+
+					switch (result) {
+						case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
+							Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + GnuTls.GnuTlsAlertGetName(GnuTls.GnuTlsAlertGet(sess)));
+							break;
+						case (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED:
+							Logging.LogGnuFunc(GnuMessage.Alert, "Fatal alert received: " + GnuTls.GnuTlsAlertGetName(GnuTls.GnuTlsAlertGet(sess)));
+							break;
+						default:
+							break;
+					}
+				}
+			} while (needRepeat);
+
+			// if (repeatCount > 2) Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " " + repeatCount + " repeats overall");
+
+			stopWatch.Stop();
 
 			return GnuUtils.Check(gcm, result);
 		}
@@ -207,14 +238,45 @@ namespace FluentFTP.GnuTLS.Core {
 			Logging.LogGnuFunc(gcm);
 
 			int result;
+			bool needRepeat;
+			int msMax;
+			int repeatCount = 0;
+
+			var stopWatch = new Stopwatch();
+			stopWatch.Start();
+
 			do {
 				result = linux ?
 					GnuTlsLin.gnutls_bye(sess.ptr, how) :
 					GnuTlsWin.gnutls_bye(sess.ptr, how);
-				if (result >= (int)EC.en.GNUTLS_E_SUCCESS) { break; }
-				Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " repeat due to " + Enum.GetName(typeof(EC.en), result));
-			} while (result == (int)EC.en.GNUTLS_E_AGAIN ||
-					 result == (int)EC.en.GNUTLS_E_INTERRUPTED);
+
+				if (result >= (int)EC.en.GNUTLS_E_SUCCESS) {
+					break;
+				}
+
+				needRepeat = GnuUtils.NeedRepeat(GnuUtils.RepeatType.Bye, result, out msMax);
+
+				if ((stopWatch.ElapsedMilliseconds < msMax) && needRepeat) {
+					repeatCount++;
+
+					// if (repeatCount <= 2) Logging.LogGnuFunc(GnuMessage.InteropFunction, gcm + " repeat due to " + Enum.GetName(typeof(EC.en), result));
+
+					switch (result) {
+						case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
+							Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + GnuTls.GnuTlsAlertGetName(GnuTls.GnuTlsAlertGet(sess)));
+							break;
+						case (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED:
+							Logging.LogGnuFunc(GnuMessage.Alert, "Fatal alert received: " + GnuTls.GnuTlsAlertGetName(GnuTls.GnuTlsAlertGet(sess)));
+							break;
+						default:
+							break;
+					}
+				}
+			} while (needRepeat);
+
+			// if (repeatCount > 2) Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " " + repeatCount + " repeats overall");
+
+			stopWatch.Stop();
 
 			return GnuUtils.Check(gcm, result);
 		}
@@ -294,16 +356,16 @@ namespace FluentFTP.GnuTLS.Core {
 			else GnuTlsWin.gnutls_transport_set_int2(sess.ptr, socketDescriptorRecv, socketDescriptorSend);
 		}
 
-		public static int GnuTlsRecordRecv(IntPtr session, byte[] data, int data_size) {
+		public static int GnuTlsRecordRecv(Session session, byte[] data, int data_size) {
 			return linux ?
-				GnuTlsLin.gnutls_record_recv(session, data, data_size) :
-				GnuTlsWin.gnutls_record_recv(session, data, data_size);
+				GnuTlsLin.gnutls_record_recv(session.ptr, data, data_size) :
+				GnuTlsWin.gnutls_record_recv(session.ptr, data, data_size);
 		}
 
-		public static int GnuTlsRecordSend(IntPtr session, byte[] data, int data_size) {
+		public static int GnuTlsRecordSend(Session session, byte[] data, int data_size) {
 			return linux ?
-				GnuTlsLin.gnutls_record_send(session, data, data_size) :
-				GnuTlsWin.gnutls_record_send(session, data, data_size);
+				GnuTlsLin.gnutls_record_send(session.ptr, data, data_size) :
+				GnuTlsWin.gnutls_record_send(session.ptr, data, data_size);
 		}
 
 		// Session Resume
