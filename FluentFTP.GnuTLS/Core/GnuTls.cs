@@ -2,7 +2,6 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace FluentFTP.GnuTLS.Core {
 	internal static class GnuTls {
