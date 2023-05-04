@@ -57,11 +57,15 @@ In order to download the sources, build and install these libraries, use the scr
 
 ### 5. Finalize
 
-You will find `libgmp-10.dll`, `libnettle-8.dll`, `libhogweed-6.dll`, `libgnutls-30.dll` in the
-folder `mkgnutls/builds/gnutls/client64/bin`.
+You will find the built files in the folder `mkgnutls/builds/gnutls/client64/bin`:
 
-`libgcc_s_seh-1.dll` and `libwinpthread-1.dll` is part of the `mingw-w64` toolchain.
+- `libgmp-10.dll`
+- `libnettle-8.dll`
+- `libhogweed-6.dll`
+- `libgnutls-30.dll` 
+- `libgcc_s_seh-1.dll` (part of the `mingw-w64` toolchain)
+- `libwinpthread-1.dll` (part of the `mingw-w64` toolchain)
 
 ### 6. Build FluentFTP.GnuTLS
 
-Use Visual Studio to build `FluentFTP.GnuTLS`, which will include the Windows DLLs and Linux SO binaries in the package.
+Use Visual Studio to build `FluentFTP.GnuTLS`, which will include the Windows DLLs and Linux binaries in the package.
