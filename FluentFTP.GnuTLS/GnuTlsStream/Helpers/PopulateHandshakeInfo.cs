@@ -8,7 +8,7 @@ namespace FluentFTP.GnuTLS {
 
 	internal partial class GnuTlsInternalStream : Stream, IDisposable {
 
-		private void PopulateHandshakeInfo() {
+		public void PopulateHandshakeInfo() {
 
 			// This will be the GnuTLS format of the protocol name
 			// TLS1.2, TLS1.3 or other

@@ -5,11 +5,11 @@ namespace FluentFTP.GnuTLS {
 
 	internal partial class GnuTlsInternalStream : Stream, IDisposable {
 
-		private void DisableNagle() {
+		public void DisableNagle() {
 			socket.NoDelay = true;
 		}
 
-		private void ReEnableNagle() {
+		public void ReEnableNagle() {
 			socket.NoDelay = false;
 		}
 

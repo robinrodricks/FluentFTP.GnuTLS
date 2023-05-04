@@ -8,12 +8,12 @@ using FluentFTP.GnuTLS.Enums;
 namespace FluentFTP.GnuTLS.Core {
 	internal class Logging {
 
-		public static int logMaxLevel;
-		public static GnuMessage logDebugInformation;
 		public static Queue<string> logQueue;
 		public static int logQueueMaxSize;
 
-		private static GnuStreamLogCBFunc logCBFunc;
+		static int logMaxLevel;
+		static GnuMessage logDebugInformation;
+		static GnuStreamLogCBFunc logCBFunc;
 
 		// Not suppressable, level 0 - the GnuTls version message
 		public static void Log(string msg) {

@@ -15,7 +15,7 @@ namespace FluentFTP.GnuTLS {
 			// ****
 			//
 
-			Logging.LogGnuFunc(GnuMessage.Handshake, "Setup client certificate - currently not implemented");
+			Logging.LogGnuFunc(GnuMessage.Handshake, "*SetupClientCertificates(...) - currently not implemented");
 
 		}
 

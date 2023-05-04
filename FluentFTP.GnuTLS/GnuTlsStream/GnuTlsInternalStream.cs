@@ -2,10 +2,8 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
-using System.Threading;
 using FluentFTP.GnuTLS.Core;
 using FluentFTP.GnuTLS.Enums;
 
@@ -56,7 +54,7 @@ namespace FluentFTP.GnuTLS {
 		// For our own inside use
 		//
 
-		internal Logging logging;
+		public Logging logging;
 
 		// GnuTLS Handshake Hook function
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -86,7 +84,7 @@ namespace FluentFTP.GnuTLS {
 		private static DatumT resumeDataTLS = new();
 
 		// Handle for gnutls-30.dll
-		internal static IntPtr hDLL = IntPtr.Zero;
+		public static IntPtr hDLL = IntPtr.Zero;
 
 		//
 		// Constructor

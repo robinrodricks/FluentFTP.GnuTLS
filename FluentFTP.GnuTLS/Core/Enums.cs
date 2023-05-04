@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace FluentFTP.GnuTLS.Core {
 
 	[StructLayout(LayoutKind.Sequential)]
-	public struct DatumT {
+	internal struct DatumT {
 		public IntPtr ptr;
 		public ulong size;
 	}
@@ -76,7 +76,7 @@ namespace FluentFTP.GnuTLS.Core {
 	* would support the generated key.
 */
 	[Flags]
-	public enum InitFlagsT : uint {
+	internal enum InitFlagsT : uint {
 		GNUTLS_SERVER = 1,
 		GNUTLS_CLIENT = 1 << 1,
 		GNUTLS_DATAGRAM = 1 << 2,
@@ -110,7 +110,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 *
 	 * Enumeration of how TLS session should be terminated.  See gnutls_bye().
 */
-	public enum CloseRequestT : uint {
+	internal enum CloseRequestT : uint {
 		GNUTLS_SHUT_RDWR = 0,
 		GNUTLS_SHUT_WR = 1
 	}
@@ -121,7 +121,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 *
 	 * Enumeration of different server name types.
 	*/
-	public enum ServerNameTypeT : uint {
+	internal enum ServerNameTypeT : uint {
 		GNUTLS_NAME_DNS = 1
 	}
 
@@ -135,7 +135,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 *
 	 * Enumeration of different credential types.
 	*/
-	public enum CredentialsTypeT : uint {
+	internal enum CredentialsTypeT : uint {
 		GNUTLS_CRD_CERTIFICATE = 1,
 		GNUTLS_CRD_ANON = 2,
 		GNUTLS_CRD_SRP = 3,
@@ -153,7 +153,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 * Enumeration of different ALPN flags. These are used by gnutls_alpn_set_protocols().
 	*/
 	[Flags]
-	public enum AlpnFlagsT {
+	internal enum AlpnFlagsT {
 		GNUTLS_ALPN_MANDATORY = 1,
 		GNUTLS_ALPN_SERVER_PRECEDENCE = 1 << 1
 	}
@@ -175,7 +175,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 *
 	 * Enumeration of different SSL/TLS protocol versions.
 	*/
-	public enum ProtocolT : uint {
+	internal enum ProtocolT : uint {
 		GNUTLS_SSL3 = 1,
 		GNUTLS_TLS1_0 = 2,
 		GNUTLS_TLS1_1 = 3,
@@ -213,7 +213,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 *
 	 * Enumeration of different TLS handshake packets.
 	*/
-	public enum HandshakeDescriptionT : uint {
+	internal enum HandshakeDescriptionT : uint {
 		GNUTLS_HANDSHAKE_HELLO_REQUEST = 0,
 		GNUTLS_HANDSHAKE_CLIENT_HELLO = 1,
 		GNUTLS_HANDSHAKE_SERVER_HELLO = 2,
@@ -251,7 +251,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 *
 	 * Returns: Non zero on error.
 	*/
-	public enum HandshakeHookT : int {
+	internal enum HandshakeHookT : int {
 		GNUTLS_HOOK_PRE = 0,
 		GNUTLS_HOOK_POST = 1,
 		GNUTLS_HOOK_BOTH = -1,
@@ -264,7 +264,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 *
 	 * Enumeration of different TLS alert severities.
 	 */
-	public enum AlertLevelT : uint {
+	internal enum AlertLevelT : uint {
 		GNUTLS_AL_WARNING = 1,
 		GNUTLS_AL_FATAL
 	}
@@ -311,7 +311,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 *
 	 * Enumeration of different TLS alerts.
 	*/
-	public enum AlertDescriptionT : uint {
+	internal enum AlertDescriptionT : uint {
 		GNUTLS_A_CLOSE_NOTIFY,
 		GNUTLS_A_UNEXPECTED_MESSAGE = 10,
 		GNUTLS_A_BAD_RECORD_MAC = 20,
@@ -366,7 +366,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 * Enumeration of different session parameters.
 	*/
 	[Flags]
-	enum SessionFlagsT : uint {
+	internal enum SessionFlagsT : uint {
 		GNUTLS_SFLAGS_SAFE_RENEGOTIATION = 1,
 		GNUTLS_SFLAGS_EXT_MASTER_SECRET = 1 << 1,
 		GNUTLS_SFLAGS_ETM = 1 << 2,
@@ -382,10 +382,10 @@ namespace FluentFTP.GnuTLS.Core {
 		GNUTLS_SFLAGS_SERV_REQUESTED_OCSP = 1 << 12
 	}
 
-	public class TimeoutV {
+	internal class TimeoutV {
 		// Very special values:
-		uint GNUTLS_DEFAULT_HANDSHAKE_TIMEOUT = unchecked((uint)-1);
-		uint GNUTLS_INDEFINITE_TIMEOUT = unchecked((uint)-2);
+		public uint GNUTLS_DEFAULT_HANDSHAKE_TIMEOUT = unchecked((uint)-1);
+		public uint GNUTLS_INDEFINITE_TIMEOUT = unchecked((uint)-2);
 	}
 
 	/**
@@ -422,7 +422,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 * certificate verification.
 	*/
 	[Flags]
-	enum CertificateStatusT : uint {
+	internal enum CertificateStatusT : uint {
 		INVALID = 1 << 1,
 		REVOKED = 1 << 5,
 		SIGNER_NOT_FOUND = 1 << 6,
@@ -450,7 +450,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 *
 	 * Enumeration of certificate request types.
 	*/
-	enum CertificateRequestT : uint {
+	internal enum CertificateRequestT : uint {
 		GNUTLS_CERT_IGNORE = 0,
 		GNUTLS_CERT_REQUEST = 1,
 		GNUTLS_CERT_REQUIRE = 2
@@ -509,7 +509,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 * and %gnutls_certificate_verification_profiles_t.
 	*/
 	[Flags]
-	enum CertificateVerifyFlagsT : uint {
+	internal enum CertificateVerifyFlagsT : uint {
 		GNUTLS_VERIFY_DISABLE_CA_SIGN = 1 << 0,
 		GNUTLS_VERIFY_DO_NOT_ALLOW_IP_MATCHES = 1 << 1,
 		GNUTLS_VERIFY_DO_NOT_ALLOW_SAME = 1 << 2,
@@ -554,7 +554,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 *
 	 * Enumeration of different certificate verification profiles.
 	*/
-	enum CertificateVerificationProfilesT : uint {
+	internal enum CertificateVerificationProfilesT : uint {
 		GNUTLS_PROFILE_UNKNOWN = 0,
 		GNUTLS_PROFILE_VERY_WEAK = 1,
 		GNUTLS_PROFILE_LOW = 2,
@@ -586,7 +586,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 *
 	 * Enumeration of different certificate types.
 	*/
-	enum CertificateTypeT : uint {
+	internal enum CertificateTypeT : uint {
 		GNUTLS_CRT_UNKNOWN = 0,
 		GNUTLS_CRT_X509 = 1,
 		GNUTLS_CRT_OPENPGP = 2,
@@ -601,7 +601,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 *
 	 * Enumeration of different certificate encoding formats.
 	*/
-	enum X509CrtFmtT : uint {
+	internal enum X509CrtFmtT : uint {
 		GNUTLS_X509_FMT_DER = 0,
 		GNUTLS_X509_FMT_PEM = 1
 	}
@@ -616,7 +616,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 *
 	 * Enumeration of different certificate printing variants.
 	 */
-	enum CertificatePrintFormatsT : int {
+	internal enum CertificatePrintFormatsT : int {
 		GNUTLS_CRT_PRINT_FULL = 0,
 		GNUTLS_CRT_PRINT_ONELINE = 1,
 		GNUTLS_CRT_PRINT_UNSIGNED_FULL = 2,
@@ -635,7 +635,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 * certificate types as specified in RFC7250 and P2P connection set up
 	 * as specified in draft-vanrein-tls-symmetry-02.
 	 */
-	enum CtypeTargetT : uint {
+	internal enum CtypeTargetT : uint {
 		GNUTLS_CTYPE_CLIENT,
 		GNUTLS_CTYPE_SERVER,
 		GNUTLS_CTYPE_OURS,
@@ -660,7 +660,7 @@ namespace FluentFTP.GnuTLS.Core {
 	 *
 	 * Enumeration of different public-key algorithms.
 	*/
-	enum PkAlgorithmT : uint {
+	internal enum PkAlgorithmT : uint {
 		GNUTLS_PK_UNKNOWN = 0,
 		GNUTLS_PK_RSA = 1,
 		GNUTLS_PK_DSA = 2,

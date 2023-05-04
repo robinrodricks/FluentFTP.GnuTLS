@@ -8,7 +8,7 @@ namespace FluentFTP.GnuTLS {
 	internal partial class GnuTlsInternalStream : Stream, IDisposable {
 
 		// handshake_hook_func(gnutls_session_t session, unsigned int htype, unsigned when, unsigned int incoming, const gnutls_datum_t* msg)
-		internal static int HandshakeHook(IntPtr session, uint htype, uint post, uint incoming, IntPtr msg) {
+		public static int HandshakeHook(IntPtr session, uint htype, uint post, uint incoming, IntPtr msg) {
 
 			if (session == null) {
 				return 0;
