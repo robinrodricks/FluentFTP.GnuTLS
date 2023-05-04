@@ -47,16 +47,15 @@ namespace FluentFTP.GnuTLS {
 				//          or by using %NO_TICKETS_TLS12 in the priority string in config
 				// TLS1.3 : A session ticket appeared
 				//
-				if (htype == (uint)HandshakeDescriptionT.GNUTLS_HANDSHAKE_NEW_SESSION_TICKET) {
-					SessionFlagsT flags = GnuTls.GnuTlsSessionGetFlags(session);
-					if (flags.HasFlag(SessionFlagsT.GNUTLS_SFLAGS_SESSION_TICKET)) {
-						GnuTls.GnuTlsSessionGetData2(session, out resumeDataTLS);
-						Logging.LogGnuFunc(GnuMessage.Handshake, "Retrieved session data with new session ticket");
-
-						GnuTls.GnuTlsSessionSetData(session, resumeDataTLS);
-						GnuTls.GnuTlsFree(resumeDataTLS.ptr);
-					}
-				}
+				//if (htype == (uint)HandshakeDescriptionT.GNUTLS_HANDSHAKE_NEW_SESSION_TICKET) {
+				//	SessionFlagsT flags = GnuTls.GnuTlsSessionGetFlags(session);
+				//	if (flags.HasFlag(SessionFlagsT.GNUTLS_SFLAGS_SESSION_TICKET)) {
+				//		Logging.LogGnuFunc(GnuMessage.Handshake, "Session resume: use received session ticket");
+				//		GnuTls.GnuTlsSessionGetData2(session, out resumeDataTLS);
+				//		GnuTls.GnuTlsSessionSetData(session, resumeDataTLS);
+				//		GnuTls.GnuTlsFree(resumeDataTLS.ptr);
+				//	}
+				//}
 
 			}
 
