@@ -124,7 +124,6 @@ namespace FluentFTP.GnuTLS {
 					return;
 				}
 
-
 				string s = "Certificate type: X.509, list contains " + numData + " certificate";
 				if (numData > 1) { s = s + "s";	}
 				Logging.LogGnuFunc(GnuMessage.X509, s);
