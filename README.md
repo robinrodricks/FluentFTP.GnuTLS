@@ -28,9 +28,9 @@ Windows PC.
 
 Do NOT use an existing Debian 11 image. Export it in order to save it and install a fresh one.
 
-Perform the following steps in WSL2(Debian 11), work as root or use sudo appropriately:
-
 ### 2. Preparation
+
+Perform the following steps in WSL2(Debian 11), work as root or use sudo appropriately:
 
 Perform this once:
 
