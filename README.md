@@ -1,3 +1,10 @@
+![FluentFTP](https://github.com/robinrodricks/FluentFTP/raw/master/.github/logo-new.png)
+
+[![Version](https://img.shields.io/nuget/vpre/FluentFTP.GnuTLS.svg)](https://www.nuget.org/packages/FluentFTP.GnuTLS)
+[![Downloads](https://img.shields.io/nuget/dt/FluentFTP.GnuTLS.svg)](https://www.nuget.org/packages/FluentFTP.GnuTLS)
+[![GitHub contributors](https://img.shields.io/github/contributors/robinrodricks/FluentFTP.GnuTLS.svg)](https://github.com/robinrodricks/FluentFTP.GnuTLS/graphs/contributors)
+[![License](https://img.shields.io/github/license/robinrodricks/FluentFTP.GnuTLS.svg)](https://github.com/robinrodricks/FluentFTP.GnuTLS/blob/master/LICENSE)
+
 # FluentFTP.GnuTLS
 Premiere .NET wrapper for GnuTLS along with integration into FluentFTP
 
