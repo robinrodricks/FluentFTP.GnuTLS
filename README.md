@@ -1,4 +1,4 @@
-![FluentFTP](https://github.com/robinrodricks/FluentFTP.GnuTLS/raw/master/.github/logo.png)
+![FluentFTP](https://raw.githubusercontent.com/robinrodricks/FluentFTP.GnuTLS/main/.github/logo.png)
 
 [![Version](https://img.shields.io/nuget/vpre/FluentFTP.GnuTLS.svg)](https://www.nuget.org/packages/FluentFTP.GnuTLS)
 [![Downloads](https://img.shields.io/nuget/dt/FluentFTP.GnuTLS.svg)](https://www.nuget.org/packages/FluentFTP.GnuTLS)
