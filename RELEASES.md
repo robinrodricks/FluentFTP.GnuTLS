@@ -1,5 +1,9 @@
 # Release Notes
 
+#### 1.0.9
+  - Support running on linux (.Net and Mono), Mac OSX
+    using classic DllImport switching logic
+
 #### 1.0.8
  - Improved: Certificate validation failure exception text
 
