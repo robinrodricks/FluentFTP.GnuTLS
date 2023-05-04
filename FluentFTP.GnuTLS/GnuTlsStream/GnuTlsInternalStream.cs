@@ -202,6 +202,7 @@ namespace FluentFTP.GnuTLS {
 			if (weAreInitialized && weAreRootStream) {
 				cred.Dispose();
 				GnuTls.GnuTlsGlobalDeInit();
+				GnuTls.FunctionLoader.Free();
 				weAreInitialized = false;
 			}
 
