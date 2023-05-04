@@ -57,7 +57,7 @@ In order to download the sources, build and install these libraries, use the scr
 
 ### 5. Finalize
 
-You will find the built files in the folder `mkgnutls/builds/gnutls/client64/bin`:
+You will find the compiled binary files in the folder `mkgnutls/builds/gnutls/client64/bin`:
 
 - `libgmp-10.dll`
 - `libnettle-8.dll`
