@@ -44,7 +44,7 @@ Perform this once:
 
 ### 3. Building
 
-Download source/Build/Install of:
+In order to download the sources, build and install these libraries, use the scripts in the `Libs/Build` folder.
 
 - libgmp:     ``run step1.sh``
 - libnettle:  ``run step2.sh``
