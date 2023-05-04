@@ -6,11 +6,11 @@ namespace FluentFTP.GnuTLS.Core {
 	internal class GnuUtils {
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		internal static string GetCurrentMethod([CallerMemberName] string memberName = "") {
+		public static string GetCurrentMethod([CallerMemberName] string memberName = "") {
 			return "*" + memberName + "(...)";
 		}
 
-		internal static int Check(string methodName, int result, params int[] resultsAllowed) {
+		public static int Check(string methodName, int result, params int[] resultsAllowed) {
 
 			if (result >= 0) {
 				return result;
@@ -42,19 +42,19 @@ namespace FluentFTP.GnuTLS.Core {
 			throw ex;
 		}
 
-		internal static string GnuTlsErrorText(int errorCode) {
+		public static string GnuTlsErrorText(int errorCode) {
 			if (!EC.ec.TryGetValue(errorCode, out string errText)) errText = "Unknown error";
 			return errText;
 		}
 
-		internal enum RepeatType {
+		public enum RepeatType {
 			Read,
 			Write,
 			Handshake,
 			Bye,
 		}
 
-		internal static bool NeedRepeat(RepeatType type, int result, out int msMax) {
+		public static bool NeedRepeat(RepeatType type, int result, out int msMax) {
 			switch (type) {
 
 				case RepeatType.Read:
@@ -88,11 +88,11 @@ namespace FluentFTP.GnuTLS.Core {
 			return false;
 		}
 
-		internal static string GetLibVersion() {
+		public static string GetLibVersion() {
 			return Assembly.GetAssembly(MethodBase.GetCurrentMethod().DeclaringType).GetName().Version.ToString();
 		}
 
-		internal static string GetLibTarget() {
+		public static string GetLibTarget() {
 			// Return the library target version chosen by the build process of
 			// the user of this library, useful when multitargeted Nuget package
 			// is accessed.

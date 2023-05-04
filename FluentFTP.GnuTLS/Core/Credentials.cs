@@ -7,7 +7,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 		public CredentialsTypeT credentialsType;
 
-		protected Credentials(CredentialsTypeT type) {
+		public Credentials(CredentialsTypeT type) {
 			credentialsType = type;
 		}
 
