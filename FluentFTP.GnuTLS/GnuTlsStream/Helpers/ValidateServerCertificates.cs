@@ -124,7 +124,10 @@ namespace FluentFTP.GnuTLS {
 					return;
 				}
 
-				Logging.LogGnuFunc(GnuMessage.X509, "Certificate type: X.509, list contains " + numData);
+
+				string s = "Certificate type: X.509, list contains " + numData + " certificate";
+				if (numData > 1) { s = s + "s";	}
+				Logging.LogGnuFunc(GnuMessage.X509, s);
 
 				IntPtr cert = IntPtr.Zero;
 				DatumT pinfo = new();
@@ -132,7 +135,9 @@ namespace FluentFTP.GnuTLS {
 
 				for (uint i = 0; i < numData; i++) {
 
-					Logging.LogGnuFunc(GnuMessage.X509, "Certificate #" + (i + 1));
+					if (weAreRootStream) {
+						Logging.LogGnuFunc(GnuMessage.X509, "Certificate #" + (i + 1));
+					}
 
 					int result;
 
