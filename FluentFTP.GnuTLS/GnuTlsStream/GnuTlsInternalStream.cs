@@ -144,6 +144,10 @@ namespace FluentFTP.GnuTLS {
 				// Setup/Allocate certificate credentials for this first session
 				cred = new();
 
+				// sets the system trusted CAs for Internet PKI
+				int n = GnuTls.GnuTlsCertificateSetX509SystemTrust(cred.ptr);
+				Logging.LogGnuFunc(GnuMessage.Handshake, "Processed " + n + " certificates in trust list");
+
 				weAreInitialized = true;
 			}
 
