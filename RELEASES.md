@@ -1,5 +1,9 @@
 # Release Notes
 
+#### 1.0.11
+  - Set up X509 System Trust List: adds the system’s default trusted CAs
+    for certificate validation.
+
 #### 1.0.10
   - Support running on linux (.Net and Mono), Mac OSX
     using new delegate/FunctionLoader technology
