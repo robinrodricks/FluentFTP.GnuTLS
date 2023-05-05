@@ -133,6 +133,7 @@ namespace FluentFTP.GnuTLS.Core {
 			gnutls_certificate_allocate_credentials_h = (gnutls_certificate_allocate_credentials_)FunctionLoader.LoadFunction<gnutls_certificate_allocate_credentials_>(@"gnutls_certificate_allocate_credentials");
 			gnutls_certificate_free_credentials_h = (gnutls_certificate_free_credentials_)FunctionLoader.LoadFunction<gnutls_certificate_free_credentials_>(@"gnutls_certificate_free_credentials");
 			gnutls_credentials_set_h = (gnutls_credentials_set_)FunctionLoader.LoadFunction<gnutls_credentials_set_>(@"gnutls_credentials_set");
+			gnutls_certificate_set_x509_system_trust_h = (gnutls_certificate_set_x509_system_trust_)FunctionLoader.LoadFunction<gnutls_certificate_set_x509_system_trust_>(@"gnutls_certificate_set_x509_system_trust");
 			gnutls_certificate_client_get_request_status_h = (gnutls_certificate_client_get_request_status_)FunctionLoader.LoadFunction<gnutls_certificate_client_get_request_status_>(@"gnutls_certificate_client_get_request_status");
 			gnutls_certificate_verify_peers3_h = (gnutls_certificate_verify_peers3_)FunctionLoader.LoadFunction<gnutls_certificate_verify_peers3_>(@"gnutls_certificate_verify_peers3");
 			gnutls_certificate_type_get2_h = (gnutls_certificate_type_get2_)FunctionLoader.LoadFunction<gnutls_certificate_type_get2_>(@"gnutls_certificate_type_get2");
@@ -703,6 +704,17 @@ namespace FluentFTP.GnuTLS.Core {
 			Logging.LogGnuFunc(gcm);
 
 			return GnuUtils.Check(gcm, gnutls_credentials_set_h(session.ptr, CredentialsTypeT.GNUTLS_CRD_CERTIFICATE, credentials.ptr));
+		}
+
+		// int gnutls_certificate_set_x509_system_trust (gnutls_certificate_credentials_t cred)
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate int gnutls_certificate_set_x509_system_trust_(IntPtr cred);
+		static gnutls_certificate_set_x509_system_trust_ gnutls_certificate_set_x509_system_trust_h;
+		public static int GnuTlsCertificateSetX509SystemTrust(IntPtr cred) {
+			string gcm = GnuUtils.GetCurrentMethod();
+			Logging.LogGnuFunc(gcm);
+
+			return GnuUtils.Check(gcm, gnutls_certificate_set_x509_system_trust_h(cred));
 		}
 
 		// Info
