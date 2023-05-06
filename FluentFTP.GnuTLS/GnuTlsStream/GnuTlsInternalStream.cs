@@ -168,6 +168,7 @@ namespace FluentFTP.GnuTLS {
 			// Setup handshake hook
 			GnuTls.GnuTlsHandshakeSetHookFunction(sess, (uint)HandshakeDescriptionT.GNUTLS_HANDSHAKE_ANY, (int)HandshakeHookT.GNUTLS_HOOK_BOTH, handshakeHookFunc);
 
+
 			IsSessionOk = true;
 
 			// Setup Session Resume

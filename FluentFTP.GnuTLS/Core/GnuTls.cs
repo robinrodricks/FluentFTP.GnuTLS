@@ -181,7 +181,7 @@ namespace FluentFTP.GnuTLS.Core {
 			gnutls_certificate_type_get2_h = (gnutls_certificate_type_get2_)FunctionLoader.LoadFunction<gnutls_certificate_type_get2_>(@"gnutls_certificate_type_get2");
 			gnutls_certificate_get_peers_h = (gnutls_certificate_get_peers_)FunctionLoader.LoadFunction<gnutls_certificate_get_peers_>(@"gnutls_certificate_get_peers");
 			gnutls_certificate_set_x509_system_trust_h = (gnutls_certificate_set_x509_system_trust_)FunctionLoader.LoadFunction<gnutls_certificate_set_x509_system_trust_>(@"gnutls_certificate_set_x509_system_trust");
-			gnutls_certificate_set_x509_key_file2_h = (gnutls_certificate_set_x509_key_file2_)FunctionLoader.LoadFunction<gnutls_certificate_set_x509_key_file2_>(@"gnutls_certificate_set_x509_key_file2");
+			gnutls_certificate_set_x509_key_mem2_h = (gnutls_certificate_set_x509_key_mem2_)FunctionLoader.LoadFunction<gnutls_certificate_set_x509_key_mem2_>(@"gnutls_certificate_set_x509_key_mem2");
 			gnutls_x509_crt_init_h = (gnutls_x509_crt_init_)FunctionLoader.LoadFunction<gnutls_x509_crt_init_>(@"gnutls_x509_crt_init");
 			gnutls_x509_crt_deinit_h = (gnutls_x509_crt_deinit_)FunctionLoader.LoadFunction<gnutls_x509_crt_deinit_>(@"gnutls_x509_crt_deinit");
 			gnutls_x509_crt_import_h = (gnutls_x509_crt_import_)FunctionLoader.LoadFunction<gnutls_x509_crt_import_>(@"gnutls_x509_crt_import");
@@ -830,15 +830,33 @@ namespace FluentFTP.GnuTLS.Core {
 			return GnuUtils.Check(gcm, gnutls_certificate_set_x509_system_trust_h(cred));
 		}
 
-		// int gnutls_certificate_set_x509_key_file2 (gnutls_certificate_credentials_t res, const char * certfile, const char * keyfile, gnutls_x509_crt_fmt_t type, const char * pass, unsigned int flags)
+		// int gnutls_certificate_set_x509_key_mem2 (gnutls_certificate_credentials_t res, const gnutls_datum_t * cert, const gnutls_datum_t * key, gnutls_x509_crt_fmt_t type, const char * pass, unsigned int flags)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int gnutls_certificate_set_x509_key_file2_(IntPtr res, [In()][MarshalAs(UnmanagedType.LPStr)] string certfile, [In()][MarshalAs(UnmanagedType.LPStr)] string keyfile, X509CrtFmtT type, uint flags);
-		static gnutls_certificate_set_x509_key_file2_ gnutls_certificate_set_x509_key_file2_h;
-		public static int GnuTlsCertificateSetX509KeyFile2(IntPtr res, string certfile, string keyfile, X509CrtFmtT type, uint flags) {
+		delegate int gnutls_certificate_set_x509_key_mem2_(IntPtr res, IntPtr cert, IntPtr key, X509CrtFmtT type, [In()][MarshalAs(UnmanagedType.LPStr)] string pass, uint flags);
+		static gnutls_certificate_set_x509_key_mem2_ gnutls_certificate_set_x509_key_mem2_h;
+		public static int GnutlsCertificateSetX509KeyMem2(IntPtr res, string cert, string key, X509CrtFmtT pem, string pass, uint flags) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
 
-			return GnuUtils.Check(gcm, gnutls_certificate_set_x509_key_file2_h(res, certfile, keyfile, type, flags));
+			var certDatumPtr = Marshal.AllocHGlobal(Marshal.SizeOf<DatumT>());
+			var certValuePtr = Marshal.StringToHGlobalAnsi(cert);
+
+			Marshal.StructureToPtr(new DatumT { ptr = certValuePtr, size = (uint)cert.Length + 1 }, certDatumPtr, true);
+
+			var keyDatumPtr = Marshal.AllocHGlobal(Marshal.SizeOf<DatumT>());
+			var keyValuePtr = Marshal.StringToHGlobalAnsi(key);
+
+			Marshal.StructureToPtr(new DatumT { ptr = keyValuePtr, size = (uint)key.Length + 1 }, keyDatumPtr, true);
+
+			int result = gnutls_certificate_set_x509_key_mem2_h(res, certDatumPtr, keyDatumPtr, pem, pass, flags);
+
+			Marshal.FreeHGlobal(certValuePtr);
+			Marshal.FreeHGlobal(certDatumPtr);
+
+			Marshal.FreeHGlobal(keyValuePtr);
+			Marshal.FreeHGlobal(keyDatumPtr);
+
+			return result;
 		}
 
 		// X509

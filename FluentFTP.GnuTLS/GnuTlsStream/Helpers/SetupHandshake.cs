@@ -51,10 +51,6 @@ namespace FluentFTP.GnuTLS {
 
 			// Set the timeout for the handshake process
 			GnuTls.GnuTlsHandshakeSetTimeout(sess, (uint)htimeout);
-
-			// Any client certificate for presentation to server?
-			SetupClientCertificates();
-
 		}
 
 		private static bool SocketUsable(Socket sock, int ptmo, out string rsn) {

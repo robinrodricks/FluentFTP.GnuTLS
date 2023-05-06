@@ -15,6 +15,11 @@ namespace FluentFTP.GnuTLS.Core {
 		static GnuMessage logDebugInformation;
 		static GnuStreamLogCBFunc logCBFunc;
 
+		public static int LogMaxLevel {
+			get { return logMaxLevel; }
+			set { logMaxLevel = value; }
+		}
+
 		// Not suppressable, level 0 - the GnuTls version message
 		public static void Log(string msg) {
 			Log(0, msg, true);
