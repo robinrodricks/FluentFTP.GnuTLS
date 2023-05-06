@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using FluentFTP.GnuTLS.Core;
 using FluentFTP.GnuTLS.Enums;
 
@@ -94,6 +95,7 @@ namespace FluentFTP.GnuTLS {
 			string targetHostString,
 			Socket socketDescriptor,
 			CustomRemoteCertificateValidationCallback customRemoteCertificateValidation,
+			X509CertificateCollection clientCertificates,
 			string? alpnString,
 			GnuTlsInternalStream streamToResume,
 			string priorityString,
@@ -146,10 +148,18 @@ namespace FluentFTP.GnuTLS {
 
 				// sets the system trusted CAs for Internet PKI
 				int n = GnuTls.GnuTlsCertificateSetX509SystemTrust(cred.ptr);
-				Logging.LogGnuFunc(GnuMessage.Handshake, "Processed " + n + " certificates in trust list");
+				if (n > 0) {
+					Logging.LogGnuFunc(GnuMessage.Handshake, "Processed " + n + " certificates in system X509 trust list");
+				}
+				else {
+					Logging.LogGnuFunc(GnuMessage.Handshake, "Loading system X509 trust list failed: " + GnuUtils.GnuTlsErrorText(n));
+				}
 
 				weAreInitialized = true;
 			}
+
+			// Any client certificates for presentation to server?
+			SetupClientCertificates(clientCertificates);
 
 			sess = new(/*InitFlagsT.GNUTLS_NO_TICKETS_TLS12*/);
 

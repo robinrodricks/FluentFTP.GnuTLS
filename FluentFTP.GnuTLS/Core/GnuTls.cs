@@ -16,6 +16,8 @@ namespace FluentFTP.GnuTLS.Core {
 			// Linux
 			private const string dllNameLinUtil = @"libdl.so.2";
 			[DllImport(dllNameLinUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			private static extern IntPtr dlerror();
+			[DllImport(dllNameLinUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern IntPtr dlopen([MarshalAs(UnmanagedType.LPStr)] string filename, int flags);
 			[DllImport(dllNameLinUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern IntPtr dlsym(IntPtr handle, [MarshalAs(UnmanagedType.LPStr)] string symbol);
@@ -23,7 +25,21 @@ namespace FluentFTP.GnuTLS.Core {
 			private static extern int dlclose(IntPtr handle);
 
 			// Windows
+			[System.Flags]
+			private enum ErrorModes : uint {
+				SYSTEM_DEFAULT = 0x0,
+				SEM_FAILCRITICALERRORS = 0x0001,
+				SEM_NOALIGNMENTFAULTEXCEPT = 0x0004,
+				SEM_NOGPFAULTERRORBOX = 0x0002,
+				SEM_NOOPENFILEERRORBOX = 0x8000
+			}
 			private const string dllNameWinUtil = @"Kernel32.dll";
+			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+			private static extern ErrorModes SetErrorMode(ErrorModes uMode);
+			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+			private static extern uint GetLastError();
+			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
+			private static extern int FormatMessage(uint dwFlags, IntPtr lpSource, uint dwMessageId, uint dwLanguageId, ref IntPtr lpBuffer, uint dwSize, IntPtr parms);
 			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
 			private static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
 			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
@@ -32,10 +48,38 @@ namespace FluentFTP.GnuTLS.Core {
 			[return: MarshalAs(UnmanagedType.Bool)]
 			private static extern bool FreeLibrary(IntPtr hModule);
 
-			public static void Load(bool linux, string dllPath) {
-				platformIsLinux = linux;
-				hModule = platformIsLinux ? dlopen(dllPath, 2) : LoadLibrary(dllPath);
-				if (hModule == IntPtr.Zero) { throw new GnuTlsException("Could not load " + dllPath); }
+			public static void Load(string dllPath) {
+				IntPtr errMsgPtr = IntPtr.Zero;
+				string errMsg = string.Empty;
+				if (platformIsLinux) {
+					_ = dlerror();
+					hModule = dlopen(dllPath, 2);
+
+					if (hModule == IntPtr.Zero) {
+						errMsgPtr = dlerror();
+						Logging.Log(errMsgPtr.ToString());
+						if (errMsgPtr != IntPtr.Zero) {
+							errMsg = Marshal.PtrToStringAnsi(errMsgPtr);
+						}
+						throw new GnuTlsException("Could not load " + dllPath + ", " + errMsg);
+					}
+				}
+				else {
+					_ = SetErrorMode(ErrorModes.SEM_FAILCRITICALERRORS | ErrorModes.SEM_NOGPFAULTERRORBOX | ErrorModes.SEM_NOOPENFILEERRORBOX);
+					_ = GetLastError();
+					hModule = LoadLibrary(dllPath);
+
+					if (hModule == IntPtr.Zero) {
+						uint err = GetLastError();
+						if (err != 0) {
+							_ = FormatMessage(0x00001300, IntPtr.Zero, err, 0, ref errMsgPtr, 256, IntPtr.Zero);
+						}
+						if (errMsgPtr != IntPtr.Zero) {
+							errMsg = Marshal.PtrToStringAnsi(errMsgPtr).TrimEnd(Environment.NewLine.ToCharArray());
+						}
+						throw new GnuTlsException("Could not load " + dllPath + ", (" + err + ") " + errMsg);
+					}
+				}
 			}
 
 			public static Delegate LoadFunction<T>(string entryName, bool exportIsValueType = false) {
@@ -69,20 +113,19 @@ namespace FluentFTP.GnuTLS.Core {
 			#region Platform
 			PlatformID platformID = Environment.OSVersion.Platform;
 
-			bool linux = false;
-
 			if ((int)platformID == 4 || (int)platformID == 6 || (int)platformID == 128) {
-				linux = true;
+				platformIsLinux = true;
 				useDllName = @"libgnutls.so.30";
 			}
 			else {
+				platformIsLinux = false;
 				useDllName = @"libgnutls-30.dll";
 			}
 			#endregion
 
 			// Initialize the function loader
 
-			FunctionLoader.Load(linux, useDllName);
+			FunctionLoader.Load(useDllName);
 
 			// Get all the needed functions from the library into handlers via delegates.
 			// In this section of the code:
@@ -133,11 +176,12 @@ namespace FluentFTP.GnuTLS.Core {
 			gnutls_certificate_allocate_credentials_h = (gnutls_certificate_allocate_credentials_)FunctionLoader.LoadFunction<gnutls_certificate_allocate_credentials_>(@"gnutls_certificate_allocate_credentials");
 			gnutls_certificate_free_credentials_h = (gnutls_certificate_free_credentials_)FunctionLoader.LoadFunction<gnutls_certificate_free_credentials_>(@"gnutls_certificate_free_credentials");
 			gnutls_credentials_set_h = (gnutls_credentials_set_)FunctionLoader.LoadFunction<gnutls_credentials_set_>(@"gnutls_credentials_set");
-			gnutls_certificate_set_x509_system_trust_h = (gnutls_certificate_set_x509_system_trust_)FunctionLoader.LoadFunction<gnutls_certificate_set_x509_system_trust_>(@"gnutls_certificate_set_x509_system_trust");
 			gnutls_certificate_client_get_request_status_h = (gnutls_certificate_client_get_request_status_)FunctionLoader.LoadFunction<gnutls_certificate_client_get_request_status_>(@"gnutls_certificate_client_get_request_status");
 			gnutls_certificate_verify_peers3_h = (gnutls_certificate_verify_peers3_)FunctionLoader.LoadFunction<gnutls_certificate_verify_peers3_>(@"gnutls_certificate_verify_peers3");
 			gnutls_certificate_type_get2_h = (gnutls_certificate_type_get2_)FunctionLoader.LoadFunction<gnutls_certificate_type_get2_>(@"gnutls_certificate_type_get2");
 			gnutls_certificate_get_peers_h = (gnutls_certificate_get_peers_)FunctionLoader.LoadFunction<gnutls_certificate_get_peers_>(@"gnutls_certificate_get_peers");
+			gnutls_certificate_set_x509_system_trust_h = (gnutls_certificate_set_x509_system_trust_)FunctionLoader.LoadFunction<gnutls_certificate_set_x509_system_trust_>(@"gnutls_certificate_set_x509_system_trust");
+			gnutls_certificate_set_x509_key_file2_h = (gnutls_certificate_set_x509_key_file2_)FunctionLoader.LoadFunction<gnutls_certificate_set_x509_key_file2_>(@"gnutls_certificate_set_x509_key_file2");
 			gnutls_x509_crt_init_h = (gnutls_x509_crt_init_)FunctionLoader.LoadFunction<gnutls_x509_crt_init_>(@"gnutls_x509_crt_init");
 			gnutls_x509_crt_deinit_h = (gnutls_x509_crt_deinit_)FunctionLoader.LoadFunction<gnutls_x509_crt_deinit_>(@"gnutls_x509_crt_deinit");
 			gnutls_x509_crt_import_h = (gnutls_x509_crt_import_)FunctionLoader.LoadFunction<gnutls_x509_crt_import_>(@"gnutls_x509_crt_import");
@@ -706,17 +750,6 @@ namespace FluentFTP.GnuTLS.Core {
 			return GnuUtils.Check(gcm, gnutls_credentials_set_h(session.ptr, CredentialsTypeT.GNUTLS_CRD_CERTIFICATE, credentials.ptr));
 		}
 
-		// int gnutls_certificate_set_x509_system_trust (gnutls_certificate_credentials_t cred)
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int gnutls_certificate_set_x509_system_trust_(IntPtr cred);
-		static gnutls_certificate_set_x509_system_trust_ gnutls_certificate_set_x509_system_trust_h;
-		public static int GnuTlsCertificateSetX509SystemTrust(IntPtr cred) {
-			string gcm = GnuUtils.GetCurrentMethod();
-			Logging.LogGnuFunc(gcm);
-
-			return GnuUtils.Check(gcm, gnutls_certificate_set_x509_system_trust_h(cred));
-		}
-
 		// Info
 
 		// unsigned gnutls_certificate_client_get_request_status(gnutls_session_t session)
@@ -784,6 +817,28 @@ namespace FluentFTP.GnuTLS.Core {
 			}
 
 			return peers;
+		}
+
+		// int gnutls_certificate_set_x509_system_trust (gnutls_certificate_credentials_t cred)
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate int gnutls_certificate_set_x509_system_trust_(IntPtr cred);
+		static gnutls_certificate_set_x509_system_trust_ gnutls_certificate_set_x509_system_trust_h;
+		public static int GnuTlsCertificateSetX509SystemTrust(IntPtr cred) {
+			string gcm = GnuUtils.GetCurrentMethod();
+			Logging.LogGnuFunc(gcm);
+
+			return GnuUtils.Check(gcm, gnutls_certificate_set_x509_system_trust_h(cred));
+		}
+
+		// int gnutls_certificate_set_x509_key_file2 (gnutls_certificate_credentials_t res, const char * certfile, const char * keyfile, gnutls_x509_crt_fmt_t type, const char * pass, unsigned int flags)
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		delegate int gnutls_certificate_set_x509_key_file2_(IntPtr res, [In()][MarshalAs(UnmanagedType.LPStr)] string certfile, [In()][MarshalAs(UnmanagedType.LPStr)] string keyfile, X509CrtFmtT type, uint flags);
+		static gnutls_certificate_set_x509_key_file2_ gnutls_certificate_set_x509_key_file2_h;
+		public static int GnuTlsCertificateSetX509KeyFile2(IntPtr res, string certfile, string keyfile, X509CrtFmtT type, uint flags) {
+			string gcm = GnuUtils.GetCurrentMethod();
+			Logging.LogGnuFunc(gcm);
+
+			return GnuUtils.Check(gcm, gnutls_certificate_set_x509_key_file2_h(res, certfile, keyfile, type, flags));
 		}
 
 		// X509
