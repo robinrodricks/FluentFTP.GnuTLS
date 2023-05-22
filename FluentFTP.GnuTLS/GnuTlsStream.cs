@@ -46,7 +46,7 @@ namespace FluentFTP.GnuTLS {
 				socket,
 				customRemoteCertificateValidation,
 				Client.Config.ClientCertificates,
-				isControl ? "ftp" : "ftp-data",
+				isControl ? config.SetALPNControlConnection : config.SetALPNDataConnection,
 				isControl ? null : (controlConnStream as GnuTlsStream).BaseStream,
 				priority,
 				config.HandshakeTimeout,

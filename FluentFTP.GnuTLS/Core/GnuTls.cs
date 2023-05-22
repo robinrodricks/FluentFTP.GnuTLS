@@ -685,14 +685,14 @@ namespace FluentFTP.GnuTLS.Core {
 		static gnutls_alpn_set_protocols_ gnutls_alpn_set_protocols_h;
 		public static int GnuTlsAlpnSetProtocols(Session session, string protocols) {
 			string gcm = GnuUtils.GetCurrentMethod();
-			Logging.LogGnuFunc(gcm);
+			Logging.LogGnuFunc(gcm + "(" + protocols + ")");
 
 			var datumPtr = Marshal.AllocHGlobal(Marshal.SizeOf<DatumT>());
 			var valuePtr = Marshal.StringToHGlobalAnsi(protocols);
 
 			Marshal.StructureToPtr(new DatumT { ptr = valuePtr, size = (uint)protocols.Length + 1 }, datumPtr, true);
 
-			int result = GnuUtils.Check(gcm, gnutls_alpn_set_protocols_h(session.ptr, datumPtr, 1, AlpnFlagsT.GNUTLS_ALPN_MANDATORY));
+			int result = GnuUtils.Check(gcm, gnutls_alpn_set_protocols_h(session.ptr, datumPtr, 1, AlpnFlagsT.GNUTLS_ALPN_SERVER_PRECEDENCE));
 
 			Marshal.FreeHGlobal(valuePtr);
 			Marshal.FreeHGlobal(datumPtr);
