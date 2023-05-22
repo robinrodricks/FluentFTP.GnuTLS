@@ -555,7 +555,7 @@ namespace FluentFTP.GnuTLS.Core {
 		static gnutls_priority_set_direct_ gnutls_priority_set_direct_h;
 		public static int GnuTlsPrioritySetDirect(Session session, string priorities) {
 			string gcm = GnuUtils.GetCurrentMethod();
-			Logging.LogGnuFunc(gcm);
+			Logging.LogGnuFunc(gcm + "(" + priorities + ")");
 
 			IntPtr errPos; // does not seem terribly useful...
 			return GnuUtils.Check(gcm, gnutls_priority_set_direct_h(session.ptr, priorities, out errPos));
@@ -567,7 +567,7 @@ namespace FluentFTP.GnuTLS.Core {
 		static gnutls_set_default_priority_append_ gnutls_set_default_priority_append_h;
 		public static int GnuTlsSetDefaultPriorityAppend(Session session, string priorities) {
 			string gcm = GnuUtils.GetCurrentMethod();
-			Logging.LogGnuFunc(gcm);
+			Logging.LogGnuFunc(gcm + "(" + priorities + ")");
 
 			IntPtr errPos; // does not seem terribly useful...
 			return GnuUtils.Check(gcm, gnutls_set_default_priority_append_h(session.ptr, priorities, out errPos, 0));
@@ -685,14 +685,14 @@ namespace FluentFTP.GnuTLS.Core {
 		static gnutls_alpn_set_protocols_ gnutls_alpn_set_protocols_h;
 		public static int GnuTlsAlpnSetProtocols(Session session, string protocols) {
 			string gcm = GnuUtils.GetCurrentMethod();
-			Logging.LogGnuFunc(gcm + "(" + protocols + ")");
+			Logging.LogGnuFunc(gcm);
 
 			var datumPtr = Marshal.AllocHGlobal(Marshal.SizeOf<DatumT>());
 			var valuePtr = Marshal.StringToHGlobalAnsi(protocols);
 
 			Marshal.StructureToPtr(new DatumT { ptr = valuePtr, size = (uint)protocols.Length + 1 }, datumPtr, true);
 
-			int result = GnuUtils.Check(gcm, gnutls_alpn_set_protocols_h(session.ptr, datumPtr, 1, AlpnFlagsT.GNUTLS_ALPN_SERVER_PRECEDENCE));
+			int result = GnuUtils.Check(gcm, gnutls_alpn_set_protocols_h(session.ptr, datumPtr, 1, AlpnFlagsT.GNUTLS_ALPN_MANDATORY));
 
 			Marshal.FreeHGlobal(valuePtr);
 			Marshal.FreeHGlobal(datumPtr);
