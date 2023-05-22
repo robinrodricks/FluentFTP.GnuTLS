@@ -31,6 +31,13 @@ namespace FluentFTP.GnuTLS {
 		public IList<GnuAdvanced> AdvancedOptions { get; set; } = null;
 
 		/// <summary>
+		/// Options to configure GnuTLS ALPN protocol(s) setting.
+		/// To disable the setting of the ALPN protocol(s) string, use string.Empty.
+		/// </summary>
+		public string SetALPNControlConnection { get; set; } = "ftp";
+		public string SetALPNDataConnection { get; set; } = "ftp-data";
+
+		/// <summary>
 		/// How long to wait for a handshake before giving up, in milliseconds.
 		/// Set to zero to disable.
 		/// </summary>

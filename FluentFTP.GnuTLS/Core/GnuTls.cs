@@ -555,7 +555,7 @@ namespace FluentFTP.GnuTLS.Core {
 		static gnutls_priority_set_direct_ gnutls_priority_set_direct_h;
 		public static int GnuTlsPrioritySetDirect(Session session, string priorities) {
 			string gcm = GnuUtils.GetCurrentMethod();
-			Logging.LogGnuFunc(gcm);
+			Logging.LogGnuFunc(gcm + "(" + priorities + ")");
 
 			IntPtr errPos; // does not seem terribly useful...
 			return GnuUtils.Check(gcm, gnutls_priority_set_direct_h(session.ptr, priorities, out errPos));
@@ -567,7 +567,7 @@ namespace FluentFTP.GnuTLS.Core {
 		static gnutls_set_default_priority_append_ gnutls_set_default_priority_append_h;
 		public static int GnuTlsSetDefaultPriorityAppend(Session session, string priorities) {
 			string gcm = GnuUtils.GetCurrentMethod();
-			Logging.LogGnuFunc(gcm);
+			Logging.LogGnuFunc(gcm + "(" + priorities + ")");
 
 			IntPtr errPos; // does not seem terribly useful...
 			return GnuUtils.Check(gcm, gnutls_set_default_priority_append_h(session.ptr, priorities, out errPos, 0));

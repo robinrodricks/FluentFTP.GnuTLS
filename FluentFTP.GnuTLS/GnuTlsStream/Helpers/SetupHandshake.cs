@@ -33,7 +33,7 @@ namespace FluentFTP.GnuTLS {
 			GnuTls.GnuTlsCredentialsSet(cred, sess);
 
 			// Application Layer Protocol Negotiation (ALPN)
-			// (alway AFTER credential allocation and setup
+			// (always AFTER credential allocation and setup
 			if (!string.IsNullOrEmpty(alpn)) {
 				GnuTls.GnuTlsAlpnSetProtocols(sess, alpn);
 			}
