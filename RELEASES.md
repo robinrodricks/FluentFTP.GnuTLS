@@ -1,5 +1,9 @@
 # Release Notes
 
+#### 1.0.12
+  - Enable ALPN protocols to be set (or disabled) via config options
+  - Logging improvements
+
 #### 1.0.11
   - Set up X509 System Trust List: adds the system’s default trusted CAs
     for certificate validation.
