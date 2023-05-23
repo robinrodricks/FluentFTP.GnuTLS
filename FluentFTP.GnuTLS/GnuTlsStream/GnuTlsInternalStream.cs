@@ -79,12 +79,6 @@ namespace FluentFTP.GnuTLS {
 		// One for all of these, therefore static
 		private CertificateCredentials cred;
 
-		// Storage for resume data:
-		// * retrieved from the "session-to-be-resumed"
-		// * used for a session that is "to-be-resumed"
-		// * re-used, therefore static
-		private static DatumT resumeDataTLS = new();
-
 		// Handle for gnutls-30.dll
 		public static IntPtr hDLL = IntPtr.Zero;
 
@@ -168,6 +162,7 @@ namespace FluentFTP.GnuTLS {
 			// Setup Session Resume
 			if (streamToResumeFrom != null) {
 				Logging.LogGnuFunc(GnuMessage.Handshake, "Session resume: Use session data from control connection");
+				DatumT resumeDataTLS;
 				GnuTls.GnuTlsSessionGetData2(streamToResumeFrom.sess, out resumeDataTLS);
 				GnuTls.GnuTlsSessionSetData(sess, resumeDataTLS);
 				GnuTls.GnuTlsFree(resumeDataTLS.ptr);
