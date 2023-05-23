@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.13
+  - Reload all function pointers for repeated client create - dispose sequences
+
 #### 1.0.12
   - Enable ALPN protocols to be set (or disabled) via config options
   - Logging improvements
