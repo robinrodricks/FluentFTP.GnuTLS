@@ -97,7 +97,7 @@ namespace FluentFTP.GnuTLS {
 			CustomRemoteCertificateValidationCallback customRemoteCertificateValidation,
 			X509CertificateCollection clientCertificates,
 			string? alpnString,
-			GnuTlsInternalStream streamToResume,
+			GnuTlsInternalStream streamToResumeFrom,
 			string priorityString,
 			int handshakeTimeout,
 			int pollTimeout,
@@ -113,7 +113,7 @@ namespace FluentFTP.GnuTLS {
 			htimeout = handshakeTimeout;
 			ptimeout = pollTimeout;
 
-			weAreRootStream = streamToResume == null;
+			weAreRootStream = streamToResumeFrom == null;
 
 			if (!weAreInitialized) {
 
@@ -136,7 +136,7 @@ namespace FluentFTP.GnuTLS {
 				// one or previous ones
 				// TLS 1.3:
 				// Additionally, Session Tickets to store session data may appear at any time
-				if (streamToResume != null) {
+				if (streamToResumeFrom != null) {
 					throw new GnuTlsException("Cannot resume from anything if fresh stream");
 				}
 
@@ -147,11 +147,11 @@ namespace FluentFTP.GnuTLS {
 			}
 
 			// Setup/Allocate certificate credentials
-			if (streamToResume == null) {
+			if (streamToResumeFrom == null) {
 				cred = new();
 			}
 			else {
-				cred = new(streamToResume.cred);
+				cred = new(streamToResumeFrom.cred);
 			}
 
 			// sets the system trusted CAs for Internet PKI
@@ -177,9 +177,9 @@ namespace FluentFTP.GnuTLS {
 			IsSessionOk = true;
 
 			// Setup Session Resume
-			if (streamToResume != null) {
+			if (streamToResumeFrom != null) {
 				Logging.LogGnuFunc(GnuMessage.Handshake, "Session resume: Use session data from control connection");
-				GnuTls.GnuTlsSessionGetData2(streamToResume.sess, out resumeDataTLS);
+				GnuTls.GnuTlsSessionGetData2(streamToResumeFrom.sess, out resumeDataTLS);
 				GnuTls.GnuTlsSessionSetData(sess, resumeDataTLS);
 				GnuTls.GnuTlsFree(resumeDataTLS.ptr);
 			}
