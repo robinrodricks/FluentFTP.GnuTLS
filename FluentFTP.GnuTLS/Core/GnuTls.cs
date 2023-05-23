@@ -11,7 +11,10 @@ namespace FluentFTP.GnuTLS.Core {
 		private static IntPtr hModule = IntPtr.Zero;
 
 		#region FunctionLoader
-		public static class FunctionLoader {
+
+		private static bool functionsAreLoaded = false;
+
+		private static class FunctionLoader {
 
 			// Linux
 			private const string dllNameLinUtil = @"libdl.so.2";
@@ -97,6 +100,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 			public static void Free() {
 				_ = platformIsLinux ? dlclose(hModule) == 1 : FreeLibrary(hModule);
+				functionsAreLoaded = false;
 			}
 		}
 		#endregion
@@ -109,7 +113,9 @@ namespace FluentFTP.GnuTLS.Core {
 			LoadAllFunctions();
 		}
 
-		public static void LoadAllFunctions() {
+		private static void LoadAllFunctions() {
+			if (functionsAreLoaded) return;
+
 			string useDllName;
 
 			// Determine the platform we are running under
@@ -194,6 +200,8 @@ namespace FluentFTP.GnuTLS.Core {
 			gnutls_pcert_import_rawpk_raw_h = (gnutls_pcert_import_rawpk_raw_)FunctionLoader.LoadFunction<gnutls_pcert_import_rawpk_raw_>(@"gnutls_pcert_import_rawpk_raw");
 			#endregion
 
+			functionsAreLoaded = true;
+
 			//FunctionLoader.Free(); will be done when GnuTlsStream is disposed.
 		}
 
@@ -219,6 +227,7 @@ namespace FluentFTP.GnuTLS.Core {
 		delegate IntPtr gnutls_check_version_([In()][MarshalAs(UnmanagedType.LPStr)] string req_version);
 		static gnutls_check_version_ gnutls_check_version_h;
 		public static string GnuTlsCheckVersion(string reqVersion) {
+			if (!functionsAreLoaded) LoadAllFunctions();
 			IntPtr versionPtr = gnutls_check_version_h(reqVersion);
 			string version = Marshal.PtrToStringAnsi(versionPtr);
 			// gnutls_free_h(versionPtr);
@@ -268,6 +277,8 @@ namespace FluentFTP.GnuTLS.Core {
 			Logging.LogGnuFunc(gcm);
 
 			gnutls_global_deinit_h();
+
+			FunctionLoader.Free();
 		}
 
 		// void gnutls_free(* ptr)

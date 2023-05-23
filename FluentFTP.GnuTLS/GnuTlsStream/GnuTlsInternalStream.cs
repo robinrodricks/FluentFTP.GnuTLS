@@ -216,7 +216,6 @@ namespace FluentFTP.GnuTLS {
 			if (weAreInitialized && weAreRootStream) {
 				cred.Dispose();
 				GnuTls.GnuTlsGlobalDeInit();
-				GnuTls.FunctionLoader.Free();
 				weAreInitialized = false;
 			}
 
@@ -403,8 +402,6 @@ namespace FluentFTP.GnuTLS {
 				Exception nex = new GnuTlsException("GnuTlsStream needs to be run as a 64bit process");
 				throw new GnuTlsException("Process validation error", nex);
 			}
-
-			GnuTls.LoadAllFunctions();
 
 			string gnuTlsVersion;
 
