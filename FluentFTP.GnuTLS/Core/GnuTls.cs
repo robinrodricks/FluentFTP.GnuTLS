@@ -228,6 +228,7 @@ namespace FluentFTP.GnuTLS.Core {
 		static gnutls_check_version_ gnutls_check_version_h;
 		public static string GnuTlsCheckVersion(string reqVersion) {
 			if (!functionsAreLoaded) LoadAllFunctions();
+
 			IntPtr versionPtr = gnutls_check_version_h(reqVersion);
 			string version = Marshal.PtrToStringAnsi(versionPtr);
 			// gnutls_free_h(versionPtr);
@@ -262,6 +263,8 @@ namespace FluentFTP.GnuTLS.Core {
 		delegate int gnutls_global_init_();
 		static gnutls_global_init_ gnutls_global_init_h;
 		public static int GnuTlsGlobalInit() {
+			if (!functionsAreLoaded) LoadAllFunctions();
+
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
 
