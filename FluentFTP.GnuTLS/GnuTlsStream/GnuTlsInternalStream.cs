@@ -404,6 +404,8 @@ namespace FluentFTP.GnuTLS {
 				throw new GnuTlsException("Process validation error", nex);
 			}
 
+			GnuTls.LoadAllFunctions();
+
 			string gnuTlsVersion;
 
 			try {
