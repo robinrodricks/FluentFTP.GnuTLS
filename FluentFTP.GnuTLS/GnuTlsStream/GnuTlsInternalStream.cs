@@ -121,24 +121,12 @@ namespace FluentFTP.GnuTLS {
 				// 1. Logging
 				// 2. Make sure GnuTls version corresponds to our Native. and Enums.
 				// 3. GnuTls Gobal Init
-				// 4. One single credentials set
 
 				Logging.InitLogging(elog, logMaxLevel, logDebugInformationMessages, logQueueMaxSize);
 
 				Validate(true);
 
 				Logging.AttachGnuTlsLogging();
-
-				// GnuTlsStreams are organized as
-				// TLS 1.2:
-				// First one: Creates/Initializes the GnuTls infrastructure, cannot resume
-				// Subsequent ones: Re-use part of the GnuTls infrastructure, can resume from first
-				// one or previous ones
-				// TLS 1.3:
-				// Additionally, Session Tickets to store session data may appear at any time
-				if (streamToResumeFrom != null) {
-					throw new GnuTlsException("Cannot resume from anything if fresh stream");
-				}
 
 				// Setup the GnuTLS infrastructure
 				GnuTls.GnuTlsGlobalInit();
