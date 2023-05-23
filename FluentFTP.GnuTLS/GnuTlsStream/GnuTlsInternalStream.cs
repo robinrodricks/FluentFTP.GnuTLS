@@ -65,7 +65,7 @@ namespace FluentFTP.GnuTLS {
 		// Keep track: Is this the first instance or a subsequent one?
 		// We need to do a "Global Init" and a "Global DeInit" when the first
 		// instance is born or dies.
-		private bool weAreRootStream = true;
+		private bool weAreControlConnection = true;
 		private static bool weAreInitialized = false;
 
 		//
@@ -113,7 +113,7 @@ namespace FluentFTP.GnuTLS {
 			htimeout = handshakeTimeout;
 			ptimeout = pollTimeout;
 
-			weAreRootStream = streamToResumeFrom == null;
+			weAreControlConnection = streamToResumeFrom == null;
 
 			if (!weAreInitialized) {
 
@@ -206,7 +206,7 @@ namespace FluentFTP.GnuTLS {
 				sess.Dispose();
 			}
 
-			if (weAreInitialized && weAreRootStream) {
+			if (weAreInitialized && weAreControlConnection) {
 				cred.Dispose();
 				GnuTls.GnuTlsGlobalDeInit();
 				weAreInitialized = false;
