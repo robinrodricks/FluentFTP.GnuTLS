@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using FluentFTP.GnuTLS.Enums;
 
 namespace FluentFTP.GnuTLS.Core {
-	internal class Logging {
+	internal static class Logging {
 
 		public static Queue<string> logQueue;
 		public static int logQueueMaxSize;
@@ -43,6 +43,8 @@ namespace FluentFTP.GnuTLS.Core {
 			}
 		}
 
+		private static object logQueueLock = new object();
+
 		// Common log routine for "Interop" and "Internal" messages.
 		// These are buffered regardless of loglevel settings.
 		// Then they are filtered by loglevel and passed via callback
@@ -52,13 +54,15 @@ namespace FluentFTP.GnuTLS.Core {
 		public static void Log(int lvl, string msg, bool q) {
 			string s = lvl.ToString().PadRight(3) + " " + msg.TrimEnd(new char[] { '\n', '\r' });
 
-			if (q) {
-				if (logQueue.Count < logQueueMaxSize) {
-					logQueue.Enqueue(s);
-				}
-				else {
-					logQueue.Enqueue(s);
-					logQueue.Dequeue();
+			lock (logQueueLock) {
+				if (q) {
+					if (logQueue.Count < logQueueMaxSize) {
+						logQueue.Enqueue(s);
+					}
+					else {
+						logQueue.Enqueue(s);
+						logQueue.Dequeue();
+					}
 				}
 			}
 
@@ -105,7 +109,6 @@ namespace FluentFTP.GnuTLS.Core {
 			Logging.logMaxLevel = logMaxLevel;
 			Logging.logDebugInformation = logDebugInformation;
 			Logging.logQueueMaxSize = logQueueMaxSize;
-
 		}
 
 		// Setup GnuTls logging to overall log
