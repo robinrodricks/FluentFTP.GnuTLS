@@ -76,7 +76,7 @@ namespace FluentFTP.GnuTLS {
 		// The Certificate Credentials associated with this
 		// GnuTlsStream and ALL streams resumed from it
 		// One for all of these, therefore static
-		private static CertificateCredentials cred;
+		private CertificateCredentials cred;
 
 		// Storage for resume data:
 		// * retrieved from the "session-to-be-resumed"
@@ -143,19 +143,24 @@ namespace FluentFTP.GnuTLS {
 				// Setup the GnuTLS infrastructure
 				GnuTls.GnuTlsGlobalInit();
 
-				// Setup/Allocate certificate credentials for this first session
-				cred = new();
-
-				// sets the system trusted CAs for Internet PKI
-				int n = GnuTls.GnuTlsCertificateSetX509SystemTrust(cred.ptr);
-				if (n > 0) {
-					Logging.LogGnuFunc(GnuMessage.Handshake, "Processed " + n + " certificates in system X509 trust list");
-				}
-				else {
-					Logging.LogGnuFunc(GnuMessage.Handshake, "Loading system X509 trust list failed: " + GnuUtils.GnuTlsErrorText(n));
-				}
-
 				weAreInitialized = true;
+			}
+
+			// Setup/Allocate certificate credentials
+			if (streamToResume == null) {
+				cred = new();
+			}
+			else {
+				cred = new(streamToResume.cred);
+			}
+
+			// sets the system trusted CAs for Internet PKI
+			int n = GnuTls.GnuTlsCertificateSetX509SystemTrust(cred.ptr);
+			if (n > 0) {
+				Logging.LogGnuFunc(GnuMessage.Handshake, "Processed " + n + " certificates in system X509 trust list");
+			}
+			else {
+				Logging.LogGnuFunc(GnuMessage.Handshake, "Loading system X509 trust list failed: " + GnuUtils.GnuTlsErrorText(n));
 			}
 
 			// Any client certificates for presentation to server?
