@@ -55,8 +55,6 @@ namespace FluentFTP.GnuTLS {
 		// For our own inside use
 		//
 
-		public Logging logging;
-
 		// GnuTLS Handshake Hook function
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		internal delegate int GnuTlsHandshakeHookFunc(IntPtr session, uint htype, uint post, uint incoming, IntPtr msg);

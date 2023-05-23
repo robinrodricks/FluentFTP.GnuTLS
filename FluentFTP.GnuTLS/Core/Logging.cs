@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using FluentFTP.GnuTLS.Enums;
 
 namespace FluentFTP.GnuTLS.Core {
-	internal class Logging {
+	internal static class Logging {
 
 		public static Queue<string> logQueue;
 		public static int logQueueMaxSize;
@@ -105,7 +105,6 @@ namespace FluentFTP.GnuTLS.Core {
 			Logging.logMaxLevel = logMaxLevel;
 			Logging.logDebugInformation = logDebugInformation;
 			Logging.logQueueMaxSize = logQueueMaxSize;
-
 		}
 
 		// Setup GnuTls logging to overall log
