@@ -1,5 +1,9 @@
 # Release Notes
 
+#### 1.0.14
+  - Eliminate static constructs, make de-init optional, make log queue thread-safe
+    and improve function pointer loading for multi-threaded usage
+
 #### 1.0.13
   - Reload all function pointers for repeated client create - dispose sequences
 
