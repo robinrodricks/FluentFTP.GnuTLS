@@ -55,8 +55,6 @@ namespace FluentFTP.GnuTLS {
 		// For our own inside use
 		//
 
-		public Logging logging;
-
 		// GnuTLS Handshake Hook function
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		internal delegate int GnuTlsHandshakeHookFunc(IntPtr session, uint htype, uint post, uint incoming, IntPtr msg);
@@ -65,8 +63,11 @@ namespace FluentFTP.GnuTLS {
 		// Keep track: Is this the first instance or a subsequent one?
 		// We need to do a "Global Init" and a "Global DeInit" when the first
 		// instance is born or dies.
-		private bool weAreRootStream = true;
 		private static bool weAreInitialized = false;
+
+		private bool weAreControlConnection = true;
+
+		private bool deInit = true;
 
 		//
 
@@ -76,29 +77,25 @@ namespace FluentFTP.GnuTLS {
 		// The Certificate Credentials associated with this
 		// GnuTlsStream and ALL streams resumed from it
 		// One for all of these, therefore static
-		private static CertificateCredentials cred;
-
-		// Storage for resume data:
-		// * retrieved from the "session-to-be-resumed"
-		// * used for a session that is "to-be-resumed"
-		// * re-used, therefore static
-		private static DatumT resumeDataTLS = new();
+		private CertificateCredentials cred;
 
 		// Handle for gnutls-30.dll
 		public static IntPtr hDLL = IntPtr.Zero;
 
+		private static object initLock = new object();
+
 		//
 		// Constructor
 		//
-
 		public GnuTlsInternalStream(
 			string targetHostString,
 			Socket socketDescriptor,
 			CustomRemoteCertificateValidationCallback customRemoteCertificateValidation,
 			X509CertificateCollection clientCertificates,
 			string? alpnString,
-			GnuTlsInternalStream streamToResume,
+			GnuTlsInternalStream streamToResumeFrom,
 			string priorityString,
+			bool deInitGnuTls,
 			int handshakeTimeout,
 			int pollTimeout,
 			GnuStreamLogCBFunc elog,
@@ -109,53 +106,49 @@ namespace FluentFTP.GnuTLS {
 			socket = socketDescriptor;
 			alpn = alpnString;
 			priority = priorityString;
+			deInit = deInitGnuTls;
 			hostname = targetHostString;
 			htimeout = handshakeTimeout;
 			ptimeout = pollTimeout;
 
-			weAreRootStream = streamToResume == null;
+			weAreControlConnection = streamToResumeFrom == null;
 
-			if (!weAreInitialized) {
+			lock (initLock) {
+				if (!weAreInitialized) {
 
-				// On the first instance of GnuTlsStream, setup:
-				// 1. Logging
-				// 2. Make sure GnuTls version corresponds to our Native. and Enums.
-				// 3. GnuTls Gobal Init
-				// 4. One single credentials set
+					// On the first instance of GnuTlsStream, setup:
+					// 1. Logging
+					// 2. Make sure GnuTls version corresponds to our Native. and Enums.
+					// 3. GnuTls Gobal Init
 
-				Logging.InitLogging(elog, logMaxLevel, logDebugInformationMessages, logQueueMaxSize);
+					Logging.InitLogging(elog, logMaxLevel, logDebugInformationMessages, logQueueMaxSize);
 
-				Validate(true);
+					Validate(true);
 
-				Logging.AttachGnuTlsLogging();
+					Logging.AttachGnuTlsLogging();
 
-				// GnuTlsStreams are organized as
-				// TLS 1.2:
-				// First one: Creates/Initializes the GnuTls infrastructure, cannot resume
-				// Subsequent ones: Re-use part of the GnuTls infrastructure, can resume from first
-				// one or previous ones
-				// TLS 1.3:
-				// Additionally, Session Tickets to store session data may appear at any time
-				if (streamToResume != null) {
-					throw new GnuTlsException("Cannot resume from anything if fresh stream");
+					// Setup the GnuTLS infrastructure
+					GnuTls.GnuTlsGlobalInit();
+
+					weAreInitialized = true;
 				}
+			}
 
-				// Setup the GnuTLS infrastructure
-				GnuTls.GnuTlsGlobalInit();
-
-				// Setup/Allocate certificate credentials for this first session
+			// Setup/Allocate certificate credentials
+			if (streamToResumeFrom == null) {
 				cred = new();
+			}
+			else {
+				cred = new(streamToResumeFrom.cred);
+			}
 
-				// sets the system trusted CAs for Internet PKI
-				int n = GnuTls.GnuTlsCertificateSetX509SystemTrust(cred.ptr);
-				if (n > 0) {
-					Logging.LogGnuFunc(GnuMessage.Handshake, "Processed " + n + " certificates in system X509 trust list");
-				}
-				else {
-					Logging.LogGnuFunc(GnuMessage.Handshake, "Loading system X509 trust list failed: " + GnuUtils.GnuTlsErrorText(n));
-				}
-
-				weAreInitialized = true;
+			// sets the system trusted CAs for Internet PKI
+			int n = GnuTls.GnuTlsCertificateSetX509SystemTrust(cred.ptr);
+			if (n > 0) {
+				Logging.LogGnuFunc(GnuMessage.Handshake, "Processed " + n + " certificates in system X509 trust list");
+			}
+			else {
+				Logging.LogGnuFunc(GnuMessage.Handshake, "Loading system X509 trust list failed: " + GnuUtils.GnuTlsErrorText(n));
 			}
 
 			// Any client certificates for presentation to server?
@@ -172,9 +165,10 @@ namespace FluentFTP.GnuTLS {
 			IsSessionOk = true;
 
 			// Setup Session Resume
-			if (streamToResume != null) {
+			if (streamToResumeFrom != null) {
 				Logging.LogGnuFunc(GnuMessage.Handshake, "Session resume: Use session data from control connection");
-				GnuTls.GnuTlsSessionGetData2(streamToResume.sess, out resumeDataTLS);
+				DatumT resumeDataTLS;
+				GnuTls.GnuTlsSessionGetData2(streamToResumeFrom.sess, out resumeDataTLS);
 				GnuTls.GnuTlsSessionSetData(sess, resumeDataTLS);
 				GnuTls.GnuTlsFree(resumeDataTLS.ptr);
 			}
@@ -213,8 +207,9 @@ namespace FluentFTP.GnuTLS {
 				sess.Dispose();
 			}
 
-			if (weAreInitialized && weAreRootStream) {
-				cred.Dispose();
+			cred.Dispose();
+
+			if (weAreControlConnection && deInit) {
 				GnuTls.GnuTlsGlobalDeInit();
 				weAreInitialized = false;
 			}
