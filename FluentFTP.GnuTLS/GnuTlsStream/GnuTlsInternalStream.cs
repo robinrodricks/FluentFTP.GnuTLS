@@ -67,6 +67,8 @@ namespace FluentFTP.GnuTLS {
 
 		private bool weAreControlConnection = true;
 
+		private bool deInit = true;
+
 		//
 
 		// The TLS session associated with this GnuTlsStream
@@ -80,10 +82,11 @@ namespace FluentFTP.GnuTLS {
 		// Handle for gnutls-30.dll
 		public static IntPtr hDLL = IntPtr.Zero;
 
+		private static object initLock = new object();
+
 		//
 		// Constructor
 		//
-
 		public GnuTlsInternalStream(
 			string targetHostString,
 			Socket socketDescriptor,
@@ -92,6 +95,7 @@ namespace FluentFTP.GnuTLS {
 			string? alpnString,
 			GnuTlsInternalStream streamToResumeFrom,
 			string priorityString,
+			bool deInitGnuTls,
 			int handshakeTimeout,
 			int pollTimeout,
 			GnuStreamLogCBFunc elog,
@@ -102,29 +106,32 @@ namespace FluentFTP.GnuTLS {
 			socket = socketDescriptor;
 			alpn = alpnString;
 			priority = priorityString;
+			deInit = deInitGnuTls;
 			hostname = targetHostString;
 			htimeout = handshakeTimeout;
 			ptimeout = pollTimeout;
 
 			weAreControlConnection = streamToResumeFrom == null;
 
-			if (!weAreInitialized) {
+			lock (initLock) {
+				if (!weAreInitialized) {
 
-				// On the first instance of GnuTlsStream, setup:
-				// 1. Logging
-				// 2. Make sure GnuTls version corresponds to our Native. and Enums.
-				// 3. GnuTls Gobal Init
+					// On the first instance of GnuTlsStream, setup:
+					// 1. Logging
+					// 2. Make sure GnuTls version corresponds to our Native. and Enums.
+					// 3. GnuTls Gobal Init
 
-				Logging.InitLogging(elog, logMaxLevel, logDebugInformationMessages, logQueueMaxSize);
+					Logging.InitLogging(elog, logMaxLevel, logDebugInformationMessages, logQueueMaxSize);
 
-				Validate(true);
+					Validate(true);
 
-				Logging.AttachGnuTlsLogging();
+					Logging.AttachGnuTlsLogging();
 
-				// Setup the GnuTLS infrastructure
-				GnuTls.GnuTlsGlobalInit();
+					// Setup the GnuTLS infrastructure
+					GnuTls.GnuTlsGlobalInit();
 
-				weAreInitialized = true;
+					weAreInitialized = true;
+				}
 			}
 
 			// Setup/Allocate certificate credentials
@@ -202,7 +209,7 @@ namespace FluentFTP.GnuTLS {
 
 			cred.Dispose();
 
-			if (weAreControlConnection) {
+			if (weAreControlConnection && deInit) {
 				GnuTls.GnuTlsGlobalDeInit();
 				weAreInitialized = false;
 			}

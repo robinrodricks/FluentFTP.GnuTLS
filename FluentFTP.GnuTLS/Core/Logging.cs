@@ -43,17 +43,18 @@ namespace FluentFTP.GnuTLS.Core {
 			}
 		}
 
+		private static object logQueueLock = new object();
+
 		// Common log routine for "Interop" and "Internal" messages.
 		// These are buffered regardless of loglevel settings.
 		// Then they are filtered by loglevel and passed via callback
 		// to the FluentFTP logging framework.
 		// In case of an exception being thrown, the buffered messages
 		// are re-issued prior to throw of the exception to aid in debugging.
-		private static object syncObject = new object();
 		public static void Log(int lvl, string msg, bool q) {
 			string s = lvl.ToString().PadRight(3) + " " + msg.TrimEnd(new char[] { '\n', '\r' });
 
-			lock (syncObject) {
+			lock (logQueueLock) {
 				if (q) {
 					if (logQueue.Count < logQueueMaxSize) {
 						logQueue.Enqueue(s);
