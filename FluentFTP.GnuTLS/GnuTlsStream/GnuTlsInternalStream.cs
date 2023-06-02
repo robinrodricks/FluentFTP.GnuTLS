@@ -96,6 +96,7 @@ namespace FluentFTP.GnuTLS {
 			GnuTlsInternalStream streamToResumeFrom,
 			string priorityString,
 			bool deInitGnuTls,
+			string loadLibraryDllNamePrefix,
 			int handshakeTimeout,
 			int pollTimeout,
 			GnuStreamLogCBFunc elog,
@@ -107,6 +108,7 @@ namespace FluentFTP.GnuTLS {
 			alpn = alpnString;
 			priority = priorityString;
 			deInit = deInitGnuTls;
+			GnuTls.SetLoadLibraryDllNamePrefix(loadLibraryDllNamePrefix);
 			hostname = targetHostString;
 			htimeout = handshakeTimeout;
 			ptimeout = pollTimeout;

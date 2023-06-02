@@ -38,6 +38,12 @@ namespace FluentFTP.GnuTLS {
 		public string SetALPNDataConnection { get; set; } = "ftp-data";
 
 		/// <summary>
+		/// Add an optional string prefix to the LoadLibrary dllname
+		/// </summary>
+
+		public string LoadLibraryDllNamePrefix = string.Empty;
+
+		/// <summary>
 		/// Normally, the GnuTLS library is de-initialised after dispose of the control
 		/// connection. If you plan to use the GnuTLS library functions in a multithreaded
 		/// environment, you need to disable this behaviour by setting this to false. The
