@@ -8,10 +8,10 @@ namespace FluentFTP.GnuTLS.Core {
 
 		public static bool platformIsLinux;
 
-		private static IntPtr hModule = IntPtr.Zero;
+		public static string loadLibraryDllNamePrefix = string.Empty;
 
 		#region FunctionLoader
-
+		private static IntPtr hModule = IntPtr.Zero;
 		private static bool functionsAreLoaded = false;
 
 		private static class FunctionLoader {
@@ -110,7 +110,11 @@ namespace FluentFTP.GnuTLS.Core {
 			// Static class construction, used to initialize the entry point addresses of the HANDLERs
 			// that are defined as properties in this class.
 
-			LoadAllFunctions();
+			// LoadAllFunctions(); Most of the (Global)Init functions will do this now.
+		}
+
+		internal static void SetLoadLibraryDllNamePrefix(string pfx) {
+			loadLibraryDllNamePrefix = pfx;
 		}
 
 		private static void LoadAllFunctions() {
@@ -135,7 +139,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 			// Initialize the function loader
 
-			FunctionLoader.Load(useDllName);
+			FunctionLoader.Load(loadLibraryDllNamePrefix + useDllName);
 
 			// Get all the needed functions from the library into handlers via delegates.
 			// In this section of the code:
@@ -241,6 +245,8 @@ namespace FluentFTP.GnuTLS.Core {
 		delegate void gnutls_global_set_log_function_([In()][MarshalAs(UnmanagedType.FunctionPtr)] Logging.GnuTlsLogCBFunc log_func);
 		static gnutls_global_set_log_function_ gnutls_global_set_log_function_h;
 		public static void GnuTlsGlobalSetLogFunction(Logging.GnuTlsLogCBFunc logCBFunc) {
+			if (!functionsAreLoaded) LoadAllFunctions();
+
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
 
