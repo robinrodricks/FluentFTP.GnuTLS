@@ -1,5 +1,9 @@
 # Release Notes
 
+#### 1.0.15
+  - Provide a "LoadLibraryDllPrefix" config parameter to aid in difficult dll packaging 
+    scenarios
+
 #### 1.0.14
   - Eliminate static constructs, make de-init optional, make log queue thread-safe
     and improve function pointer loading for multi-threaded usage
