@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.16
+  - 1.0.15 Re-release
+
 #### 1.0.15
   - Provide a "LoadLibraryDllPrefix" config parameter to aid in difficult dll packaging 
     scenarios
