@@ -110,7 +110,7 @@ namespace FluentFTP.GnuTLS.Core {
 			// Static class construction, used to initialize the entry point addresses of the HANDLERs
 			// that are defined as properties in this class.
 
-			// LoadAllFunctions();
+			// LoadAllFunctions(); Most of the (Global)Init functions will do this now.
 		}
 
 		internal static void SetLoadLibraryDllNamePrefix(string pfx) {
