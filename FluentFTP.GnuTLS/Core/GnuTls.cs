@@ -709,7 +709,7 @@ namespace FluentFTP.GnuTLS.Core {
 		static gnutls_alpn_set_protocols_ gnutls_alpn_set_protocols_h;
 		public static int GnuTlsAlpnSetProtocols(Session session, string protocols) {
 			string gcm = GnuUtils.GetCurrentMethod();
-			Logging.LogGnuFunc(gcm);
+			Logging.LogGnuFunc(gcm + "(" + protocols + ")");
 
 			var datumPtr = Marshal.AllocHGlobal(Marshal.SizeOf<DatumT>());
 			var valuePtr = Marshal.StringToHGlobalAnsi(protocols);
