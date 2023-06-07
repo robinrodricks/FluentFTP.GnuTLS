@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.17
+  - Improve FunctionLoader for Azure environments
+
 #### 1.0.16
   - 1.0.15 Re-release
 
