@@ -139,7 +139,17 @@ namespace FluentFTP.GnuTLS.Core {
 
 			// Initialize the function loader
 
-			FunctionLoader.Load(loadLibraryDllNamePrefix + useDllName);
+			if (platformIsLinux || loadLibraryDllNamePrefix == string.Empty) {
+				FunctionLoader.Load(useDllName);
+			}
+			else {
+				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgcc_s_seh-1.dll");
+				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgmp-10.dll");
+				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libnettle-8.dll");
+				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libwinpthread-1.dll");
+				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libhogweed-6.dll");
+				FunctionLoader.Load(loadLibraryDllNamePrefix + useDllName);
+			}
 
 			// Get all the needed functions from the library into handlers via delegates.
 			// In this section of the code:
