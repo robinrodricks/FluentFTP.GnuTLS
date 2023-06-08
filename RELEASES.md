@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.18
+  - set_x509_system_trust failure (-64) E_FILE_ERROR: Do not terminate on this error.
+
 #### 1.0.17
   - Improve FunctionLoader for Azure environments
 
