@@ -861,7 +861,7 @@ namespace FluentFTP.GnuTLS.Core {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
 
-			return GnuUtils.Check(gcm, gnutls_certificate_set_x509_system_trust_h(cred), (int)EC.en.GNUTLS_E_FILE_ERROR);
+			return gnutls_certificate_set_x509_system_trust_h(cred);
 		}
 
 		// int gnutls_certificate_set_x509_key_mem2 (gnutls_certificate_credentials_t res, const gnutls_datum_t * cert, const gnutls_datum_t * key, gnutls_x509_crt_fmt_t type, const char * pass, unsigned int flags)
