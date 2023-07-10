@@ -391,6 +391,7 @@ namespace FluentFTP.GnuTLS {
 			if ((int)platformID != 2 && (int)platformID != 4 && (int)platformID != 6 && (int)platformID != 128) {
 				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
 				Exception nex = new GnuTlsException("Unsupported platform: " + platformID.ToString());
+				Logging.Log(nex.Message);
 				throw new GnuTlsException("Environment validation error", nex);
 			}
 
@@ -409,9 +410,11 @@ namespace FluentFTP.GnuTLS {
 				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
 				if (ex.InnerException != null) {
 					Exception nex = new GnuTlsException(ex.InnerException.Message);
+					Logging.Log(nex.Message);
 					throw new GnuTlsException("GnuTLS .dll load/call validation error", nex);
 				}
 				else {
+					Logging.Log(ex.Message);
 					throw new GnuTlsException("GnuTLS .dll load/call validation error", ex);
 				}
 			}
@@ -424,6 +427,7 @@ namespace FluentFTP.GnuTLS {
 			// Under linux, we ignore the version and take whatever the distro provides (and hope for the best)
 			if ((int)platformID == 2 && gnuTlsVersion != gnuTlsVersionNeeded) {
 				Exception nex = new GnuTlsException("GnuTLS library version must be " + gnuTlsVersionNeeded);
+				Logging.Log(nex.Message);
 				throw new GnuTlsException("GnuTLS .dll version validation error", nex);
 			}
 
