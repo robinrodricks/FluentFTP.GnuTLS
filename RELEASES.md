@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.20
+  - Add copy for non-managed dlls to publish dir to support dotnet publish command
+
 #### 1.0.19
   - Improve validation error message logging
   - gnutls lib update to 3.8.0
