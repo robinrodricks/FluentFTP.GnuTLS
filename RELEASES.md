@@ -1,5 +1,11 @@
 # Release Notes
 
+#### 1.0.19
+  - Improve validation error message logging
+  - gnutls lib update to 3.8.0
+  - nettle lib update to 3.9.1
+  - Survive all failing x509 system trust calls
+
 #### 1.0.18
   - set_x509_system_trust failure (-64) E_FILE_ERROR: Do not terminate on this error.
 
@@ -25,7 +31,7 @@
   - Logging improvements
 
 #### 1.0.11
-  - Set up X509 System Trust List: adds the system’s default trusted CAs
+  - Set up X509 System Trust List: adds the systemï¿½s default trusted CAs
     for certificate validation.
 
 #### 1.0.10
