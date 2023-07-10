@@ -382,7 +382,7 @@ namespace FluentFTP.GnuTLS {
 
 		internal static bool Validate(bool log) {
 
-			string gnuTlsVersionNeeded = "3.7.8";
+			string gnuTlsVersionNeeded = "3.8.0";
 
 			PlatformID platformID = Environment.OSVersion.Platform;
 
