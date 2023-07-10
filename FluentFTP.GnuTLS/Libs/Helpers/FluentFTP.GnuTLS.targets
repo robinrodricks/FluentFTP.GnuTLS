@@ -2,7 +2,10 @@
   <ItemGroup>
     <Files Include="$(MSBuildThisFileDirectory)/../content/*.dll" />
   </ItemGroup>
-  <Target Name="CopyFiles" AfterTargets="Build">
+  <Target Name="CopyFilesBuild" AfterTargets="Build">
     <Copy SourceFiles="@(Files)" DestinationFolder="$(TargetDir)" />
+  </Target>
+  <Target Name="CopyFilesPublish" AfterTargets="Publish">
+	<Copy SourceFiles="@(Files)" DestinationFolder="$(PublishDir)" />
   </Target>
 </Project>
