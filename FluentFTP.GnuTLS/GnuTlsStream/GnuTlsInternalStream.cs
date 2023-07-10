@@ -398,6 +398,7 @@ namespace FluentFTP.GnuTLS {
 			if (!Environment.Is64BitProcess) {
 				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
 				Exception nex = new GnuTlsException("GnuTlsStream needs to be run as a 64bit process");
+				Logging.Log(nex.Message);
 				throw new GnuTlsException("Process validation error", nex);
 			}
 
@@ -408,7 +409,9 @@ namespace FluentFTP.GnuTLS {
 			}
 			catch (Exception ex) {
 				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
+				Logging.Log(ex.Message);
 				if (ex.InnerException != null) {
+					Logging.Log(ex.InnerException.Message);
 					Exception nex = new GnuTlsException(ex.InnerException.Message);
 					Logging.Log(nex.Message);
 					throw new GnuTlsException("GnuTLS .dll load/call validation error", nex);
