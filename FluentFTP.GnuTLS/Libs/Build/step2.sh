@@ -31,13 +31,13 @@ echo -e "\r\n"
 
 cd sources
 
-rm -rf nettle-3.8.1
-rm nettle-3.8.1.tar.gz
+rm -rf nettle-3.9.1
+rm nettle-3.9.1.tar.gz
 
-wget https://ftp.gnu.org/gnu/nettle/nettle-3.8.1.tar.gz
-tar xvf nettle-3.8.1.tar.gz
+wget https://ftp.gnu.org/gnu/nettle/nettle-3.9.1.tar.gz
+tar xvf nettle-3.9.1.tar.gz
 
-cd nettle-3.8.1
+cd nettle-3.9.1
 
 ./configure --host=$THOST --prefix="$TPFX" --enable-shared --disable-static --enable-fat 
 
