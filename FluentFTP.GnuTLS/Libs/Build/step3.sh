@@ -31,13 +31,13 @@ echo -e "\r\n"
 
 cd sources
 
-rm -rf gnutls-3.7.8
-rm gnutls-3.7.8.tar.xz
+rm -rf gnutls-3.8.0
+rm gnutls-3.8.0.tar.xz
 
-wget https://www.gnupg.org/ftp/gcrypt/gnutls/v3.7/gnutls-3.7.8.tar.xz
-tar xvf gnutls-3.7.8.tar.xz
+wget https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.0.tar.xz
+tar xvf gnutls-3.8.0.tar.xz
 
-cd gnutls-3.7.8
+cd gnutls-3.8.0
 
 autoreconf -f -i
 
