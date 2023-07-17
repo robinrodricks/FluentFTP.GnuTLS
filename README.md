@@ -22,7 +22,7 @@ or modification of the GnuTLS library.
 The `FluentFTP.GnuTLS` wrapper uses the ORIGINAL unmodified GnuTLS library as a `.dll`
 that is dynamically linked.
 
-As of this writing, the GnuTLS library version needed is 3.7.8.
+As of this writing, the GnuTLS library version needed is 3.8.0.
 
 This guide is for building GnuTLS-30.dll and its dependencies from their respective
 original official source.
