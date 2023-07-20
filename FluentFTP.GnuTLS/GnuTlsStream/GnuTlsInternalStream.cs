@@ -134,6 +134,9 @@ namespace FluentFTP.GnuTLS {
 
 					weAreInitialized = true;
 				}
+				else if(deInit) {
+					GnuTls.GnuTlsGlobalInit();
+				}
 			}
 
 			// Setup/Allocate certificate credentials
@@ -189,33 +192,33 @@ namespace FluentFTP.GnuTLS {
 
 		}
 
-		// Destructor
-
-		~GnuTlsInternalStream() {
-		}
-
 		// Dispose
 
-		public void Dispose() {
-			if (sess != null) {
-				if (IsSessionOk) {
-					int count = GnuTls.GnuTlsRecordCheckPending(sess);
-					if (count > 0) {
-						byte[] buf = new byte[count];
-						this.Read(buf, 0, count);
+		protected override void Dispose(bool disposing) {
+			if (disposing) {
+				if (sess != null) {
+					if (IsSessionOk) {
+						int count = GnuTls.GnuTlsRecordCheckPending(sess);
+						if (count > 0) {
+							byte[] buf = new byte[count];
+							this.Read(buf, 0, count);
+						}
+						GnuTls.GnuTlsBye(sess, CloseRequestT.GNUTLS_SHUT_RDWR);
 					}
-					GnuTls.GnuTlsBye(sess, CloseRequestT.GNUTLS_SHUT_RDWR);
+					sess.Dispose();
 				}
-				sess.Dispose();
+
+				cred.Dispose();
+
+				if (deInit) {
+					lock (initLock) {
+						// Reset initialized if the library was unloaded
+						weAreInitialized = !GnuTls.GnuTlsGlobalDeInit();
+					}
+				}
 			}
 
-			cred.Dispose();
-
-			if (weAreControlConnection && deInit) {
-				GnuTls.GnuTlsGlobalDeInit();
-				weAreInitialized = false;
-			}
-
+			base.Dispose(disposing);
 		}
 
 		// Methods overriding base ( = System.IO.Stream )
