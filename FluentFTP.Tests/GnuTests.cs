@@ -27,84 +27,71 @@ namespace FluentFTP.Tests {
 		[Fact]
 		public void ConnectTest() {
 			using (var conn = new FtpClient("127.0.0.1", "ftptest", "ftptest")) {
+				ConfigureConnection(conn);
 
+				conn.Connect();
+			}
+		}
 
-				// enable GnuTLS streams for FTP client
-				conn.Config.CustomStream = typeof(GnuTlsStream);
-				conn.Config.CustomStreamConfig = new GnuConfig() {
-					LogLevel = 1,
+		private static void ConfigureConnection(BaseFtpClient conn) {
+			// enable GnuTLS streams for FTP client
+			conn.Config.CustomStream = typeof(GnuTlsStream);
+			conn.Config.CustomStreamConfig = new GnuConfig() {
+				LogLevel = 1,
 
-					// sample setting to use the default security suite
-					SecuritySuite = GnuSuite.Normal,
+				// sample setting to use the default security suite
+				SecuritySuite = GnuSuite.Normal,
 
-					// sample setting to include all TLS protocols except for TLS 1.0 and TLS 1.1
-					SecurityOptions = new List<GnuOption> {
+				// sample setting to include all TLS protocols except for TLS 1.0 and TLS 1.1
+				SecurityOptions = new List<GnuOption> {
 						new GnuOption(GnuOperator.Include, GnuCommand.Protocol_All),
 						new GnuOption(GnuOperator.Exclude, GnuCommand.Protocol_Tls10),
 						new GnuOption(GnuOperator.Exclude, GnuCommand.Protocol_Tls11),
 					},
 
-					// no profile required
-					SecurityProfile = GnuProfile.None,
+				// no profile required
+				SecurityProfile = GnuProfile.None,
 
-					// sample special flags (this is not normally required)
-					AdvancedOptions = new List<GnuAdvanced> {
+				// sample special flags (this is not normally required)
+				AdvancedOptions = new List<GnuAdvanced> {
 						GnuAdvanced.CompatibilityMode
 					},
 
-					HandshakeTimeout = 5000,
-				};
+				HandshakeTimeout = 5000,
+			};
 
 
-				// connect using Explicit FTPS with TLS 1.3
-				conn.Config.ValidateAnyCertificate = true;
-				conn.Config.EncryptionMode = FtpEncryptionMode.Explicit;
-
-				conn.Connect();
-			}
+			// connect using Explicit FTPS with TLS 1.3
+			conn.Config.ValidateAnyCertificate = true;
+			conn.Config.EncryptionMode = FtpEncryptionMode.Explicit;
 		}
 
 		[Fact]
 		public async Task ConnectAsyncTest() {
 			var token = new CancellationToken();
 			using (var conn = new AsyncFtpClient("127.0.0.1", "ftptest", "ftptest")) {
-
-
-				// enable GnuTLS streams for FTP client
-				conn.Config.CustomStream = typeof(GnuTlsStream);
-				conn.Config.CustomStreamConfig = new GnuConfig() {
-					LogLevel = 1,
-
-					// sample setting to use the default security suite
-					SecuritySuite = GnuSuite.Normal,
-
-					// sample setting to include all TLS protocols except for TLS 1.0 and TLS 1.1
-					SecurityOptions = new List<GnuOption> {
-						new GnuOption(GnuOperator.Include, GnuCommand.Protocol_All),
-						new GnuOption(GnuOperator.Exclude, GnuCommand.Protocol_Tls10),
-						new GnuOption(GnuOperator.Exclude, GnuCommand.Protocol_Tls11),
-					},
-
-					// no profile required
-					SecurityProfile = GnuProfile.None,
-
-					// sample special flags (this is not normally required)
-					AdvancedOptions = new List<GnuAdvanced> {
-						GnuAdvanced.CompatibilityMode
-					},
-
-					HandshakeTimeout = 5000,
-				};
-
-
-				// connect using Explicit FTPS with TLS 1.3
-				conn.Config.ValidateAnyCertificate = true;
-				conn.Config.EncryptionMode = FtpEncryptionMode.Explicit;
+				ConfigureConnection(conn);
 
 				await conn.Connect(token);
 			}
 		}
 
+		[Fact]
+		public async Task ConnectParallelTest() {
+			var token = new CancellationToken();
+			using (var conn = new AsyncFtpClient("127.0.0.1", "ftptest", "ftptest")) {
 
+				ConfigureConnection(conn);
+				await conn.Connect(token);
+
+				// Create second connection to test nested initialization
+				// This crashes the entire process on access violation, so the test will not show as failed!
+				using (var conn2 = new AsyncFtpClient("127.0.0.1", "ftptest", "ftptest")) {
+
+					ConfigureConnection(conn2);
+					await conn2.Connect(token);
+				}
+			}
+		}
 	}
 }
