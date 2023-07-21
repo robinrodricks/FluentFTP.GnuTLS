@@ -133,6 +133,7 @@ namespace FluentFTP.GnuTLS.Core {
 				if (incUseCount) {
 					++useCount;
 				}
+
 				if (functionsAreLoaded) return;
 
 				string useDllName;
