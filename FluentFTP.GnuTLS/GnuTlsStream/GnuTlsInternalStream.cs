@@ -114,10 +114,10 @@ namespace FluentFTP.GnuTLS {
 			lock (initLock) {
 				if (!weAreInitialized) {
 
-					// On the first instance of GnuTlsStream, setup:
-					// 1. Logging
+					// On constructing the first instance of GnuTlsStream, setup:
+					// 1. Logging init
 					// 2. Make sure GnuTls version corresponds to our Native. and Enums.
-					// 3. GnuTls Gobal Init
+					// 3. Loggin attach
 
 					Logging.InitLogging(elog, logMaxLevel, logDebugInformationMessages, logQueueMaxSize);
 
@@ -127,6 +127,9 @@ namespace FluentFTP.GnuTLS {
 
 					weAreInitialized = true;
 				}
+
+				// On constructing all instances of GnuTlsStream, init the library.
+				// Note: The internal logic of this handles loading/unloading the library etc.
 
 				GnuTls.GnuTlsGlobalInit();
 			}
@@ -198,6 +201,9 @@ namespace FluentFTP.GnuTLS {
 				cred.Dispose();
 
 				lock (initLock) {
+					// On destructing this instance, de-init the library
+					// Note: The internal logic of this handles loading/unloading the library etc.
+
 					weAreInitialized = !GnuTls.GnuTlsGlobalDeInit();
 				}
 			}
