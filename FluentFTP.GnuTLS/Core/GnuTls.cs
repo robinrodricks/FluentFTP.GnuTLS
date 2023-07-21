@@ -4,6 +4,9 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace FluentFTP.GnuTLS.Core {
+	// Wrapper that handles loading the external GnuTls library
+	// Loading happens in the first call to GnuTlsGlobalInit, GnuTlsCheckVersion or GnuTlsGlobalSetLogLevel
+	// If GnuTlsGlobalDeInit is called the same number of times as GnuTlsGlobalInit, the library is freed and true is returned
 	internal static class GnuTls {
 
 		public static bool platformIsLinux;
@@ -13,6 +16,10 @@ namespace FluentFTP.GnuTLS.Core {
 		#region FunctionLoader
 		private static IntPtr hModule = IntPtr.Zero;
 		private static bool functionsAreLoaded = false;
+		// Number of active library users (called global init and not global deinit)
+		private static int useCount = 0;
+		// Lock to protect loading, freeing and useCount
+		private static readonly object loaderLock = new object();
 
 		private static class FunctionLoader {
 
@@ -99,8 +106,21 @@ namespace FluentFTP.GnuTLS.Core {
 			}
 
 			public static void Free() {
-				_ = platformIsLinux ? dlclose(hModule) == 1 : FreeLibrary(hModule);
-				functionsAreLoaded = false;
+				lock (loaderLock) {
+					_ = platformIsLinux ? dlclose(hModule) == 1 : FreeLibrary(hModule);
+					functionsAreLoaded = false;
+				}
+			}
+
+			public static bool FreeUser() {
+				lock (loaderLock) {
+					--useCount;
+					if (useCount == 0) {
+						_ = platformIsLinux ? dlclose(hModule) == 1 : FreeLibrary(hModule);
+						functionsAreLoaded = false;
+					}
+					return !functionsAreLoaded;
+				}
 			}
 		}
 		#endregion
@@ -117,105 +137,109 @@ namespace FluentFTP.GnuTLS.Core {
 			loadLibraryDllNamePrefix = pfx;
 		}
 
-		private static void LoadAllFunctions() {
-			if (functionsAreLoaded) return;
+		private static void LoadAllFunctions(bool incrementUsers) {
+			lock (loaderLock) {
+				if (incrementUsers) {
+					++useCount;
+				}
+				if (functionsAreLoaded) return;
 
-			string useDllName;
+				string useDllName;
 
-			// Determine the platform we are running under
+				// Determine the platform we are running under
 
-			#region Platform
-			PlatformID platformID = Environment.OSVersion.Platform;
+				#region Platform
+				PlatformID platformID = Environment.OSVersion.Platform;
 
-			if ((int)platformID == 4 || (int)platformID == 6 || (int)platformID == 128) {
-				platformIsLinux = true;
-				useDllName = @"libgnutls.so.30";
+				if ((int)platformID == 4 || (int)platformID == 6 || (int)platformID == 128) {
+					platformIsLinux = true;
+					useDllName = @"libgnutls.so.30";
+				}
+				else {
+					platformIsLinux = false;
+					useDllName = @"libgnutls-30.dll";
+				}
+				#endregion
+
+				// Initialize the function loader
+
+				if (platformIsLinux || loadLibraryDllNamePrefix == string.Empty) {
+					FunctionLoader.Load(useDllName);
+				}
+				else {
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgcc_s_seh-1.dll");
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgmp-10.dll");
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libnettle-8.dll");
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libwinpthread-1.dll");
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libhogweed-6.dll");
+					FunctionLoader.Load(loadLibraryDllNamePrefix + useDllName);
+				}
+
+				// Get all the needed functions from the library into handlers via delegates.
+				// In this section of the code:
+				// gnutls_func_name_ is the delegate, gnutls_func_name_h is the handler.
+
+				#region Global
+				gnutls_check_version_h = (gnutls_check_version_)FunctionLoader.LoadFunction<gnutls_check_version_>(@"gnutls_check_version");
+				gnutls_global_set_log_function_h = (gnutls_global_set_log_function_)FunctionLoader.LoadFunction<gnutls_global_set_log_function_>(@"gnutls_global_set_log_function");
+				gnutls_global_set_log_level_h = (gnutls_global_set_log_level_)FunctionLoader.LoadFunction<gnutls_global_set_log_level_>(@"gnutls_global_set_log_level");
+				gnutls_global_init_h = (gnutls_global_init_)FunctionLoader.LoadFunction<gnutls_global_init_>(@"gnutls_global_init");
+				gnutls_global_deinit_h = (gnutls_global_deinit_)FunctionLoader.LoadFunction<gnutls_global_deinit_>(@"gnutls_global_deinit");
+				// gnutls_free is (for reasons beyond my comprehension) exported from libgnutls marked as a value, not an entry point.
+				gnutls_free_h = (gnutls_free_)FunctionLoader.LoadFunction<gnutls_free_>(@"gnutls_free", true);
+				#endregion
+
+				#region Session
+				gnutls_init_h = (gnutls_init_)FunctionLoader.LoadFunction<gnutls_init_>(@"gnutls_init");
+				gnutls_deinit_h = (gnutls_deinit_)FunctionLoader.LoadFunction<gnutls_deinit_>(@"gnutls_deinit");
+				gnutls_db_set_cache_expiration_h = (gnutls_db_set_cache_expiration_)FunctionLoader.LoadFunction<gnutls_db_set_cache_expiration_>(@"gnutls_db_set_cache_expiration");
+				gnutls_session_get_desc_h = (gnutls_session_get_desc_)FunctionLoader.LoadFunction<gnutls_session_get_desc_>(@"gnutls_session_get_desc");
+				gnutls_protocol_get_name_h = (gnutls_protocol_get_name_)FunctionLoader.LoadFunction<gnutls_protocol_get_name_>(@"gnutls_protocol_get_name");
+				gnutls_protocol_get_version_h = (gnutls_protocol_get_version_)FunctionLoader.LoadFunction<gnutls_protocol_get_version_>(@"gnutls_protocol_get_version");
+				gnutls_record_get_max_size_h = (gnutls_record_get_max_size_)FunctionLoader.LoadFunction<gnutls_record_get_max_size_>(@"gnutls_record_get_max_size");
+				gnutls_alert_get_h = (gnutls_alert_get_)FunctionLoader.LoadFunction<gnutls_alert_get_>(@"gnutls_alert_get");
+				gnutls_alert_get_name_h = (gnutls_alert_get_name_)FunctionLoader.LoadFunction<gnutls_alert_get_name_>(@"gnutls_alert_get_name");
+				gnutls_error_is_fatal_h = (gnutls_error_is_fatal_)FunctionLoader.LoadFunction<gnutls_error_is_fatal_>(@"gnutls_error_is_fatal");
+				gnutls_handshake_h = (gnutls_handshake_)FunctionLoader.LoadFunction<gnutls_handshake_>(@"gnutls_handshake");
+				gnutls_handshake_set_hook_function_h = (gnutls_handshake_set_hook_function_)FunctionLoader.LoadFunction<gnutls_handshake_set_hook_function_>(@"gnutls_handshake_set_hook_function");
+				gnutls_bye_h = (gnutls_bye_)FunctionLoader.LoadFunction<gnutls_bye_>(@"gnutls_bye");
+				gnutls_handshake_set_timeout_h = (gnutls_handshake_set_timeout_)FunctionLoader.LoadFunction<gnutls_handshake_set_timeout_>(@"gnutls_handshake_set_timeout");
+				gnutls_record_check_pending_h = (gnutls_record_check_pending_)FunctionLoader.LoadFunction<gnutls_record_check_pending_>(@"gnutls_record_check_pending");
+				gnutls_set_default_priority_h = (gnutls_set_default_priority_)FunctionLoader.LoadFunction<gnutls_set_default_priority_>(@"gnutls_set_default_priority");
+				gnutls_priority_set_direct_h = (gnutls_priority_set_direct_)FunctionLoader.LoadFunction<gnutls_priority_set_direct_>(@"gnutls_priority_set_direct");
+				gnutls_set_default_priority_append_h = (gnutls_set_default_priority_append_)FunctionLoader.LoadFunction<gnutls_set_default_priority_append_>(@"gnutls_set_default_priority_append");
+				gnutls_dh_set_prime_bits_h = (gnutls_dh_set_prime_bits_)FunctionLoader.LoadFunction<gnutls_dh_set_prime_bits_>(@"gnutls_dh_set_prime_bits");
+				gnutls_transport_set_ptr_h = (gnutls_transport_set_ptr_)FunctionLoader.LoadFunction<gnutls_transport_set_ptr_>(@"gnutls_transport_set_ptr");
+				gnutls_record_recv_h = (gnutls_record_recv_)FunctionLoader.LoadFunction<gnutls_record_recv_>(@"gnutls_record_recv");
+				gnutls_record_send_h = (gnutls_record_send_)FunctionLoader.LoadFunction<gnutls_record_send_>(@"gnutls_record_send");
+				gnutls_session_is_resumed_h = (gnutls_session_is_resumed_)FunctionLoader.LoadFunction<gnutls_session_is_resumed_>(@"gnutls_session_is_resumed");
+				gnutls_session_get_data2_h = (gnutls_session_get_data2_)FunctionLoader.LoadFunction<gnutls_session_get_data2_>(@"gnutls_session_get_data2");
+				gnutls_session_set_data_h = (gnutls_session_set_data_)FunctionLoader.LoadFunction<gnutls_session_set_data_>(@"gnutls_session_set_data");
+				gnutls_session_get_flags_h = (gnutls_session_get_flags_)FunctionLoader.LoadFunction<gnutls_session_get_flags_>(@"gnutls_session_get_flags");
+				gnutls_alpn_set_protocols_h = (gnutls_alpn_set_protocols_)FunctionLoader.LoadFunction<gnutls_alpn_set_protocols_>(@"gnutls_alpn_set_protocols");
+				gnutls_alpn_get_selected_protocol_h = (gnutls_alpn_get_selected_protocol_)FunctionLoader.LoadFunction<gnutls_alpn_get_selected_protocol_>(@"gnutls_alpn_get_selected_protocol");
+				#endregion
+
+				#region Credentials
+				gnutls_certificate_allocate_credentials_h = (gnutls_certificate_allocate_credentials_)FunctionLoader.LoadFunction<gnutls_certificate_allocate_credentials_>(@"gnutls_certificate_allocate_credentials");
+				gnutls_certificate_free_credentials_h = (gnutls_certificate_free_credentials_)FunctionLoader.LoadFunction<gnutls_certificate_free_credentials_>(@"gnutls_certificate_free_credentials");
+				gnutls_credentials_set_h = (gnutls_credentials_set_)FunctionLoader.LoadFunction<gnutls_credentials_set_>(@"gnutls_credentials_set");
+				gnutls_certificate_client_get_request_status_h = (gnutls_certificate_client_get_request_status_)FunctionLoader.LoadFunction<gnutls_certificate_client_get_request_status_>(@"gnutls_certificate_client_get_request_status");
+				gnutls_certificate_verify_peers3_h = (gnutls_certificate_verify_peers3_)FunctionLoader.LoadFunction<gnutls_certificate_verify_peers3_>(@"gnutls_certificate_verify_peers3");
+				gnutls_certificate_type_get2_h = (gnutls_certificate_type_get2_)FunctionLoader.LoadFunction<gnutls_certificate_type_get2_>(@"gnutls_certificate_type_get2");
+				gnutls_certificate_get_peers_h = (gnutls_certificate_get_peers_)FunctionLoader.LoadFunction<gnutls_certificate_get_peers_>(@"gnutls_certificate_get_peers");
+				gnutls_certificate_set_x509_system_trust_h = (gnutls_certificate_set_x509_system_trust_)FunctionLoader.LoadFunction<gnutls_certificate_set_x509_system_trust_>(@"gnutls_certificate_set_x509_system_trust");
+				gnutls_certificate_set_x509_key_mem2_h = (gnutls_certificate_set_x509_key_mem2_)FunctionLoader.LoadFunction<gnutls_certificate_set_x509_key_mem2_>(@"gnutls_certificate_set_x509_key_mem2");
+				gnutls_x509_crt_init_h = (gnutls_x509_crt_init_)FunctionLoader.LoadFunction<gnutls_x509_crt_init_>(@"gnutls_x509_crt_init");
+				gnutls_x509_crt_deinit_h = (gnutls_x509_crt_deinit_)FunctionLoader.LoadFunction<gnutls_x509_crt_deinit_>(@"gnutls_x509_crt_deinit");
+				gnutls_x509_crt_import_h = (gnutls_x509_crt_import_)FunctionLoader.LoadFunction<gnutls_x509_crt_import_>(@"gnutls_x509_crt_import");
+				gnutls_x509_crt_print_h = (gnutls_x509_crt_print_)FunctionLoader.LoadFunction<gnutls_x509_crt_print_>(@"gnutls_x509_crt_print");
+				gnutls_x509_crt_export2_h = (gnutls_x509_crt_export2_)FunctionLoader.LoadFunction<gnutls_x509_crt_export2_>(@"gnutls_x509_crt_export2");
+				gnutls_pcert_import_rawpk_raw_h = (gnutls_pcert_import_rawpk_raw_)FunctionLoader.LoadFunction<gnutls_pcert_import_rawpk_raw_>(@"gnutls_pcert_import_rawpk_raw");
+				#endregion
+
+				functionsAreLoaded = true;
 			}
-			else {
-				platformIsLinux = false;
-				useDllName = @"libgnutls-30.dll";
-			}
-			#endregion
-
-			// Initialize the function loader
-
-			if (platformIsLinux || loadLibraryDllNamePrefix == string.Empty) {
-				FunctionLoader.Load(useDllName);
-			}
-			else {
-				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgcc_s_seh-1.dll");
-				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgmp-10.dll");
-				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libnettle-8.dll");
-				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libwinpthread-1.dll");
-				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libhogweed-6.dll");
-				FunctionLoader.Load(loadLibraryDllNamePrefix + useDllName);
-			}
-
-			// Get all the needed functions from the library into handlers via delegates.
-			// In this section of the code:
-			// gnutls_func_name_ is the delegate, gnutls_func_name_h is the handler.
-
-			#region Global
-			gnutls_check_version_h = (gnutls_check_version_)FunctionLoader.LoadFunction<gnutls_check_version_>(@"gnutls_check_version");
-			gnutls_global_set_log_function_h = (gnutls_global_set_log_function_)FunctionLoader.LoadFunction<gnutls_global_set_log_function_>(@"gnutls_global_set_log_function");
-			gnutls_global_set_log_level_h = (gnutls_global_set_log_level_)FunctionLoader.LoadFunction<gnutls_global_set_log_level_>(@"gnutls_global_set_log_level");
-			gnutls_global_init_h = (gnutls_global_init_)FunctionLoader.LoadFunction<gnutls_global_init_>(@"gnutls_global_init");
-			gnutls_global_deinit_h = (gnutls_global_deinit_)FunctionLoader.LoadFunction<gnutls_global_deinit_>(@"gnutls_global_deinit");
-			// gnutls_free is (for reasons beyond my comprehension) exported from libgnutls marked as a value, not an entry point.
-			gnutls_free_h = (gnutls_free_)FunctionLoader.LoadFunction<gnutls_free_>(@"gnutls_free", true);
-			#endregion
-
-			#region Session
-			gnutls_init_h = (gnutls_init_)FunctionLoader.LoadFunction<gnutls_init_>(@"gnutls_init");
-			gnutls_deinit_h = (gnutls_deinit_)FunctionLoader.LoadFunction<gnutls_deinit_>(@"gnutls_deinit");
-			gnutls_db_set_cache_expiration_h = (gnutls_db_set_cache_expiration_)FunctionLoader.LoadFunction<gnutls_db_set_cache_expiration_>(@"gnutls_db_set_cache_expiration");
-			gnutls_session_get_desc_h = (gnutls_session_get_desc_)FunctionLoader.LoadFunction<gnutls_session_get_desc_>(@"gnutls_session_get_desc");
-			gnutls_protocol_get_name_h = (gnutls_protocol_get_name_)FunctionLoader.LoadFunction<gnutls_protocol_get_name_>(@"gnutls_protocol_get_name");
-			gnutls_protocol_get_version_h = (gnutls_protocol_get_version_)FunctionLoader.LoadFunction<gnutls_protocol_get_version_>(@"gnutls_protocol_get_version");
-			gnutls_record_get_max_size_h = (gnutls_record_get_max_size_)FunctionLoader.LoadFunction<gnutls_record_get_max_size_>(@"gnutls_record_get_max_size");
-			gnutls_alert_get_h = (gnutls_alert_get_)FunctionLoader.LoadFunction<gnutls_alert_get_>(@"gnutls_alert_get");
-			gnutls_alert_get_name_h = (gnutls_alert_get_name_)FunctionLoader.LoadFunction<gnutls_alert_get_name_>(@"gnutls_alert_get_name");
-			gnutls_error_is_fatal_h = (gnutls_error_is_fatal_)FunctionLoader.LoadFunction<gnutls_error_is_fatal_>(@"gnutls_error_is_fatal");
-			gnutls_handshake_h = (gnutls_handshake_)FunctionLoader.LoadFunction<gnutls_handshake_>(@"gnutls_handshake");
-			gnutls_handshake_set_hook_function_h = (gnutls_handshake_set_hook_function_)FunctionLoader.LoadFunction<gnutls_handshake_set_hook_function_>(@"gnutls_handshake_set_hook_function");
-			gnutls_bye_h = (gnutls_bye_)FunctionLoader.LoadFunction<gnutls_bye_>(@"gnutls_bye");
-			gnutls_handshake_set_timeout_h = (gnutls_handshake_set_timeout_)FunctionLoader.LoadFunction<gnutls_handshake_set_timeout_>(@"gnutls_handshake_set_timeout");
-			gnutls_record_check_pending_h = (gnutls_record_check_pending_)FunctionLoader.LoadFunction<gnutls_record_check_pending_>(@"gnutls_record_check_pending");
-			gnutls_set_default_priority_h = (gnutls_set_default_priority_)FunctionLoader.LoadFunction<gnutls_set_default_priority_>(@"gnutls_set_default_priority");
-			gnutls_priority_set_direct_h = (gnutls_priority_set_direct_)FunctionLoader.LoadFunction<gnutls_priority_set_direct_>(@"gnutls_priority_set_direct");
-			gnutls_set_default_priority_append_h = (gnutls_set_default_priority_append_)FunctionLoader.LoadFunction<gnutls_set_default_priority_append_>(@"gnutls_set_default_priority_append");
-			gnutls_dh_set_prime_bits_h = (gnutls_dh_set_prime_bits_)FunctionLoader.LoadFunction<gnutls_dh_set_prime_bits_>(@"gnutls_dh_set_prime_bits");
-			gnutls_transport_set_ptr_h = (gnutls_transport_set_ptr_)FunctionLoader.LoadFunction<gnutls_transport_set_ptr_>(@"gnutls_transport_set_ptr");
-			gnutls_record_recv_h = (gnutls_record_recv_)FunctionLoader.LoadFunction<gnutls_record_recv_>(@"gnutls_record_recv");
-			gnutls_record_send_h = (gnutls_record_send_)FunctionLoader.LoadFunction<gnutls_record_send_>(@"gnutls_record_send");
-			gnutls_session_is_resumed_h = (gnutls_session_is_resumed_)FunctionLoader.LoadFunction<gnutls_session_is_resumed_>(@"gnutls_session_is_resumed");
-			gnutls_session_get_data2_h = (gnutls_session_get_data2_)FunctionLoader.LoadFunction<gnutls_session_get_data2_>(@"gnutls_session_get_data2");
-			gnutls_session_set_data_h = (gnutls_session_set_data_)FunctionLoader.LoadFunction<gnutls_session_set_data_>(@"gnutls_session_set_data");
-			gnutls_session_get_flags_h = (gnutls_session_get_flags_)FunctionLoader.LoadFunction<gnutls_session_get_flags_>(@"gnutls_session_get_flags");
-			gnutls_alpn_set_protocols_h = (gnutls_alpn_set_protocols_)FunctionLoader.LoadFunction<gnutls_alpn_set_protocols_>(@"gnutls_alpn_set_protocols");
-			gnutls_alpn_get_selected_protocol_h = (gnutls_alpn_get_selected_protocol_)FunctionLoader.LoadFunction<gnutls_alpn_get_selected_protocol_>(@"gnutls_alpn_get_selected_protocol");
-			#endregion
-
-			#region Credentials
-			gnutls_certificate_allocate_credentials_h = (gnutls_certificate_allocate_credentials_)FunctionLoader.LoadFunction<gnutls_certificate_allocate_credentials_>(@"gnutls_certificate_allocate_credentials");
-			gnutls_certificate_free_credentials_h = (gnutls_certificate_free_credentials_)FunctionLoader.LoadFunction<gnutls_certificate_free_credentials_>(@"gnutls_certificate_free_credentials");
-			gnutls_credentials_set_h = (gnutls_credentials_set_)FunctionLoader.LoadFunction<gnutls_credentials_set_>(@"gnutls_credentials_set");
-			gnutls_certificate_client_get_request_status_h = (gnutls_certificate_client_get_request_status_)FunctionLoader.LoadFunction<gnutls_certificate_client_get_request_status_>(@"gnutls_certificate_client_get_request_status");
-			gnutls_certificate_verify_peers3_h = (gnutls_certificate_verify_peers3_)FunctionLoader.LoadFunction<gnutls_certificate_verify_peers3_>(@"gnutls_certificate_verify_peers3");
-			gnutls_certificate_type_get2_h = (gnutls_certificate_type_get2_)FunctionLoader.LoadFunction<gnutls_certificate_type_get2_>(@"gnutls_certificate_type_get2");
-			gnutls_certificate_get_peers_h = (gnutls_certificate_get_peers_)FunctionLoader.LoadFunction<gnutls_certificate_get_peers_>(@"gnutls_certificate_get_peers");
-			gnutls_certificate_set_x509_system_trust_h = (gnutls_certificate_set_x509_system_trust_)FunctionLoader.LoadFunction<gnutls_certificate_set_x509_system_trust_>(@"gnutls_certificate_set_x509_system_trust");
-			gnutls_certificate_set_x509_key_mem2_h = (gnutls_certificate_set_x509_key_mem2_)FunctionLoader.LoadFunction<gnutls_certificate_set_x509_key_mem2_>(@"gnutls_certificate_set_x509_key_mem2");
-			gnutls_x509_crt_init_h = (gnutls_x509_crt_init_)FunctionLoader.LoadFunction<gnutls_x509_crt_init_>(@"gnutls_x509_crt_init");
-			gnutls_x509_crt_deinit_h = (gnutls_x509_crt_deinit_)FunctionLoader.LoadFunction<gnutls_x509_crt_deinit_>(@"gnutls_x509_crt_deinit");
-			gnutls_x509_crt_import_h = (gnutls_x509_crt_import_)FunctionLoader.LoadFunction<gnutls_x509_crt_import_>(@"gnutls_x509_crt_import");
-			gnutls_x509_crt_print_h = (gnutls_x509_crt_print_)FunctionLoader.LoadFunction<gnutls_x509_crt_print_>(@"gnutls_x509_crt_print");
-			gnutls_x509_crt_export2_h = (gnutls_x509_crt_export2_)FunctionLoader.LoadFunction<gnutls_x509_crt_export2_>(@"gnutls_x509_crt_export2");
-			gnutls_pcert_import_rawpk_raw_h = (gnutls_pcert_import_rawpk_raw_)FunctionLoader.LoadFunction<gnutls_pcert_import_rawpk_raw_>(@"gnutls_pcert_import_rawpk_raw");
-			#endregion
-
-			functionsAreLoaded = true;
-
 			//FunctionLoader.Free(); will be done when GnuTlsStream is disposed.
 		}
 
@@ -241,7 +265,7 @@ namespace FluentFTP.GnuTLS.Core {
 		delegate IntPtr gnutls_check_version_([In()][MarshalAs(UnmanagedType.LPStr)] string req_version);
 		static gnutls_check_version_ gnutls_check_version_h;
 		public static string GnuTlsCheckVersion(string reqVersion) {
-			if (!functionsAreLoaded) LoadAllFunctions();
+			LoadAllFunctions(false);
 
 			IntPtr versionPtr = gnutls_check_version_h(reqVersion);
 			string version = Marshal.PtrToStringAnsi(versionPtr);
@@ -255,7 +279,7 @@ namespace FluentFTP.GnuTLS.Core {
 		delegate void gnutls_global_set_log_function_([In()][MarshalAs(UnmanagedType.FunctionPtr)] Logging.GnuTlsLogCBFunc log_func);
 		static gnutls_global_set_log_function_ gnutls_global_set_log_function_h;
 		public static void GnuTlsGlobalSetLogFunction(Logging.GnuTlsLogCBFunc logCBFunc) {
-			if (!functionsAreLoaded) LoadAllFunctions();
+			LoadAllFunctions(false);
 
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -279,7 +303,7 @@ namespace FluentFTP.GnuTLS.Core {
 		delegate int gnutls_global_init_();
 		static gnutls_global_init_ gnutls_global_init_h;
 		public static int GnuTlsGlobalInit() {
-			if (!functionsAreLoaded) LoadAllFunctions();
+			LoadAllFunctions(true);
 
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -291,13 +315,16 @@ namespace FluentFTP.GnuTLS.Core {
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int gnutls_global_deinit_();
 		static gnutls_global_deinit_ gnutls_global_deinit_h;
-		public static void GnuTlsGlobalDeInit() {
+		// Calls deinit and unloads the library if no users are left
+		// Returns true if this was the final user
+		public static bool GnuTlsGlobalDeInit() {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
 
 			gnutls_global_deinit_h();
 
-			FunctionLoader.Free();
+
+			return FunctionLoader.FreeUser();
 		}
 
 		// void gnutls_free(* ptr)

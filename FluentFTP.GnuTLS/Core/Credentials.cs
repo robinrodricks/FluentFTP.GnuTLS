@@ -11,7 +11,7 @@ namespace FluentFTP.GnuTLS.Core {
 			credentialsType = type;
 		}
 
-		public void Dispose() {
+		public virtual void Dispose() {
 		}
 	}
 
@@ -34,7 +34,7 @@ namespace FluentFTP.GnuTLS.Core {
 			_ = GnuUtils.Check("*GnuTlsCertificateAllocateCredentials(...)", GnuTls.GnuTlsCertificateAllocateCredentials(ref ptr));
 		}
 
-		public void Dispose() {
+		public override void Dispose() {
 			if (ptr != IntPtr.Zero) {
 				string gcm = GnuUtils.GetCurrentMethod() + ":CertificateCredentials";
 				Logging.LogGnuFunc(gcm);
@@ -42,6 +42,7 @@ namespace FluentFTP.GnuTLS.Core {
 				GnuTls.GnuTlsCertificateFreeCredentials(ptr);
 				ptr = IntPtr.Zero;
 			}
+			base.Dispose();
 		}
 	}
 }
