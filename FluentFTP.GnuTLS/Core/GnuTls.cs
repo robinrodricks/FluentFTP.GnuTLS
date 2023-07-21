@@ -233,7 +233,6 @@ namespace FluentFTP.GnuTLS.Core {
 
 				functionsAreLoaded = true;
 			}
-			//FunctionLoader.Free(); will be done when GnuTlsStream is disposed.
 		}
 
 		// The following code is platform independant, the magic is in the FunctionLoader above
