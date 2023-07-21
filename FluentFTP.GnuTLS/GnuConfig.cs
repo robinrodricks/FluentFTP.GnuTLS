@@ -44,14 +44,6 @@ namespace FluentFTP.GnuTLS {
 		public string LoadLibraryDllNamePrefix = string.Empty;
 
 		/// <summary>
-		/// Normally, the GnuTLS library is de-initialised after dispose of the control
-		/// connection. If you plan to use the GnuTLS library functions in a multithreaded
-		/// environment, you need to disable this behaviour by setting this to false. The
-		/// library will NOT be de-initialised.
-		/// </summary>
-		public bool DeInitGnuTls { get; set; } = true;
-
-		/// <summary>
 		/// How long to wait for a handshake before giving up, in milliseconds.
 		/// Set to zero to disable.
 		/// </summary>
