@@ -130,9 +130,9 @@ namespace FluentFTP.GnuTLS.Core {
 			loadLibraryDllNamePrefix = pfx;
 		}
 
-		private static void LoadAllFunctions(bool incrementUsers) {
+		private static void LoadAllFunctions(bool incUseCount) {
 			lock (loaderLock) {
-				if (incrementUsers) {
+				if (incUseCount) {
 					++useCount;
 				}
 				if (functionsAreLoaded) return;
