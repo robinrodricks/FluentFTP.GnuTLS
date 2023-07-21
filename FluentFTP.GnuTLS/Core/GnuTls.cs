@@ -105,14 +105,7 @@ namespace FluentFTP.GnuTLS.Core {
 				return Marshal.GetDelegateForFunctionPointer(pFunc, typeof(T));
 			}
 
-			public static void Free() {
-				lock (loaderLock) {
-					_ = platformIsLinux ? dlclose(hModule) == 1 : FreeLibrary(hModule);
-					functionsAreLoaded = false;
-				}
-			}
-
-			public static bool FreeUser() {
+			public static bool Free() {
 				lock (loaderLock) {
 					--useCount;
 					if (useCount == 0) {
@@ -323,8 +316,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 			gnutls_global_deinit_h();
 
-
-			return FunctionLoader.FreeUser();
+			return FunctionLoader.Free();
 		}
 
 		// void gnutls_free(* ptr)

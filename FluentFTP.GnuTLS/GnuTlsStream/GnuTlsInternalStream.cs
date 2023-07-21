@@ -67,8 +67,6 @@ namespace FluentFTP.GnuTLS {
 
 		private bool weAreControlConnection = true;
 
-		private bool deInit = true;
-
 		//
 
 		// The TLS session associated with this GnuTlsStream
@@ -95,7 +93,6 @@ namespace FluentFTP.GnuTLS {
 			string? alpnString,
 			GnuTlsInternalStream streamToResumeFrom,
 			string priorityString,
-			bool deInitGnuTls,
 			string loadLibraryDllNamePrefix,
 			int handshakeTimeout,
 			int pollTimeout,
@@ -107,7 +104,6 @@ namespace FluentFTP.GnuTLS {
 			socket = socketDescriptor;
 			alpn = alpnString;
 			priority = priorityString;
-			deInit = deInitGnuTls;
 			GnuTls.SetLoadLibraryDllNamePrefix(loadLibraryDllNamePrefix);
 			hostname = targetHostString;
 			htimeout = handshakeTimeout;
@@ -129,23 +125,14 @@ namespace FluentFTP.GnuTLS {
 
 					Logging.AttachGnuTlsLogging();
 
-					// Setup the GnuTLS infrastructure
-					GnuTls.GnuTlsGlobalInit();
-
 					weAreInitialized = true;
 				}
-				else if(deInit) {
-					GnuTls.GnuTlsGlobalInit();
-				}
+
+				GnuTls.GnuTlsGlobalInit();
 			}
 
 			// Setup/Allocate certificate credentials
-			if (streamToResumeFrom == null) {
-				cred = new();
-			}
-			else {
-				cred = new(streamToResumeFrom.cred);
-			}
+			cred = weAreControlConnection ? new() : new(streamToResumeFrom.cred);
 
 			// sets the system trusted CAs for Internet PKI
 			int n = GnuTls.GnuTlsCertificateSetX509SystemTrust(cred.ptr);
@@ -210,11 +197,8 @@ namespace FluentFTP.GnuTLS {
 
 				cred.Dispose();
 
-				if (deInit) {
-					lock (initLock) {
-						// Reset initialized if the library was unloaded
-						weAreInitialized = !GnuTls.GnuTlsGlobalDeInit();
-					}
+				lock (initLock) {
+					weAreInitialized = !GnuTls.GnuTlsGlobalDeInit();
 				}
 			}
 

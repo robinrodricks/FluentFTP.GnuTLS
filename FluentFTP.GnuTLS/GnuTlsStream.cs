@@ -49,7 +49,6 @@ namespace FluentFTP.GnuTLS {
 				isControl ? config.SetALPNControlConnection : config.SetALPNDataConnection,
 				isControl ? null : (controlConnStream as GnuTlsStream).BaseStream,
 				priority,
-				config.DeInitGnuTls,
 				config.LoadLibraryDllNamePrefix,
 				config.HandshakeTimeout,
 				config.PollTimeout,
