@@ -1,5 +1,12 @@
 # Release Notes
 
+#### 1.0.21
+  - Implement a use-count based load/unload logic for the .dll libraries (thanks @Jojo-1000)
+  - Add logging for load and unload library actions
+  - Add a config parm DllUnloadByUseCount to disable use-count based unloading
+  - Remove the interim experimental parm DeInitGnuTLS that had a similar function
+  - Improve cred and sess dispose handling (thanks @Jojo-1000)
+
 #### 1.0.20
   - Add copy for non-managed dlls to publish dir to support dotnet publish command
 
