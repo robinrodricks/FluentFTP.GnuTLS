@@ -67,6 +67,8 @@ namespace FluentFTP.GnuTLS {
 
 		private bool weAreControlConnection = true;
 
+		private bool dllUnload = true;
+
 		//
 
 		// The TLS session associated with this GnuTlsStream
@@ -94,6 +96,7 @@ namespace FluentFTP.GnuTLS {
 			GnuTlsInternalStream streamToResumeFrom,
 			string priorityString,
 			string loadLibraryDllNamePrefix,
+			bool dllUnloadByUseCount,
 			int handshakeTimeout,
 			int pollTimeout,
 			GnuStreamLogCBFunc elog,
@@ -105,6 +108,7 @@ namespace FluentFTP.GnuTLS {
 			alpn = alpnString;
 			priority = priorityString;
 			GnuTls.SetLoadLibraryDllNamePrefix(loadLibraryDllNamePrefix);
+			dllUnload = dllUnloadByUseCount;
 			hostname = targetHostString;
 			htimeout = handshakeTimeout;
 			ptimeout = pollTimeout;
@@ -204,7 +208,9 @@ namespace FluentFTP.GnuTLS {
 					// On destructing this instance, de-init the library
 					// Note: The internal logic of this handles loading/unloading the library etc.
 
-					weAreInitialized = !GnuTls.GnuTlsGlobalDeInit();
+					if (dllUnload) {
+						weAreInitialized = !GnuTls.GnuTlsGlobalDeInit();
+					}
 				}
 			}
 

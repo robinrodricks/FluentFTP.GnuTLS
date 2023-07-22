@@ -107,9 +107,10 @@ namespace FluentFTP.GnuTLS.Core {
 
 			public static bool Free() {
 				lock (loaderLock) {
-					--useCount;
+					if (useCount > 0) --useCount;
 					if (useCount == 0) {
 						_ = platformIsLinux ? dlclose(hModule) == 1 : FreeLibrary(hModule);
+						Logging.LogGnuFunc("*Free (unload .dll libraries");
 						functionsAreLoaded = false;
 					}
 					return !functionsAreLoaded;
@@ -230,6 +231,7 @@ namespace FluentFTP.GnuTLS.Core {
 				gnutls_pcert_import_rawpk_raw_h = (gnutls_pcert_import_rawpk_raw_)FunctionLoader.LoadFunction<gnutls_pcert_import_rawpk_raw_>(@"gnutls_pcert_import_rawpk_raw");
 				#endregion
 
+				Logging.LogGnuFunc("*Load (load .dll libraries");
 				functionsAreLoaded = true;
 			}
 		}
@@ -258,6 +260,9 @@ namespace FluentFTP.GnuTLS.Core {
 		public static string GnuTlsCheckVersion(string reqVersion) {
 			LoadAllFunctions(false);
 
+			string gcm = GnuUtils.GetCurrentMethod();
+			Logging.LogGnuFunc(gcm);
+
 			IntPtr versionPtr = gnutls_check_version_h(reqVersion);
 			string version = Marshal.PtrToStringAnsi(versionPtr);
 			// gnutls_free_h(versionPtr);
@@ -270,8 +275,6 @@ namespace FluentFTP.GnuTLS.Core {
 		delegate void gnutls_global_set_log_function_([In()][MarshalAs(UnmanagedType.FunctionPtr)] Logging.GnuTlsLogCBFunc log_func);
 		static gnutls_global_set_log_function_ gnutls_global_set_log_function_h;
 		public static void GnuTlsGlobalSetLogFunction(Logging.GnuTlsLogCBFunc logCBFunc) {
-			LoadAllFunctions(false);
-
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
 

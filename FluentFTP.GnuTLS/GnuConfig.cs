@@ -40,8 +40,17 @@ namespace FluentFTP.GnuTLS {
 		/// <summary>
 		/// Add an optional string prefix to the LoadLibrary dllname
 		/// </summary>
-
 		public string LoadLibraryDllNamePrefix = string.Empty;
+
+		/// <summary>
+		/// The FluentFTP.GnuTLS extension to FluentFTP will correctly handle multi-threaded
+		/// concurrent operation by maintining a "use-count", just like the underlying GnuTLS
+		/// library does. This use-count is checked on dispose of the GnuTlsStream and an unload
+		/// of the GnuTls library .dlls only takes place when this value is zero.
+		/// To disable unloading and to keep the libraries permanently loaded, set
+		/// DllUnloadByUseCount to false.
+		/// </summary>
+		public bool DllUnloadByUseCount { get; set; } = true;
 
 		/// <summary>
 		/// How long to wait for a handshake before giving up, in milliseconds.
