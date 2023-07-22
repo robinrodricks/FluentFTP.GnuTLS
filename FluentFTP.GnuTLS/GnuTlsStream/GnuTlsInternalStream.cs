@@ -208,7 +208,9 @@ namespace FluentFTP.GnuTLS {
 					// On destructing this instance, de-init the library
 					// Note: The internal logic of this handles loading/unloading the library etc.
 
-					weAreInitialized = !GnuTls.GnuTlsGlobalDeInit(dllUnload);
+					if (dllUnload) {
+						weAreInitialized = !GnuTls.GnuTlsGlobalDeInit();
+					}
 				}
 			}
 

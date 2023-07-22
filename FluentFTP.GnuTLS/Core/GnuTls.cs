@@ -105,11 +105,12 @@ namespace FluentFTP.GnuTLS.Core {
 				return Marshal.GetDelegateForFunctionPointer(pFunc, typeof(T));
 			}
 
-			public static bool Free(bool dllUnload) {
+			public static bool Free() {
 				lock (loaderLock) {
-					--useCount;
-					if (useCount == 0 && dllUnload) {
+					if (useCount > 0) --useCount;
+					if (useCount == 0) {
 						_ = platformIsLinux ? dlclose(hModule) == 1 : FreeLibrary(hModule);
+						Logging.LogGnuFunc("*Free (unload .dll libraries");
 						functionsAreLoaded = false;
 					}
 					return !functionsAreLoaded;
@@ -230,6 +231,7 @@ namespace FluentFTP.GnuTLS.Core {
 				gnutls_pcert_import_rawpk_raw_h = (gnutls_pcert_import_rawpk_raw_)FunctionLoader.LoadFunction<gnutls_pcert_import_rawpk_raw_>(@"gnutls_pcert_import_rawpk_raw");
 				#endregion
 
+				Logging.LogGnuFunc("*Load (load .dll libraries");
 				functionsAreLoaded = true;
 			}
 		}
@@ -308,13 +310,13 @@ namespace FluentFTP.GnuTLS.Core {
 		static gnutls_global_deinit_ gnutls_global_deinit_h;
 		// Calls deinit and unloads the library if no users are left
 		// Returns true if this was the final user
-		public static bool GnuTlsGlobalDeInit(bool dllUnload) {
+		public static bool GnuTlsGlobalDeInit() {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
 
 			gnutls_global_deinit_h();
 
-			return FunctionLoader.Free(dllUnload);
+			return FunctionLoader.Free();
 		}
 
 		// void gnutls_free(* ptr)
