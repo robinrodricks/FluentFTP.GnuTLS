@@ -14,7 +14,7 @@ namespace FluentFTP.GnuTLS.Core {
 		public static string loadLibraryDllNamePrefix = string.Empty;
 
 		#region FunctionLoader
-		private static IntPtr hModule = IntPtr.Zero;
+		private static IntPtr dllPtr = IntPtr.Zero;
 		private static bool functionsAreLoaded = false;
 		// Number of active library users (called global init and not global deinit)
 		private static int useCount = 0;
@@ -58,7 +58,8 @@ namespace FluentFTP.GnuTLS.Core {
 			[return: MarshalAs(UnmanagedType.Bool)]
 			private static extern bool FreeLibrary(IntPtr hModule);
 
-			public static void Load(string dllPath) {
+			public static void Load(string dllPath, bool storePointer = true) {
+				IntPtr hModule;
 				IntPtr errMsgPtr = IntPtr.Zero;
 				string errMsg = string.Empty;
 				if (platformIsLinux) {
@@ -90,10 +91,13 @@ namespace FluentFTP.GnuTLS.Core {
 						throw new GnuTlsException("Could not load " + dllPath + ", (" + err + ") " + errMsg);
 					}
 				}
+				if (storePointer) {
+					dllPtr = hModule;
+				}
 			}
 
 			public static Delegate LoadFunction<T>(string entryName, bool exportIsValueType = false) {
-				var pFunc = platformIsLinux ? dlsym(hModule, entryName) : GetProcAddress(hModule, entryName);
+				var pFunc = platformIsLinux ? dlsym(dllPtr, entryName) : GetProcAddress(dllPtr, entryName);
 				if (pFunc == IntPtr.Zero) { throw new GnuTlsException("Could not find entry " + entryName); }
 
 				if (exportIsValueType) {
@@ -109,7 +113,7 @@ namespace FluentFTP.GnuTLS.Core {
 				lock (loaderLock) {
 					if (useCount > 0) --useCount;
 					if (useCount == 0) {
-						_ = platformIsLinux ? dlclose(hModule) == 1 : FreeLibrary(hModule);
+						_ = platformIsLinux ? dlclose(dllPtr) == 1 : FreeLibrary(dllPtr);
 						Logging.LogGnuFunc("*Free (unload .dll libraries");
 						functionsAreLoaded = false;
 					}
@@ -160,11 +164,11 @@ namespace FluentFTP.GnuTLS.Core {
 					FunctionLoader.Load(useDllName);
 				}
 				else {
-					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgcc_s_seh-1.dll");
-					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgmp-10.dll");
-					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libnettle-8.dll");
-					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libwinpthread-1.dll");
-					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libhogweed-6.dll");
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgcc_s_seh-1.dll", false);
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgmp-10.dll", false);
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libnettle-8.dll", false);
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libwinpthread-1.dll", false);
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libhogweed-6.dll", false);
 					FunctionLoader.Load(loadLibraryDllNamePrefix + useDllName);
 				}
 
@@ -265,7 +269,6 @@ namespace FluentFTP.GnuTLS.Core {
 
 			IntPtr versionPtr = gnutls_check_version_h(reqVersion);
 			string version = Marshal.PtrToStringAnsi(versionPtr);
-			// gnutls_free_h(versionPtr);
 
 			return version;
 		}
