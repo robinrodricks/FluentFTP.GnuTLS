@@ -132,9 +132,6 @@ namespace FluentFTP.GnuTLS {
 					weAreInitialized = true;
 				}
 
-				// On constructing all instances of GnuTlsStream, init the library.
-				// Note: The internal logic of this handles loading/unloading the library etc.
-
 				GnuTls.GnuTlsGlobalInit();
 			}
 
@@ -205,11 +202,8 @@ namespace FluentFTP.GnuTLS {
 				cred.Dispose();
 
 				lock (initLock) {
-					// On destructing this instance, de-init the library
-					// Note: The internal logic of this handles loading/unloading the library etc.
-
 					if (dllUnload) {
-						weAreInitialized = !GnuTls.GnuTlsGlobalDeInit();
+						weAreInitialized = GnuTls.GnuTlsGlobalDeInit();
 					}
 				}
 			}
