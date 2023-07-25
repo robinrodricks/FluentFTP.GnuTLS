@@ -130,7 +130,6 @@ namespace FluentFTP.GnuTLS {
 					Logging.AttachGnuTlsLogging();
 
 					weAreInitialized = true;
-
 				}
 
 				GnuTls.GnuTlsGlobalInit();
