@@ -74,10 +74,10 @@ namespace FluentFTP.GnuTLS {
 			return BaseStream.CanWrite;
 		}
 		public SslProtocols GetSslProtocol() {
-			return GnuTlsInternalStream.SslProtocol;
+			return BaseStream.SslProtocol;
 		}
 		public string GetCipherSuite() {
-			return GnuTlsInternalStream.CipherSuite;
+			return BaseStream.CipherSuite;
 		}
 		public void Dispose() {
 			BaseStream?.Dispose();

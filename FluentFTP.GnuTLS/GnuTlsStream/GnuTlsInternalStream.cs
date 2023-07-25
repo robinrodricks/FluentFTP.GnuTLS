@@ -17,11 +17,11 @@ namespace FluentFTP.GnuTLS {
 	internal partial class GnuTlsInternalStream : Stream, IDisposable {
 
 		// After a successful handshake, the following will be available:
-		public static string ProtocolName { get; private set; } = "Unknown";
-		public static string CipherSuite { get; private set; } = "None";
-		public static string? AlpnProtocol { get; private set; } = null;
-		public static SslProtocols SslProtocol { get; private set; } = SslProtocols.None;
-		public static int MaxRecordSize { get; private set; } = 8192;
+		public string ProtocolName { get; private set; } = "Unknown";
+		public string CipherSuite { get; private set; } = "None";
+		public string? AlpnProtocol { get; private set; } = null;
+		public SslProtocols SslProtocol { get; private set; } = SslProtocols.None;
+		public int MaxRecordSize { get; private set; } = 8192;
 
 		public bool IsResumed { get; private set; } = false;
 		public bool IsSessionOk { get; private set; } = false;
@@ -82,7 +82,7 @@ namespace FluentFTP.GnuTLS {
 		// Handle for gnutls-30.dll
 		public static IntPtr hDLL = IntPtr.Zero;
 
-		private static object initLock = new object();
+		private static readonly object initLock = new object();
 
 		//
 		// Constructor
