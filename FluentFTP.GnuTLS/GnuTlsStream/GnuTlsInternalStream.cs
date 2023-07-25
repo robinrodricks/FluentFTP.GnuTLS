@@ -130,12 +130,14 @@ namespace FluentFTP.GnuTLS {
 					Logging.AttachGnuTlsLogging();
 
 					weAreInitialized = true;
+
+					GnuTls.GnuTlsGlobalInit();
+				} else {
+					if (dllUnload) {
+						GnuTls.GnuTlsGlobalInit();
+					}
 				}
 
-				// On constructing all instances of GnuTlsStream, init the library.
-				// Note: The internal logic of this handles loading/unloading the library etc.
-
-				GnuTls.GnuTlsGlobalInit();
 			}
 
 			// Setup/Allocate certificate credentials
@@ -205,11 +207,8 @@ namespace FluentFTP.GnuTLS {
 				cred.Dispose();
 
 				lock (initLock) {
-					// On destructing this instance, de-init the library
-					// Note: The internal logic of this handles loading/unloading the library etc.
-
 					if (dllUnload) {
-						weAreInitialized = !GnuTls.GnuTlsGlobalDeInit();
+						weAreInitialized = GnuTls.GnuTlsGlobalDeInit();
 					}
 				}
 			}

@@ -117,7 +117,7 @@ namespace FluentFTP.GnuTLS.Core {
 						Logging.LogGnuFunc("*Free (unload .dll libraries");
 						functionsAreLoaded = false;
 					}
-					return !functionsAreLoaded;
+					return functionsAreLoaded;
 				}
 			}
 		}
@@ -312,8 +312,6 @@ namespace FluentFTP.GnuTLS.Core {
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int gnutls_global_deinit_();
 		static gnutls_global_deinit_ gnutls_global_deinit_h;
-		// Calls deinit and unloads the library if no users are left
-		// Returns true if this was the final user
 		public static bool GnuTlsGlobalDeInit() {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
