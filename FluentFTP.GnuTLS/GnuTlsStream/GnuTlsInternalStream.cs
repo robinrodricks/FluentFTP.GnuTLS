@@ -131,13 +131,9 @@ namespace FluentFTP.GnuTLS {
 
 					weAreInitialized = true;
 
-					GnuTls.GnuTlsGlobalInit();
-				} else {
-					if (dllUnload) {
-						GnuTls.GnuTlsGlobalInit();
-					}
 				}
 
+				GnuTls.GnuTlsGlobalInit();
 			}
 
 			// Setup/Allocate certificate credentials
