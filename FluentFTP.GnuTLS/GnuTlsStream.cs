@@ -50,7 +50,6 @@ namespace FluentFTP.GnuTLS {
 				isControl ? null : (controlConnStream as GnuTlsStream).BaseStream,
 				priority,
 				config.LoadLibraryDllNamePrefix,
-				config.DllUnloadByUseCount,
 				config.HandshakeTimeout,
 				config.PollTimeout,
 				fluentFtpLog,

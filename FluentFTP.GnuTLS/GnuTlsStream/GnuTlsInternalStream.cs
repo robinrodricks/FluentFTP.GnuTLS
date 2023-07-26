@@ -60,14 +60,14 @@ namespace FluentFTP.GnuTLS {
 		internal delegate int GnuTlsHandshakeHookFunc(IntPtr session, uint htype, uint post, uint incoming, IntPtr msg);
 		internal GnuTlsHandshakeHookFunc handshakeHookFunc = HandshakeHook;
 
+		private bool weAreControlConnection = true;
+
 		// Keep track: Is this the first instance or a subsequent one?
 		// We need to do a "Global Init" and a "Global DeInit" when the first
 		// instance is born or dies.
-		private static bool weAreInitialized = false;
+		private static readonly object initLock = new object();
 
-		private bool weAreControlConnection = true;
-
-		private bool dllUnload = true;
+		private static int streamUseCount = 0;
 
 		//
 
@@ -82,7 +82,6 @@ namespace FluentFTP.GnuTLS {
 		// Handle for gnutls-30.dll
 		public static IntPtr hDLL = IntPtr.Zero;
 
-		private static readonly object initLock = new object();
 
 		//
 		// Constructor
@@ -96,7 +95,6 @@ namespace FluentFTP.GnuTLS {
 			GnuTlsInternalStream streamToResumeFrom,
 			string priorityString,
 			string loadLibraryDllNamePrefix,
-			bool dllUnloadByUseCount,
 			int handshakeTimeout,
 			int pollTimeout,
 			GnuStreamLogCBFunc elog,
@@ -108,7 +106,6 @@ namespace FluentFTP.GnuTLS {
 			alpn = alpnString;
 			priority = priorityString;
 			GnuTls.SetLoadLibraryDllNamePrefix(loadLibraryDllNamePrefix);
-			dllUnload = dllUnloadByUseCount;
 			hostname = targetHostString;
 			htimeout = handshakeTimeout;
 			ptimeout = pollTimeout;
@@ -116,7 +113,7 @@ namespace FluentFTP.GnuTLS {
 			weAreControlConnection = streamToResumeFrom == null;
 
 			lock (initLock) {
-				if (!weAreInitialized) {
+				if (streamUseCount == 0) {
 
 					// On constructing the first instance of GnuTlsStream, setup:
 					// 1. Logging init
@@ -129,10 +126,10 @@ namespace FluentFTP.GnuTLS {
 
 					Logging.AttachGnuTlsLogging();
 
-					weAreInitialized = true;
+					GnuTls.GnuTlsGlobalInit();
 				}
 
-				GnuTls.GnuTlsGlobalInit();
+				++streamUseCount;
 			}
 
 			// Setup/Allocate certificate credentials
@@ -202,8 +199,12 @@ namespace FluentFTP.GnuTLS {
 				cred.Dispose();
 
 				lock (initLock) {
-					if (dllUnload) {
-						weAreInitialized = GnuTls.GnuTlsGlobalDeInit();
+					if (streamUseCount > 0) {
+						--streamUseCount;
+					}
+
+					if (streamUseCount == 0) {
+						GnuTls.GnuTlsGlobalDeInit();
 					}
 				}
 			}
