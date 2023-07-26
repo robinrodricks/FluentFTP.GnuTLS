@@ -51,7 +51,7 @@ namespace FluentFTP.GnuTLS.Core {
 		// to the FluentFTP logging framework.
 		// In case of an exception being thrown, the buffered messages
 		// are re-issued prior to throw of the exception to aid in debugging.
-		public static void Log(int lvl, string msg, bool q) {
+		public static void Log(int lvl, string msg, bool q = true) {
 			string s = lvl.ToString().PadRight(3) + " " + msg.TrimEnd(new char[] { '\n', '\r' });
 
 			lock (logQueueLock) {
