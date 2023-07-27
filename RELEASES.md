@@ -1,5 +1,17 @@
 # Release Notes
 
+#### 1.0.22
+  - Add some logging to the loading of the GnuTLS API function delegates
+  - Add some error messages to the function loader for function delegate loading and library
+    freeing processes (Linux/Windows)
+  - Move the use-count based Init- and De-Init- logic of the GnuTls library into the stream itself
+  - Important: Disable and library freeing under Windows and Linux. libgnutls-30.dll remains 
+    permanently loaded (once) until the parent process (i.e. your app) terminates.
+    See issue #100.
+  - Remove config parm DllUnloadByUseCount to disable use-count based unloading, this logic is now
+    unchangeable. GlobalDeInit ist done on use count 0 and has no detrimental effects, library unloading
+    is now irrevocably disabled - library remains permanently loaded.
+
 #### 1.0.21
   - Implement a use-count based load/unload logic for the .dll libraries (thanks @Jojo-1000)
   - Add logging for load and unload library actions
