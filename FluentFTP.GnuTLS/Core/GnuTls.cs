@@ -132,7 +132,7 @@ namespace FluentFTP.GnuTLS.Core {
 					pFunc = (IntPtr)Marshal.PtrToStructure(pFunc, typeof(IntPtr));
 				}
 
-				Logging.LogGnuFunc("*LoadFunction Found entry '" + entryName+ "'");
+				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*LoadFunction Found entry '" + entryName+ "'");
 
 				return Marshal.GetDelegateForFunctionPointer(pFunc, typeof(T));
 			}
