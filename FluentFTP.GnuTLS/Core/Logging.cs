@@ -82,11 +82,15 @@ namespace FluentFTP.GnuTLS.Core {
 		private static void Log(int lvl, IntPtr msg) {
 			string s = Marshal.PtrToStringAnsi(msg);
 
-			// Remove some unimportant messages
+			if (lvl == 1 &&
+				s.StartsWith("There was a non-CA certificate in the trusted list:")) {
+				lvl = 3;
+			}
+
 			if (lvl == 2 &&
 				(s.StartsWith("Keeping ciphersuite") ||
 				 s.StartsWith("Advertizing version"))) {
-				return;
+				lvl = 3;
 			}
 
 			string logMsg = "Internal: " + s;
