@@ -59,7 +59,7 @@ namespace FluentFTP.GnuTLS {
 		/// The allowed values are 0-99, where 0 suppresses GnuTls related messages entirely, and 99 includes every possible message.
 		/// Consult the online docs for more help.
 		/// </summary>
-		public int LogLevel { get; set; } = 1;
+		public int LogLevel { get; set; } = 0;
 
 		/// <summary>
 		/// What additional debug information to log? You can combine multiple of these.
