@@ -63,6 +63,8 @@ namespace FluentFTP.GnuTLS {
 
 		/// <summary>
 		/// What additional debug information to log? You can combine multiple of these.
+		/// These messages all carry a log level of "1", so to see them you must set
+		/// LogLevel (see above) to at least "1" or more.
 		/// </summary>
 		public GnuMessage LogMessages { get; set; } = GnuMessage.None;
 
