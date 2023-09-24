@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.23
+  - Some more logging tweaks and small code cleanup changes.
+
 #### 1.0.22
   - Add some logging to the loading of the GnuTLS API function delegates
   - Add some error messages to the function loader for function delegate loading and library
