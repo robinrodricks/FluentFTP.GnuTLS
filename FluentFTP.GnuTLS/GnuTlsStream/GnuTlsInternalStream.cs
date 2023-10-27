@@ -79,10 +79,6 @@ namespace FluentFTP.GnuTLS {
 		// One for all of these, therefore static
 		private CertificateCredentials cred;
 
-		// Handle for gnutls-30.dll
-		public static IntPtr hDLL = IntPtr.Zero;
-
-
 		//
 		// Constructor
 		//
