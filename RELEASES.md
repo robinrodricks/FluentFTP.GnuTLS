@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.24
+  - Stream disposal can result in GnuTls_Bye to fail with PUSH error. Fixed.
+
 #### 1.0.23
   - Some more logging tweaks and small code cleanup changes.
 
