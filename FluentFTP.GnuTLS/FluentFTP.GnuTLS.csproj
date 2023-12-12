@@ -7,7 +7,7 @@
 		<Authors>Michael Stiemke, Robin Rodricks, FluentFTP Contributors</Authors>
 		<PackageProjectUrl>https://github.com/robinrodricks/FluentFTP</PackageProjectUrl>
 		<Copyright>Copyright (c) 2015 Robin Rodricks and FluentFTP Contributors</Copyright>
-		<PackageTags>FluentFTP, ftp, tls13, gnutls</PackageTags>
+		<PackageTags>FluentFTP, FluentFTP.GnuTLS, ftp, tls13, gnutls</PackageTags>
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\FluentFTP.GnuTLS.xml</DocumentationFile>
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
@@ -19,7 +19,7 @@
 
     <PropertyGroup>
 
-	<TargetFrameworks>net60;net50;net472;net462;netstandard2.0;netstandard2.1</TargetFrameworks>
+	<TargetFrameworks>net6.0;net5.0;net472;net462;netstandard2.0;netstandard2.1</TargetFrameworks>
         <LangVersion>10.0</LangVersion>
         <RepositoryUrl>https://github.com/robinrodricks/FluentFTP</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
