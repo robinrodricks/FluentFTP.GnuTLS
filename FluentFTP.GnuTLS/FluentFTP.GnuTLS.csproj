@@ -104,7 +104,7 @@
     </ItemGroup>
     
     <ItemGroup>
-      <PackageReference Include="FluentFTP" Version="46.0.2" />
+      <PackageReference Include="FluentFTP" Version="48.0.3" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
