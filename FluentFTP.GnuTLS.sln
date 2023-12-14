@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentFTP.GnuTLS", "FluentF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentFTP.LocalTests", "FluentFTP.Tests\FluentFTP.LocalTests.csproj", "{C77BF78A-9266-4E5B-B69B-C3D99223153B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentFTP.NugetTests", "FluentFTP.NugetTests\FluentFTP.NugetTests.csproj", "{BAF07BD7-20DD-419D-8D43-881CC23430B4}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,14 +41,6 @@ Global
 		{C77BF78A-9266-4E5B-B69B-C3D99223153B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C77BF78A-9266-4E5B-B69B-C3D99223153B}.Release|x64.ActiveCfg = Release|x64
 		{C77BF78A-9266-4E5B-B69B-C3D99223153B}.Release|x64.Build.0 = Release|x64
-		{BAF07BD7-20DD-419D-8D43-881CC23430B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BAF07BD7-20DD-419D-8D43-881CC23430B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BAF07BD7-20DD-419D-8D43-881CC23430B4}.Debug|x64.ActiveCfg = Debug|x64
-		{BAF07BD7-20DD-419D-8D43-881CC23430B4}.Debug|x64.Build.0 = Debug|x64
-		{BAF07BD7-20DD-419D-8D43-881CC23430B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BAF07BD7-20DD-419D-8D43-881CC23430B4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BAF07BD7-20DD-419D-8D43-881CC23430B4}.Release|x64.ActiveCfg = Release|x64
-		{BAF07BD7-20DD-419D-8D43-881CC23430B4}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
