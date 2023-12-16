@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.25
+  - Updates to TFMs, NuGet packages and build/packaging process.
+
 #### 1.0.24
   - Stream disposal can result in GnuTls_Bye to fail with PUSH error. Fixed.
 
