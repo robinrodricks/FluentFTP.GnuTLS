@@ -9,9 +9,10 @@
     <Copy SourceFiles="@(Files)" DestinationFolder="$(TargetDir)" />
   </Target>
 
-  <Target Name="CopyFilesPublish" BeforeTargets="Publish">
-	  <Message Text="Copying .dll files into the publish folder -> $(PublishDir)" Importance="high"/>
-	  <Copy SourceFiles="@(Files)" DestinationFolder="$(PublishDir)" />
-  </Target>
-
+	<!-- 
+  Target Name="CopyFilesPublish" BeforeTargets="Publish">
+	  Message Text="Copying .dll files into the publish folder -> $(PublishDir)" Importance="high"/>
+	  Copy SourceFiles="@(Files)" DestinationFolder="$(PublishDir)" />
+  /Target>
+	-->
 </Project>
