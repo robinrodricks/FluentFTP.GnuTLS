@@ -8,9 +8,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="$(MSBuildThisFileDirectory)/../content/*.dll"
-			  Link="\%(Filename)%(Extension)"
-			  CopyToOutputDirectory="Always" />
+		<Content Include="$(MSBuildThisFileDirectory)/../content/*.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>%(Filename)%(Extension)</Link>
+		</Content>
 	</ItemGroup>
 	
 	<!-- Deprecated
