@@ -11,35 +11,41 @@
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\FluentFTP.GnuTLS.xml</DocumentationFile>
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
-		<Version>1.0.25</Version>
+		<Version>1.0.26</Version>
 		<PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
 		<PackageIcon>logo-nuget.png</PackageIcon>
-		<LangVersion>10.0</LangVersion>
+        <LangVersion>10.0</LangVersion>
+        <RepositoryUrl>https://github.com/robinrodricks/FluentFTP.GnuTLS</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
 	</PropertyGroup>
 
     <PropertyGroup>
+		<TargetFrameworks>net6.0;net5.0;netstandard2.0;netstandard2.1;net472;net462</TargetFrameworks>
+		<!--
+		    default: content;contentFiles
 
-	<TargetFrameworks>net6.0;net5.0;netstandard2.0;netstandard2.1;net472;net462</TargetFrameworks>
-        <LangVersion>10.0</LangVersion>
-        <RepositoryUrl>https://github.com/robinrodricks/FluentFTP</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
+			Projects using packages.config use the "contents" directory (legacy .csproj)
+			Projects using PackageReference use the "contentFiles" directory (SDK style .csproj)
 
-	<ContentTargetFolders>contentFiles</ContentTargetFolders>
-	<!--
-	    default: content;contentFiles
-	    Projects using packages.config use the "contents" directory
-		These will be copied to the wrong place on build, so doesn't help for .dll files
-		and anyway it also refuses to reference foreign dll files correctly.
-	    Projects using PackageReference use the "contentFiles" directory.
-		These will be then copied to the folder location of the exe file on build.
-	-->
-
+			We cannot allow "contents" to be populated automatically, as the "Libs\Win64\..." path
+			is included when MSBUILD copies the .dll files. So we unselect "content" and populate
+			the content folder later by ourself.
+		-->
+		<ContentTargetFolders>contentFiles</ContentTargetFolders>
     </PropertyGroup>
 
-    <!--
+	<ItemGroup>
+		<PackageReference Include="FluentFTP" Version="48.0.3" />
+	</ItemGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<!--
 	Build output folder:
         This copies the .dll files to the respective targetframework folders into
-	the root location where the main executable resides.
+		the root location where the main executable resides.
     -->
     <ItemGroup>
         <ContentWithTargetPath Include="Libs\Win64\**">
@@ -48,35 +54,28 @@
         </ContentWithTargetPath>
     </ItemGroup>
 
-    <!--
-	Nuget folder:
-	This copies the .dll files to the package "contentFiles" folders
-	(see comment for ContentTargetFolders above).
+	<!--
+	N U G E T
     -->
-    <ItemGroup>
-	<Content Include="Libs\Win64\**">
-	</Content>
-    </ItemGroup>
 
-    <!--
-	Nuget folder:
-        This copies the .dll files to the package "content" folder for packages.config projects,
-	but without the path. This allows the FluentFTP.GnuTLS.targets file to remain constant
-	(see comment for ContentTargetFolders above).
-    -->
-    <ItemGroup>
-        <None Include="Libs\Win64\**">
-            <Pack>True</Pack>
-            <PackagePath>\content\%(Filename)%(Extension)</PackagePath>
-        </None>
-    </ItemGroup>
+	<!-- This copies the .dll files to the package "contentFiles" folders -->
+	<ItemGroup>
+		<Content Include="Libs\Win64\**">
+		</Content>
+	</ItemGroup>
 
-    <!--
-	Nuget folder:
-	This magic causes MSBUILD on the install machine to copy in the .dlls on a build.
-	We are moving a .target file (which contains the copy command) to the nuget package
-	build folder. The copy command will move the .dll files to the build output folder.
-    -->
+	<!-- This copies the .dll files to the package "content" folder for packages.config projects,
+		 but without the path. -->
+	<ItemGroup>
+		<None Include="Libs\Win64\**">
+			<Pack>True</Pack>
+			<PackagePath>\content\%(Filename)%(Extension)</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<!-- This magic causes MSBUILD on the install machine to copy in the .dlls on a build.
+		 We are moving a .target file (which contains the copy command) to the nuget package
+		 build folder. The copy command will move the .dll files to the build output folder. -->
     <ItemGroup>
         <Content Include="Libs\Helpers\FluentFTP.GnuTLS.targets">
             <Pack>True</Pack>
@@ -84,31 +83,16 @@
         </Content>
     </ItemGroup>
 
-    <ItemGroup>
-        <!--
-            Nuget folder:
-            Logo file -> package
-        -->
+    <!-- Logo & License file -> package -->
+	<ItemGroup>
         <None Include="..\.github\logo-nuget.png">
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
         </None>
-        <!--
-            Nuget folder:
-            License file -> package
-        -->
-	<None Include="..\LICENSE">
+		<None Include="..\LICENSE">
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
         </None>
     </ItemGroup>
     
-    <ItemGroup>
-      <PackageReference Include="FluentFTP" Version="48.0.3" />
-    </ItemGroup>
-
-    <PropertyGroup Condition="'$(Configuration)'=='Release'">
-        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    </PropertyGroup>
-
 </Project>

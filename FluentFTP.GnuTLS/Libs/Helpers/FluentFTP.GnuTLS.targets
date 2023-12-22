@@ -1,11 +1,17 @@
 <Project>
+	
   <ItemGroup>
     <Files Include="$(MSBuildThisFileDirectory)/../content/*.dll" />
   </ItemGroup>
+	
   <Target Name="CopyFilesBuild" AfterTargets="Build">
+	<Message Text="Copying .dll files into the build folder -> $(TargetDir)" Importance="high"/>
     <Copy SourceFiles="@(Files)" DestinationFolder="$(TargetDir)" />
   </Target>
-  <Target Name="CopyFilesPublish" AfterTargets="Publish">
-	<Copy SourceFiles="@(Files)" DestinationFolder="$(PublishDir)" />
+
+  <Target Name="CopyFilesPublish" BeforeTargets="Publish">
+	  <Message Text="Copying .dll files into the publish folder -> $(PublishDir)" Importance="high"/>
+	  <Copy SourceFiles="@(Files)" DestinationFolder="$(PublishDir)" />
   </Target>
+
 </Project>
