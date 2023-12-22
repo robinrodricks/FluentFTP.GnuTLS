@@ -11,7 +11,7 @@
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\FluentFTP.GnuTLS.xml</DocumentationFile>
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
-		<Version>1.0.26</Version>
+		<Version>1.0.35</Version>
 		<PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
 		<PackageIcon>logo-nuget.png</PackageIcon>
         <LangVersion>10.0</LangVersion>
@@ -28,10 +28,14 @@
 			Projects using PackageReference use the "contentFiles" directory (SDK style .csproj)
 
 			We cannot allow "contents" to be populated automatically, as the "Libs\Win64\..." path
-			is included when MSBUILD copies the .dll files. So we unselect "content" and populate
-			the content folder later by ourself.
+			is included when MSBUILD copies the .dll files. So we populate the content folder by
+			ourself.
+
+			We do not need the "contentFiles/any/<framework>/Libs/Win64/... structure with duplication
+			for each framework - we don't differentiate .ddl files per each framework. So we populate
+			the content folder by ourself. This save a lot of space.
 		-->
-		<ContentTargetFolders>contentFiles</ContentTargetFolders>
+		<ContentTargetFolders>content;contentFiles</ContentTargetFolders>
     </PropertyGroup>
 
 	<ItemGroup>
@@ -58,9 +62,12 @@
 	N U G E T
     -->
 
-	<!-- This copies the .dll files to the package "contentFiles" folders -->
+	<!-- This copies the .dll files to the package "contentFiles" folders for package reference
+	     projects, but without the path. -->
 	<ItemGroup>
 		<Content Include="Libs\Win64\**">
+			<Pack>True</Pack>
+			<PackagePath>\contentFiles\%(Filename)%(Extension)</PackagePath>
 		</Content>
 	</ItemGroup>
 
