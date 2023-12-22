@@ -1,5 +1,11 @@
 # Release Notes
 
+#### 1.0.27
+  - Significantly reduce NuGet package size by elimination duplication of library .dll files
+
+#### 1.0.26
+  - Refactor NuGet folder locations
+
 #### 1.0.25
   - Updates to TFMs, NuGet packages and build/packaging process.
 
