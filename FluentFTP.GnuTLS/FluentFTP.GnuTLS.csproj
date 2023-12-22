@@ -84,10 +84,10 @@
 		 We are moving a .target file (which contains the copy command) to the nuget package
 		 build folder. The copy command will move the .dll files to the build output folder. -->
     <ItemGroup>
-        <Content Include="Libs\Helpers\FluentFTP.GnuTLS.targets">
-            <Pack>True</Pack>
+        <None Include="Libs\Helpers\FluentFTP.GnuTLS.targets">
+           <Pack>True</Pack>
            <PackagePath>build/FluentFTP.GnuTLS.targets</PackagePath>
-        </Content>
+        </None>
     </ItemGroup>
 
     <!-- Logo & License file -> package -->
