@@ -1,5 +1,9 @@
 # Release Notes
 
+#### 1.0.28
+  - Optimize NuGet folder placement. ClickOnce deployment now works for all types EXCEPT
+    when SingleFile is selected
+
 #### 1.0.27
   - Significantly reduce NuGet package size by elimination duplication of library .dll files
 
