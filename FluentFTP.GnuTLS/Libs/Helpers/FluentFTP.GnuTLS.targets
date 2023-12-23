@@ -9,7 +9,7 @@
 
 	<ItemGroup>
 		<Content Include="$(MSBuildThisFileDirectory)/../content/*.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 			<Link>%(Filename)%(Extension)</Link>
 		</Content>
 	</ItemGroup>
