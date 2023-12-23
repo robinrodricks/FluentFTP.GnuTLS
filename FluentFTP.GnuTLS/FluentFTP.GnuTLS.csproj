@@ -11,7 +11,7 @@
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\FluentFTP.GnuTLS.xml</DocumentationFile>
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
-		<Version>1.0.27</Version>
+		<Version>1.0.28</Version>
 		<PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
 		<PackageIcon>logo-nuget.png</PackageIcon>
         <LangVersion>10.0</LangVersion>
@@ -28,12 +28,12 @@
 			Projects using PackageReference use the "contentFiles" directory (SDK style .csproj)
 
 			We cannot allow "contents" to be populated automatically, as the "Libs\Win64\..." path
-			is included when MSBUILD copies the .dll files. So we populate the content folder by
-			ourself.
+			is included when MSBUILD would copy the .dll files. So we populate the content folder
+			by ourself.
 
 			We do not need the "contentFiles/any/<framework>/Libs/Win64/... structure with duplication
-			for each framework - we don't differentiate .ddl files per each framework. So we populate
-			the content folder by ourself. This save a lot of space.
+			of the .dll files for each framework - we don't differentiate .ddl files per each framework.
+			So we populate the content folder by ourself. This saves an enormous amount of space.
 		-->
 		<ContentTargetFolders>content;contentFiles</ContentTargetFolders>
     </PropertyGroup>
@@ -42,33 +42,32 @@
 		<PackageReference Include="FluentFTP" Version="48.0.3" />
 	</ItemGroup>
 
-	<PropertyGroup Condition="'$(Configuration)'=='Release'">
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	</PropertyGroup>
-
 	<!--
-	Build output folder:
         This copies the .dll files to the respective targetframework folders into
 		the root location where the main executable resides.
     -->
     <ItemGroup>
-        <ContentWithTargetPath Include="Libs\Win64\**">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <NoneWithTargetPath Include="Libs\Win64\**">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
             <TargetPath>%(Filename)%(Extension)</TargetPath>
-        </ContentWithTargetPath>
+        </NoneWithTargetPath>
     </ItemGroup>
 
 	<!--
-	N U G E T
+	N U G E T *******************************************
     -->
+
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	</PropertyGroup>
 
 	<!-- This copies the .dll files to the package "contentFiles" folders for package reference
 	     projects, but without the path. -->
 	<ItemGroup>
-		<Content Include="Libs\Win64\**">
+		<None Include="Libs\Win64\**">
 			<Pack>True</Pack>
 			<PackagePath>\contentFiles\%(Filename)%(Extension)</PackagePath>
-		</Content>
+		</None>
 	</ItemGroup>
 
 	<!-- This copies the .dll files to the package "content" folder for packages.config projects,
@@ -79,16 +78,6 @@
 			<PackagePath>\content\%(Filename)%(Extension)</PackagePath>
 		</None>
 	</ItemGroup>
-
-	<!-- This magic causes MSBUILD on the install machine to copy in the .dlls on a build.
-		 We are moving a .target file (which contains the copy command) to the nuget package
-		 build folder. The copy command will move the .dll files to the build output folder. -->
-    <ItemGroup>
-        <None Include="Libs\Helpers\FluentFTP.GnuTLS.targets">
-           <Pack>True</Pack>
-           <PackagePath>build/FluentFTP.GnuTLS.targets</PackagePath>
-        </None>
-    </ItemGroup>
 
     <!-- Logo & License file -> package -->
 	<ItemGroup>
@@ -101,5 +90,19 @@
             <PackagePath>\</PackagePath>
         </None>
     </ItemGroup>
-    
+
+	<!-- This magic causes MSBUILD on the install machine to copy in the .dlls on a build.
+		 We are moving a .target file (which contains the copy command) to the nuget package
+		 build folder. The copy command will move the .dll files to the build output folder. -->
+	<ItemGroup>
+		<None Include="Libs\Helpers\FluentFTP.GnuTLS.targets">
+			<Pack>True</Pack>
+			<PackagePath>build/FluentFTP.GnuTLS.targets</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<!--
+	N U G E T *******************************************
+    -->
+
 </Project>

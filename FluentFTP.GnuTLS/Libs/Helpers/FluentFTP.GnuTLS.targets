@@ -2,36 +2,10 @@
 
 	<ItemGroup>
 		<ContentWithTargetPath Include="$(MSBuildThisFileDirectory)/../content/*.dll">
+			<PublishState>Included</PublishState>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 			<TargetPath>%(Filename)%(Extension)</TargetPath>
 		</ContentWithTargetPath>
 	</ItemGroup>
 
-	<ItemGroup>
-		<Content Include="$(MSBuildThisFileDirectory)/../content/*.dll">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			<Link>%(Filename)%(Extension)</Link>
-		</Content>
-	</ItemGroup>
-	
-	<!-- Deprecated
-  ItemGroup>
-    Files Include="$(MSBuildThisFileDirectory)/../content/*.dll" />
-  /ItemGroup>
-    -->
-
-  <!-- Deprecated
-  Target Name="CopyFilesBuild" AfterTargets="Build">
-	Message Text="Copying .dll files into the build folder -> $(TargetDir)" Importance="high"/>
-    Copy SourceFiles="@(Files)" DestinationFolder="$(TargetDir)" />
-  /Target>
-    -->
-
-	<!-- Deprecated
-  Target Name="CopyFilesPublish" BeforeTargets="Publish">
-	  Message Text="Copying .dll files into the publish folder -> $(PublishDir)" Importance="high"/>
-	  Copy SourceFiles="@(Files)" DestinationFolder="$(PublishDir)" />
-  /Target>
-	-->
-	
 </Project>
