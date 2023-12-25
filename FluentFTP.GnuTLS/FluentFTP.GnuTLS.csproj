@@ -55,6 +55,21 @@
 
 	<!--
 	N U G E T *******************************************
+
+		To put native dlls in to the package, you should read:
+
+		See: https://github.com/NuGet/docs.microsoft.com-nuget/blob/main/docs/create-packages/native-files-in-net-packages.md
+		and  https://github.com/NuGet/docs.microsoft.com-nuget/blob/main/docs/create-packages/Creating-a-Package.md
+
+		To avoid some of the problems involved with this, you can go via the content and contentFiles
+		folders to distribute the .dlls as content, that is independant of TFM and RID. 
+
+		If you decide to build via /ref and /runtimes, you could remove the /lib folder using this:
+		
+		<PropertyGroup>
+			<IncludeBuildOutput>false</IncludeBuildOutput>
+			<IncludeSymbols>false</IncludeSymbols>
+		</PropertyGroup>
     -->
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
