@@ -1,5 +1,9 @@
 # Release Notes
 
+#### 1.0.29
+  - Logging improvements
+  - Support for ClickOnce Single File deployment
+
 #### 1.0.28
   - Optimize NuGet folder placement. ClickOnce deployment now works for all types EXCEPT
     when SingleFile is selected

@@ -38,7 +38,9 @@ namespace FluentFTP.GnuTLS {
 		public string SetALPNDataConnection { get; set; } = "ftp-data";
 
 		/// <summary>
-		/// Add an optional string prefix to the LoadLibrary dllname
+		/// Add an optional string prefix to the LoadLibrary dllname. For ClickOnce
+		/// Single File deployment, specify "ClickOnceSingleFile" instead of a path and
+		/// use "<IncludeAllContentForSelfExtract>" set to True in your apps .csproj 
 		/// </summary>
 		public string LoadLibraryDllNamePrefix = string.Empty;
 
