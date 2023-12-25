@@ -403,11 +403,9 @@ namespace FluentFTP.GnuTLS {
 				if (ex.InnerException != null) {
 					Logging.Log(ex.InnerException.Message);
 					Exception nex = new GnuTlsException(ex.InnerException.Message);
-					Logging.Log(nex.Message);
 					throw new GnuTlsException("GnuTLS .dll load/call validation error", nex);
 				}
 				else {
-					Logging.Log(ex.Message);
 					throw new GnuTlsException("GnuTLS .dll load/call validation error", ex);
 				}
 			}
