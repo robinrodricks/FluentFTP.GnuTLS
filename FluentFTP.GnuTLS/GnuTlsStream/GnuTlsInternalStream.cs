@@ -379,16 +379,16 @@ namespace FluentFTP.GnuTLS {
 			string applicationVersion = GnuUtils.GetLibVersion() + "(" + platformID.ToString() + "/" + GnuUtils.GetLibTarget() + ")";
 
 			if ((int)platformID != 2 && (int)platformID != 4 && (int)platformID != 6 && (int)platformID != 128) {
-				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
 				Exception nex = new GnuTlsException("Unsupported platform: " + platformID.ToString());
 				Logging.Log(nex.Message);
+				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
 				throw new GnuTlsException("Environment validation error", nex);
 			}
 
 			if (!Environment.Is64BitProcess) {
-				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
 				Exception nex = new GnuTlsException("GnuTlsStream needs to be run as a 64bit process");
 				Logging.Log(nex.Message);
+				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
 				throw new GnuTlsException("Process validation error", nex);
 			}
 
@@ -398,20 +398,17 @@ namespace FluentFTP.GnuTLS {
 				gnuTlsVersion = GnuTls.GnuTlsCheckVersion(null);
 			}
 			catch (Exception ex) {
-				Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
 				Logging.Log(ex.Message);
 				if (ex.InnerException != null) {
 					Logging.Log(ex.InnerException.Message);
+					Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
 					Exception nex = new GnuTlsException(ex.InnerException.Message);
 					throw new GnuTlsException("GnuTLS .dll load/call validation error", nex);
 				}
 				else {
+					Logging.Log("FluentFTP.GnuTLS " + applicationVersion);
 					throw new GnuTlsException("GnuTLS .dll load/call validation error", ex);
 				}
-			}
-
-			if (log) {
-				Logging.Log("FluentFTP.GnuTLS " + applicationVersion + " / GnuTLS " + gnuTlsVersion);
 			}
 
 			// Under windows, we need the explicitly built libgnutls.dll, whose version we know from our build chain
@@ -419,7 +416,12 @@ namespace FluentFTP.GnuTLS {
 			if ((int)platformID == 2 && gnuTlsVersion != gnuTlsVersionNeeded) {
 				Exception nex = new GnuTlsException("GnuTLS library version must be " + gnuTlsVersionNeeded);
 				Logging.Log(nex.Message);
+				Logging.Log("FluentFTP.GnuTLS " + applicationVersion + " / GnuTLS " + gnuTlsVersion);
 				throw new GnuTlsException("GnuTLS .dll version validation error", nex);
+			}
+
+			if (log) {
+				Logging.Log("FluentFTP.GnuTLS " + applicationVersion + " / GnuTLS " + gnuTlsVersion);
 			}
 
 			return true;

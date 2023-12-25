@@ -44,6 +44,8 @@ namespace FluentFTP.GnuTLS.Core {
 			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
 			private static extern ErrorModes SetErrorMode(ErrorModes uMode);
 			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			private static extern bool SetDllDirectory([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
+			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
 			private static extern uint GetLastError();
 			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
 			private static extern int FormatMessage(uint dwFlags, IntPtr lpSource, uint dwMessageId, uint dwLanguageId, ref IntPtr lpBuffer, uint dwSize, IntPtr parms);
@@ -54,6 +56,10 @@ namespace FluentFTP.GnuTLS.Core {
 			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
 			[return: MarshalAs(UnmanagedType.Bool)]
 			private static extern bool FreeLibrary(IntPtr hModule);
+
+			public static bool SetDllPath(string dllPath) {
+				return SetDllDirectory(dllPath);
+			}
 
 			public static void Load(string dllPath, bool storePointer = true) {
 				IntPtr hModule;
@@ -91,6 +97,7 @@ namespace FluentFTP.GnuTLS.Core {
 				if (storePointer) {
 					dllPtr = hModule;
 				}
+				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Loaded: " + dllPath + ")");
 			}
 
 			public static Delegate LoadFunction<T>(string entryName, bool exportIsValueType = false) {
@@ -134,13 +141,13 @@ namespace FluentFTP.GnuTLS.Core {
 					pFunc = (IntPtr)Marshal.PtrToStructure(pFunc, typeof(IntPtr));
 				}
 
-				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*LoadFunction Found entry '" + entryName+ "'");
+				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*LoadFunction (Found entry '" + entryName+ "')");
 
 				return Marshal.GetDelegateForFunctionPointer(pFunc, typeof(T));
 			}
 
 			public static void Free() {
-				Logging.LogGnuFunc("*Free (unload .dll libraries");
+				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Free (Unload .dll libraries");
 
 				IntPtr errMsgPtr = IntPtr.Zero;
 				string errMsg = string.Empty;
@@ -194,7 +201,7 @@ namespace FluentFTP.GnuTLS.Core {
 		private static void LoadAllFunctions() {
 			if (functionsAreLoaded) return;
 
-			Logging.LogGnuFunc("*Load (load .dll libraries");
+			Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load.dll libraries)");
 
 			string useDllName;
 
@@ -219,12 +226,22 @@ namespace FluentFTP.GnuTLS.Core {
 				FunctionLoader.Load(useDllName);
 			}
 			else {
-				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgcc_s_seh-1.dll", false);
-				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgmp-10.dll", false);
-				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libnettle-8.dll", false);
-				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libwinpthread-1.dll", false);
-				FunctionLoader.Load(loadLibraryDllNamePrefix + @"libhogweed-6.dll", false);
-				FunctionLoader.Load(loadLibraryDllNamePrefix + useDllName);
+				if (loadLibraryDllNamePrefix == "ClickOnceSingleFile") {
+					string strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+					string strWorkPath = System.IO.Path.GetDirectoryName(strExeFilePath);
+					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Adding ClickOnce single file temp dir to search list)");
+					_ = FunctionLoader.SetDllPath(strWorkPath);
+					FunctionLoader.Load(useDllName);
+				}
+				else {
+					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Using the given .dll name prefix)");
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgcc_s_seh-1.dll", false);
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgmp-10.dll", false);
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libnettle-8.dll", false);
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libwinpthread-1.dll", false);
+					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libhogweed-6.dll", false);
+					FunctionLoader.Load(loadLibraryDllNamePrefix + useDllName);
+				}
 			}
 
 			// Get all the needed functions from the library into handlers via delegates.
@@ -315,10 +332,10 @@ namespace FluentFTP.GnuTLS.Core {
 		delegate IntPtr gnutls_check_version_([In()][MarshalAs(UnmanagedType.LPStr)] string req_version);
 		static gnutls_check_version_ gnutls_check_version_h;
 		public static string GnuTlsCheckVersion(string reqVersion) {
-			LoadAllFunctions();
-
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
+
+			LoadAllFunctions();
 
 			IntPtr versionPtr = gnutls_check_version_h(reqVersion);
 			string version = Marshal.PtrToStringAnsi(versionPtr);
@@ -353,10 +370,10 @@ namespace FluentFTP.GnuTLS.Core {
 		delegate int gnutls_global_init_();
 		static gnutls_global_init_ gnutls_global_init_h;
 		public static int GnuTlsGlobalInit() {
-			LoadAllFunctions();
-
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
+
+			LoadAllFunctions();
 
 			return GnuUtils.Check(gcm, gnutls_global_init_h());
 		}
