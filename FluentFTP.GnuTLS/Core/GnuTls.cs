@@ -77,7 +77,8 @@ namespace FluentFTP.GnuTLS.Core {
 					hModule = LoadLibrary(dllPath);
 
 					if (hModule == IntPtr.Zero) {
-						uint err = GetLastError();
+						uint err = (uint)Marshal.GetLastWin32Error();
+//						uint err = GetLastError();
 						if (err != 0) {
 							_ = FormatMessage(0x00001300, IntPtr.Zero, err, 0, ref errMsgPtr, 256, IntPtr.Zero);
 						}
@@ -115,7 +116,8 @@ namespace FluentFTP.GnuTLS.Core {
 					pFunc = GetProcAddress(dllPtr, entryName);
 
 					if (pFunc == IntPtr.Zero) {
-						uint err = GetLastError();
+						uint err = (uint)Marshal.GetLastWin32Error();
+//						uint err = GetLastError();
 						if (err != 0) {
 							_ = FormatMessage(0x00001300, IntPtr.Zero, err, 0, ref errMsgPtr, 256, IntPtr.Zero);
 						}
@@ -160,7 +162,8 @@ namespace FluentFTP.GnuTLS.Core {
 					bool result = FreeLibrary(dllPtr);
 
 					if (!result) {
-						uint err = GetLastError();
+						uint err = (uint)Marshal.GetLastWin32Error();
+//						uint err = GetLastError();
 						if (err != 0) {
 							_ = FormatMessage(0x00001300, IntPtr.Zero, err, 0, ref errMsgPtr, 256, IntPtr.Zero);
 						}
