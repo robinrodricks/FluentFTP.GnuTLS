@@ -56,7 +56,6 @@ namespace FluentFTP.GnuTLS.Core {
 
 		public static bool NeedRepeat(RepeatType type, int result, out int msMax) {
 			switch (type) {
-
 				case RepeatType.Read:
 					msMax = 30000;
 					return result == (int)EC.en.GNUTLS_E_AGAIN ||
