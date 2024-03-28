@@ -228,7 +228,7 @@ namespace FluentFTP.GnuTLS {
 			var stopWatch = new Stopwatch();
 			stopWatch.Start();
 
-			// Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(..., " + offset + ", " + maxCount + ")");
+			Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(..., " + offset + ", " + maxCount + ")");
 
 			do {
 				result = GnuTls.GnuTlsRecordRecv(sess, buffer, maxCount);
@@ -244,7 +244,7 @@ namespace FluentFTP.GnuTLS {
 				if ((msElapsed < msMax) && needRepeat) {
 					repeatCount++;
 
-					// if (repeatCount <= 2) Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
+					if (repeatCount <= 2) Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
 
 					switch (result) {
 						case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
@@ -259,7 +259,7 @@ namespace FluentFTP.GnuTLS {
 				}
 			} while (needRepeat);
 
-			// if (repeatCount > 2) Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(...) " + repeatCount + " repeats overall");
+			if (repeatCount > 2) Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(...) " + repeatCount + " repeats overall");
 
 			stopWatch.Stop();
 
@@ -284,7 +284,7 @@ namespace FluentFTP.GnuTLS {
 			int repeatCount;
 			var stopWatch = new Stopwatch();
 
-			// Logging.LogGnuFunc(GnuMessage.Write, "*GnuTlsRecordSend(..., " + offset + ", " + count + ")");
+			Logging.LogGnuFunc(GnuMessage.Write, "*GnuTlsRecordSend(..., " + offset + ", " + count + ")");
 
 			repeatCount = 0;
 			stopWatch.Start();
@@ -304,7 +304,7 @@ namespace FluentFTP.GnuTLS {
 					if ((msElapsed < msMax) && needRepeat) {
 						repeatCount++;
 
-						// if (repeatCount <= 2) Logging.LogGnuFunc(GnuMessage.Write, "*GnuTlsRecordSend(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
+						if (repeatCount <= 2) Logging.LogGnuFunc(GnuMessage.Write, "*GnuTlsRecordSend(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
 
 						switch (result) {
 							case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
@@ -328,7 +328,7 @@ namespace FluentFTP.GnuTLS {
 				Array.Resize(ref buf, buf.Length - result);
 			}
 
-			// if (repeatCount > 2) Logging.LogGnuFunc(GnuMessage.Write, "*GnuTlsRecordSend(...) " + repeatCount + " repeats overall");
+			if (repeatCount > 2) Logging.LogGnuFunc(GnuMessage.Write, "*GnuTlsRecordSend(...) " + repeatCount + " repeats overall");
 
 			stopWatch.Stop();
 
