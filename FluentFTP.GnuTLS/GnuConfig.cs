@@ -50,7 +50,7 @@ namespace FluentFTP.GnuTLS {
 		/// </summary>
 		public int HandshakeTimeout { get; set; } = 5000;
 
-		private int commTimeout;
+		private int commTimeout = 15000;
 
 		/// <summary>
 		/// How long to wait for a RECV, SEND, HANDSHAKE or BYE API call before giving up,
