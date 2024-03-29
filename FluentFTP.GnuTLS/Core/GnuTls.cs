@@ -642,17 +642,6 @@ namespace FluentFTP.GnuTLS.Core {
 						/* Small delay before repeat */
 						Thread.Sleep(1000);
 					}
-
-					switch (result) {
-						case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
-							Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + GnuTls.GnuTlsAlertGetName(GnuTls.GnuTlsAlertGet(session)));
-							break;
-						case (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED:
-							Logging.LogGnuFunc(GnuMessage.Alert, "Fatal alert received: " + GnuTls.GnuTlsAlertGetName(GnuTls.GnuTlsAlertGet(session)));
-							break;
-						default:
-							break;
-					}
 				}
 			} while (needRepeat);
 
