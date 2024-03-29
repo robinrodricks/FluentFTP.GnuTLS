@@ -219,6 +219,8 @@ namespace FluentFTP.GnuTLS {
 				throw new ArgumentException("GnuTlsInternalStream.Read: offset + maxCount go beyond buffer length");
 			}
 
+			GnuMessage gnm = weAreControlConnection ? GnuMessage.ReadControl : GnuMessage.ReadData;
+
 			maxCount = Math.Min(maxCount, MaxRecordSize);
 
 			int result;
@@ -228,7 +230,7 @@ namespace FluentFTP.GnuTLS {
 			var stopWatch = new Stopwatch();
 			stopWatch.Start();
 
-			Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(..., " + offset + ", " + maxCount + ")");
+			Logging.LogGnuFunc(gnm, "*GnuTlsRecordRecv(..., " + offset + ", " + maxCount + ")");
 
 			do {
 				long msElapsed = stopWatch.ElapsedMilliseconds;
@@ -248,7 +250,7 @@ namespace FluentFTP.GnuTLS {
 				if (needRepeat) {
 					repeatCount++;
 
-					Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
+					Logging.LogGnuFunc(gnm, "*GnuTlsRecordRecv(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
 
 					if (repeatCount <= 2) {
 						/* Immediate repeat */
@@ -271,7 +273,7 @@ namespace FluentFTP.GnuTLS {
 				}
 			} while (needRepeat);
 
-			if (repeatCount > 0) Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(...) " + repeatCount + " repeats overall");
+			if (repeatCount > 0) Logging.LogGnuFunc(gnm, "*GnuTlsRecordRecv(...) " + repeatCount + " repeats overall");
 
 			stopWatch.Stop();
 
@@ -286,6 +288,8 @@ namespace FluentFTP.GnuTLS {
 				throw new ArgumentException("GnuTlsInternalStream.Write: offset + count go beyond buffer length");
 			}
 
+			GnuMessage gnm = weAreControlConnection ? GnuMessage.ReadControl : GnuMessage.ReadData;
+
 			byte[] buf = new byte[count];
 
 			Array.Copy(buffer, offset, buf, 0, count);
@@ -295,7 +299,7 @@ namespace FluentFTP.GnuTLS {
 			int repeatCount;
 			var stopWatch = new Stopwatch();
 
-			Logging.LogGnuFunc(GnuMessage.Write, "*GnuTlsRecordSend(..., " + offset + ", " + count + ")");
+			Logging.LogGnuFunc(gnm, "*GnuTlsRecordSend(..., " + offset + ", " + count + ")");
 
 			repeatCount = 0;
 			stopWatch.Start();
@@ -319,7 +323,7 @@ namespace FluentFTP.GnuTLS {
 					if (needRepeat) {
 						repeatCount++;
 
-						Logging.LogGnuFunc(GnuMessage.Write, "*GnuTlsRecordSend(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
+						Logging.LogGnuFunc(gnm, "*GnuTlsRecordSend(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
 
 						if (repeatCount <= 2) {
 							/* Immediate repeat */
@@ -351,7 +355,7 @@ namespace FluentFTP.GnuTLS {
 				Array.Resize(ref buf, buf.Length - result);
 			}
 
-			if (repeatCount > 0) Logging.LogGnuFunc(GnuMessage.Write, "*GnuTlsRecordSend(...) " + repeatCount + " repeats overall");
+			if (repeatCount > 0) Logging.LogGnuFunc(gnm, "*GnuTlsRecordSend(...) " + repeatCount + " repeats overall");
 
 			stopWatch.Stop();
 
