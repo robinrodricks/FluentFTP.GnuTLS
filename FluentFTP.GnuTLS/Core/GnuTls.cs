@@ -534,7 +534,7 @@ namespace FluentFTP.GnuTLS.Core {
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int gnutls_handshake_(IntPtr session);
 		static gnutls_handshake_ gnutls_handshake_h;
-		public static int GnuTlsHandShake(Session session) {
+		public static int GnuTlsHandShake(Session session, int ctimeout) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
 
@@ -547,7 +547,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 			do {
 				long msElapsed = stopWatch.ElapsedMilliseconds;
-				if (msElapsed > 15000) {
+				if (msElapsed > ctimeout) {
 					GnuUtils.Check(gcm, (int)EC.en.GNUTLS_E_SOCKET);
 					return 0;
 				}
@@ -608,7 +608,7 @@ namespace FluentFTP.GnuTLS.Core {
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int gnutls_bye_(IntPtr session, CloseRequestT how);
 		static gnutls_bye_ gnutls_bye_h;
-		public static int GnuTlsBye(Session session, CloseRequestT how) {
+		public static int GnuTlsBye(Session session, CloseRequestT how, int ctimeout) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
 
@@ -621,7 +621,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 			do {
 				long msElapsed = stopWatch.ElapsedMilliseconds;
-				if (msElapsed > 15000) {
+				if (msElapsed > ctimeout) {
 					GnuUtils.Check(gcm, (int)EC.en.GNUTLS_E_SOCKET);
 					return 0;
 				}

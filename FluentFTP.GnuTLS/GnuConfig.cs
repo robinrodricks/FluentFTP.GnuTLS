@@ -1,6 +1,6 @@
-﻿using FluentFTP.GnuTLS.Core;
-using FluentFTP.GnuTLS.Enums;
+﻿using FluentFTP.GnuTLS.Enums;
 using FluentFTP.Streams;
+using System;
 using System.Collections.Generic;
 
 namespace FluentFTP.GnuTLS {
@@ -49,6 +49,18 @@ namespace FluentFTP.GnuTLS {
 		/// Set to zero to disable.
 		/// </summary>
 		public int HandshakeTimeout { get; set; } = 5000;
+
+		private int commTimeout;
+
+		/// <summary>
+		/// How long to wait for a RECV, SEND, HANDSHAKE or BYE API call before giving up,
+		/// in milliseconds.
+		/// Minimum allowed value is 15000.
+		/// </summary>
+		public int CommTimeout {
+			get { return commTimeout; }
+			set { Math.Max(15000, value); }
+		}
 
 		/// <summary>
 		/// How long to wait for a connectivity socket poll, in milliseconds.

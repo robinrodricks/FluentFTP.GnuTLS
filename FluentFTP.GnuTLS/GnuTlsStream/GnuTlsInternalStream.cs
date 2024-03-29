@@ -49,6 +49,9 @@ namespace FluentFTP.GnuTLS {
 		// The Handshake Timeout to be honored on handshake
 		private int htimeout;
 
+		// The Communications Timeout to be honored for RECV, SEND, HANDSHAKE and BYE API comms
+		private int ctimeout;
+
 		// The Poll Timeout to use for connectivity test
 		private int ptimeout;
 
@@ -93,6 +96,7 @@ namespace FluentFTP.GnuTLS {
 			string priorityString,
 			string loadLibraryDllNamePrefix,
 			int handshakeTimeout,
+			int commTimeout,
 			int pollTimeout,
 			GnuStreamLogCBFunc elog,
 			int logMaxLevel,
@@ -105,6 +109,7 @@ namespace FluentFTP.GnuTLS {
 			GnuTls.SetLoadLibraryDllNamePrefix(loadLibraryDllNamePrefix);
 			hostname = targetHostString;
 			htimeout = handshakeTimeout;
+			ctimeout = commTimeout;
 			ptimeout = pollTimeout;
 
 			weAreControlConnection = streamToResumeFrom == null;
@@ -151,7 +156,6 @@ namespace FluentFTP.GnuTLS {
 			// Setup handshake hook
 			GnuTls.GnuTlsHandshakeSetHookFunction(sess, (uint)HandshakeDescriptionT.GNUTLS_HANDSHAKE_ANY, (int)HandshakeHookT.GNUTLS_HOOK_BOTH, handshakeHookFunc);
 
-
 			IsSessionOk = true;
 
 			// Setup Session Resume
@@ -165,7 +169,7 @@ namespace FluentFTP.GnuTLS {
 
 			DisableNagle();
 
-			GnuTls.GnuTlsHandShake(sess);
+			GnuTls.GnuTlsHandShake(sess, ctimeout);
 
 			ReEnableNagle();
 
@@ -188,7 +192,7 @@ namespace FluentFTP.GnuTLS {
 							byte[] buf = new byte[count];
 							this.Read(buf, 0, count);
 						}
-						GnuTls.GnuTlsBye(sess, CloseRequestT.GNUTLS_SHUT_RDWR);
+						GnuTls.GnuTlsBye(sess, CloseRequestT.GNUTLS_SHUT_RDWR, ctimeout);
 					}
 					sess.Dispose();
 				}
@@ -234,7 +238,7 @@ namespace FluentFTP.GnuTLS {
 
 			do {
 				long msElapsed = stopWatch.ElapsedMilliseconds;
-				if (msElapsed > 15000) {
+				if (msElapsed > ctimeout) {
 					GnuUtils.Check("*GnuTlsRecordSend(...)", (int)EC.en.GNUTLS_E_SOCKET);
 					return 0;
 				}
@@ -308,7 +312,7 @@ namespace FluentFTP.GnuTLS {
 
 				do {
 					long msElapsed = stopWatch.ElapsedMilliseconds;
-					if (msElapsed > 15000) {
+					if (msElapsed > ctimeout) {
 						GnuUtils.Check("*GnuTlsRecordSend(...)", (int)EC.en.GNUTLS_E_SOCKET);
 						return;
 					}
