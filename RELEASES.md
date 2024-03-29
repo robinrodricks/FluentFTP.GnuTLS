@@ -1,5 +1,10 @@
 # Release Notes
 
+#### 1.0.30
+  - Logging improvements
+  - Prevent potential endless loop in RECV, SEND
+  - Introduce config CommTimeout for RECV, SEND
+
 #### 1.0.29
   - Logging improvements
   - Support for ClickOnce Single File deployment
