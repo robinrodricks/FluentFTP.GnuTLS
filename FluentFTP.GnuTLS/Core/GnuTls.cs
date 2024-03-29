@@ -1,8 +1,8 @@
 ﻿using FluentFTP.GnuTLS.Enums;
 using System;
 using System.Diagnostics;
-using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace FluentFTP.GnuTLS.Core {
 	// Wrapper that handles loading the external GnuTls library
@@ -540,25 +540,38 @@ namespace FluentFTP.GnuTLS.Core {
 
 			int result;
 			bool needRepeat;
-			int msMax;
 			int repeatCount = 0;
 
 			var stopWatch = new Stopwatch();
 			stopWatch.Start();
 
 			do {
+				long msElapsed = stopWatch.ElapsedMilliseconds;
+				if (msElapsed > 15000) {
+					GnuUtils.Check(gcm, (int)EC.en.GNUTLS_E_SOCKET);
+					return 0;
+				}
+
 				result = gnutls_handshake_h(session.ptr);
 
 				if (result >= (int)EC.en.GNUTLS_E_SUCCESS) {
 					break;
 				}
 
-				needRepeat = GnuUtils.NeedRepeat(GnuUtils.RepeatType.Handshake, result, out msMax);
+				needRepeat = GnuUtils.NeedRepeat(GnuUtils.RepeatType.Handshake, result);
 
-				if ((stopWatch.ElapsedMilliseconds < msMax) && needRepeat) {
+				if (needRepeat) {
 					repeatCount++;
 
-					// if (repeatCount <= 2) Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " repeat due to " + Enum.GetName(typeof(EC.en), result));
+					Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " repeat due to " + Enum.GetName(typeof(EC.en), result));
+
+					if (repeatCount <= 2) {
+						/* Immediate repeat */
+					}
+					else {
+						/* Small delay before repeat */
+						Thread.Sleep(1000);
+					}
 
 					switch (result) {
 						case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
@@ -573,7 +586,7 @@ namespace FluentFTP.GnuTLS.Core {
 				}
 			} while (needRepeat);
 
-			// if (repeatCount > 2) Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " " + repeatCount + " repeats overall");
+			if (repeatCount > 0) Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " " + repeatCount + " repeats overall");
 
 			stopWatch.Stop();
 
@@ -601,40 +614,49 @@ namespace FluentFTP.GnuTLS.Core {
 
 			int result;
 			bool needRepeat;
-			int msMax;
 			int repeatCount = 0;
 
 			var stopWatch = new Stopwatch();
 			stopWatch.Start();
 
 			do {
-				result = gnutls_bye_h(session.ptr, how);
-
-				if (result >= (int)EC.en.GNUTLS_E_SUCCESS) {
-					break;
+				long msElapsed = stopWatch.ElapsedMilliseconds;
+				if (msElapsed > 15000) {
+					GnuUtils.Check(gcm, (int)EC.en.GNUTLS_E_SOCKET);
+					return 0;
 				}
 
-				needRepeat = GnuUtils.NeedRepeat(GnuUtils.RepeatType.Bye, result, out msMax);
+				result = gnutls_bye_h(session.ptr, how);
 
-				if ((stopWatch.ElapsedMilliseconds < msMax) && needRepeat) {
+				needRepeat = GnuUtils.NeedRepeat(GnuUtils.RepeatType.Bye, result);
+
+				if (needRepeat) {
 					repeatCount++;
 
-					// if (repeatCount <= 2) Logging.LogGnuFunc(GnuMessage.InteropFunction, gcm + " repeat due to " + Enum.GetName(typeof(EC.en), result));
+					Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " repeat due to " + Enum.GetName(typeof(EC.en), result));
 
-					//switch (result) {
-					//	case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
-					//		Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + GnuTls.GnuTlsAlertGetName(GnuTls.GnuTlsAlertGet(sess)));
-					//		break;
-					//	case (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED:
-					//		Logging.LogGnuFunc(GnuMessage.Alert, "Fatal alert received: " + GnuTls.GnuTlsAlertGetName(GnuTls.GnuTlsAlertGet(sess)));
-					//		break;
-					//	default:
-					//		break;
-					//}
+					if (repeatCount <= 2) {
+						/* Immediate repeat */
+					}
+					else {
+						/* Small delay before repeat */
+						Thread.Sleep(1000);
+					}
+
+					switch (result) {
+						case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
+							Logging.LogGnuFunc(GnuMessage.Alert, "Warning alert received: " + GnuTls.GnuTlsAlertGetName(GnuTls.GnuTlsAlertGet(session)));
+							break;
+						case (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED:
+							Logging.LogGnuFunc(GnuMessage.Alert, "Fatal alert received: " + GnuTls.GnuTlsAlertGetName(GnuTls.GnuTlsAlertGet(session)));
+							break;
+						default:
+							break;
+					}
 				}
 			} while (needRepeat);
 
-			// if (repeatCount > 2) Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " " + repeatCount + " repeats overall");
+			if (repeatCount > 0) Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " " + repeatCount + " repeats overall");
 
 			stopWatch.Stop();
 
@@ -643,8 +665,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// void gnutls_handshake_set_timeout (gnutls_session_t session, unsigned int ms)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int gnutls_record_check_pending_(IntPtr session);
-		static gnutls_record_check_pending_ gnutls_record_check_pending_h;
+		delegate void gnutls_handshake_set_timeout_(IntPtr session, uint ms);
+		static gnutls_handshake_set_timeout_ gnutls_handshake_set_timeout_h;
 		public static void GnuTlsHandshakeSetTimeout(Session session, uint ms) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
@@ -654,8 +676,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// size_t gnutls_record_check_pending (gnutls_session_t session)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate void gnutls_handshake_set_timeout_(IntPtr session, uint ms);
-		static gnutls_handshake_set_timeout_ gnutls_handshake_set_timeout_h;
+		delegate int gnutls_record_check_pending_(IntPtr session);
+		static gnutls_record_check_pending_ gnutls_record_check_pending_h;
 		public static int GnuTlsRecordCheckPending(Session session) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);

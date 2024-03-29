@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using FluentFTP.GnuTLS.Core;
 using FluentFTP.GnuTLS.Enums;
 
@@ -222,7 +223,6 @@ namespace FluentFTP.GnuTLS {
 
 			int result;
 			bool needRepeat;
-			int msMax;
 			int repeatCount = 0;
 
 			var stopWatch = new Stopwatch();
@@ -231,20 +231,32 @@ namespace FluentFTP.GnuTLS {
 			Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(..., " + offset + ", " + maxCount + ")");
 
 			do {
+				long msElapsed = stopWatch.ElapsedMilliseconds;
+				if (msElapsed > 15000) {
+					GnuUtils.Check("*GnuTlsRecordSend(...)", (int)EC.en.GNUTLS_E_SOCKET);
+					return 0;
+				}
+
 				result = GnuTls.GnuTlsRecordRecv(sess, buffer, maxCount);
 
 				if (result >= (int)EC.en.GNUTLS_E_SUCCESS) {
 					break;
 				}
 
-				needRepeat = GnuUtils.NeedRepeat(GnuUtils.RepeatType.Read, result, out msMax);
+				needRepeat = GnuUtils.NeedRepeat(GnuUtils.RepeatType.Read, result);
 
-				long msElapsed = stopWatch.ElapsedMilliseconds;
-
-				if ((msElapsed < msMax) && needRepeat) {
+				if (needRepeat) {
 					repeatCount++;
 
-					if (repeatCount <= 2) Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
+					Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
+
+					if (repeatCount <= 2) {
+						/* Immediate repeat */
+					}
+					else {
+						/* Small delay before repeat */
+						Thread.Sleep(1000);
+					}
 
 					switch (result) {
 						case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
@@ -259,7 +271,7 @@ namespace FluentFTP.GnuTLS {
 				}
 			} while (needRepeat);
 
-			if (repeatCount > 2) Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(...) " + repeatCount + " repeats overall");
+			if (repeatCount > 0) Logging.LogGnuFunc(GnuMessage.Read, "*GnuTlsRecordRecv(...) " + repeatCount + " repeats overall");
 
 			stopWatch.Stop();
 
@@ -280,7 +292,6 @@ namespace FluentFTP.GnuTLS {
 
 			int result = int.MaxValue;
 			bool needRepeat;
-			int msMax;
 			int repeatCount;
 			var stopWatch = new Stopwatch();
 
@@ -292,19 +303,31 @@ namespace FluentFTP.GnuTLS {
 			while (result > 0) {
 
 				do {
+					long msElapsed = stopWatch.ElapsedMilliseconds;
+					if (msElapsed > 15000) {
+						GnuUtils.Check("*GnuTlsRecordSend(...)", (int)EC.en.GNUTLS_E_SOCKET);
+						return;
+					}
+
 					result = GnuTls.GnuTlsRecordSend(sess, buf, Math.Min(buf.Length, MaxRecordSize));
 					if (result >= (int)EC.en.GNUTLS_E_SUCCESS) {
 						break;
 					}
 
-					needRepeat = GnuUtils.NeedRepeat(GnuUtils.RepeatType.Write, result, out msMax);
+					needRepeat = GnuUtils.NeedRepeat(GnuUtils.RepeatType.Write, result);
 
-					long msElapsed = stopWatch.ElapsedMilliseconds;
-
-					if ((msElapsed < msMax) && needRepeat) {
+					if (needRepeat) {
 						repeatCount++;
 
-						if (repeatCount <= 2) Logging.LogGnuFunc(GnuMessage.Write, "*GnuTlsRecordSend(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
+						Logging.LogGnuFunc(GnuMessage.Write, "*GnuTlsRecordSend(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
+
+						if (repeatCount <= 2) {
+							/* Immediate repeat */
+						}
+						else {
+							/* Small delay before repeat */
+							Thread.Sleep(1000);
+						}
 
 						switch (result) {
 							case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
@@ -328,7 +351,7 @@ namespace FluentFTP.GnuTLS {
 				Array.Resize(ref buf, buf.Length - result);
 			}
 
-			if (repeatCount > 2) Logging.LogGnuFunc(GnuMessage.Write, "*GnuTlsRecordSend(...) " + repeatCount + " repeats overall");
+			if (repeatCount > 0) Logging.LogGnuFunc(GnuMessage.Write, "*GnuTlsRecordSend(...) " + repeatCount + " repeats overall");
 
 			stopWatch.Stop();
 

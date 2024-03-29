@@ -54,36 +54,30 @@ namespace FluentFTP.GnuTLS.Core {
 			Bye,
 		}
 
-		public static bool NeedRepeat(RepeatType type, int result, out int msMax) {
+		public static bool NeedRepeat(RepeatType type, int result) {
 			switch (type) {
 				case RepeatType.Read:
-					msMax = 30000;
 					return result == (int)EC.en.GNUTLS_E_AGAIN ||
 						   result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
 						   result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
 						   result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED;
 
 				case RepeatType.Write:
-					msMax = 30000;
 					return result == (int)EC.en.GNUTLS_E_AGAIN ||
 						   result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
 						   result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
 						   result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED;
 
 				case RepeatType.Handshake:
-					msMax = 30000;
 					return result == (int)EC.en.GNUTLS_E_AGAIN ||
 						   result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
 					       result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
 					       result == (int)EC.en.GNUTLS_E_GOT_APPLICATION_DATA;
 
 				case RepeatType.Bye:
-					msMax = 30000;
 					return result == (int)EC.en.GNUTLS_E_AGAIN ||
 						   result == (int)EC.en.GNUTLS_E_INTERRUPTED;
 			}
-
-			msMax = 30000;
 			return false;
 		}
 
