@@ -39,6 +39,8 @@ namespace FluentFTP.GnuTLS.Core {
 				Logging.LogNoQueue("Debug   : " + s);
 			}
 
+			Logging.LogNoQueue("Debug   : End of buffered debug messages");
+
 			throw ex;
 		}
 
