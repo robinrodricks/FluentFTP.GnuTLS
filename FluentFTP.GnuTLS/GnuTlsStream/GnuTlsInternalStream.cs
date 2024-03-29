@@ -239,7 +239,7 @@ namespace FluentFTP.GnuTLS {
 			do {
 				long msElapsed = stopWatch.ElapsedMilliseconds;
 				if (msElapsed > ctimeout) {
-					GnuUtils.Check("*GnuTlsRecordSend(...)", (int)EC.en.GNUTLS_E_SOCKET);
+					GnuUtils.Check("*GnuTlsRecordRecv(...)", (int)EC.en.GNUTLS_E_SOCKET);
 					return 0;
 				}
 
