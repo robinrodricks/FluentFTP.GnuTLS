@@ -51,6 +51,7 @@ namespace FluentFTP.GnuTLS {
 				priority,
 				config.LoadLibraryDllNamePrefix,
 				config.HandshakeTimeout,
+				config.CommTimeout,
 				config.PollTimeout,
 				fluentFtpLog,
 				config.LogLevel,
