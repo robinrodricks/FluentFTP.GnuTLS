@@ -21,7 +21,7 @@ namespace FluentFTP.GnuTLS.Enums {
 		X509 = 1 << 10,
 		RAWPK = 1 << 11,
 
-		All = unchecked((ushort)-1),
+		All = unchecked((ushort)-1 - Read - Write),
 	}
 
 }
