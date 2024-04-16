@@ -206,10 +206,9 @@ namespace FluentFTP.GnuTLS {
 				lock (initLock) {
 					if (streamUseCount > 0) {
 						--streamUseCount;
-					}
-
-					if (streamUseCount == 0) {
-						GnuTls.GnuTlsGlobalDeInit();
+						if (streamUseCount == 0) {
+							GnuTls.GnuTlsGlobalDeInit();
+						}
 					}
 				}
 			}
