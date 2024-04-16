@@ -195,9 +195,11 @@ namespace FluentFTP.GnuTLS {
 						GnuTls.GnuTlsBye(sess, CloseRequestT.GNUTLS_SHUT_RDWR, ctimeout);
 					}
 					sess.Dispose();
+					sess = null;
 				}
 
 				cred.Dispose();
+				cred = null;
 
 				lock (initLock) {
 					if (streamUseCount > 0) {
