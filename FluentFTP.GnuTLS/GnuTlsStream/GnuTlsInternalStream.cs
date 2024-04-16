@@ -198,8 +198,10 @@ namespace FluentFTP.GnuTLS {
 					sess = null;
 				}
 
-				cred.Dispose();
-				cred = null;
+				if (cred != null) {
+					cred.Dispose();
+					cred = null;
+				}
 
 				lock (initLock) {
 					if (streamUseCount > 0) {
