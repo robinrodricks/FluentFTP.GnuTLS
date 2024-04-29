@@ -11,7 +11,7 @@
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\FluentFTP.GnuTLS.xml</DocumentationFile>
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
-		<Version>1.0.30</Version>
+		<Version>1.0.31</Version>
 		<PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
 		<PackageIcon>logo-nuget.png</PackageIcon>
         <LangVersion>10.0</LangVersion>

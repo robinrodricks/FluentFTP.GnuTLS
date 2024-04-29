@@ -1,5 +1,9 @@
 # Release Notes
 
+#### 1.0.31
+  - Prevent inadvertent double de-init
+  - Improve dispose method for compatibility with FluentFTP
+
 #### 1.0.30
   - Logging improvements
   - Prevent potential endless loop in RECV, SEND
