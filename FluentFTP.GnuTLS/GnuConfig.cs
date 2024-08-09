@@ -59,7 +59,7 @@ namespace FluentFTP.GnuTLS {
 		/// </summary>
 		public int CommTimeout {
 			get { return commTimeout; }
-			set { Math.Max(15000, value); }
+			set { commTimeout = Math.Max(15000, value); }
 		}
 
 		/// <summary>
