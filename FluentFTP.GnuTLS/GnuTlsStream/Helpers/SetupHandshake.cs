@@ -41,7 +41,7 @@ namespace FluentFTP.GnuTLS {
 			// Tell GnuTLS how to send and receive: Use already open socket
 			// Need to check for connectivity on this socket, cannot just blithely use it
 			if (!SocketUsable(socket, ptimeout, out string reason)) {
-				throw new GnuTlsException("Socket is unusable " + reason);
+				throw new GnuTlsException("Socket is unusable: " + reason);
 			}
 
 			//Both of these **should** be equivalent:
