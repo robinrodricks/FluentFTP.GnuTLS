@@ -20,7 +20,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 		private static class FunctionLoader {
 
-			// Linux / MacOSX
+			// Linux
 			private const string dllNameLinUtil = @"libdl.so.2";
 			[DllImport(dllNameLinUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern IntPtr dlerror();
