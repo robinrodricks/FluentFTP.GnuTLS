@@ -55,25 +55,25 @@ namespace FluentFTP.GnuTLS {
 
 		private static bool SocketUsable(Socket sock, int ptmo, out string rsn) {
 
-				if (sock == null) {
-					rsn = "sock == null";
-					return false;
-				}
+			if (sock == null) {
+				rsn = "sock == null";
+				return false;
+			}
 
-				if (sock.Handle == IntPtr.Zero) {
-					rsn = "sock handle == zero";
-					return false;
-				}
+			if (sock.Handle == IntPtr.Zero) {
+				rsn = "sock handle == zero";
+				return false;
+			}
 
-				if (!sock.Connected) {
-					rsn = "sock !connected";
-					return false;
-				}
+			if (!sock.Connected) {
+				rsn = "sock !connected";
+				return false;
+			}
 
-				if (ptmo == 0) {
-					rsn = string.Empty;
-					return true;
-				}
+			if (ptmo == 0) {
+				rsn = string.Empty;
+				return true;
+			}
 
 			try {
 				// Poll (SelectRead) returns true if:
