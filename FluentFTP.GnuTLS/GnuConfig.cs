@@ -40,7 +40,7 @@ namespace FluentFTP.GnuTLS {
 		/// <summary>
 		/// Add an optional string prefix to the LoadLibrary dllname. For ClickOnce
 		/// Single File deployment, specify "ClickOnceSingleFile" instead of a path and
-		/// use "<IncludeAllContentForSelfExtract>" set to True in your apps .csproj 
+		/// use "IncludeAllContentForSelfExtract" set to True in your apps .csproj 
 		/// </summary>
 		public string LoadLibraryDllNamePrefix = string.Empty;
 
