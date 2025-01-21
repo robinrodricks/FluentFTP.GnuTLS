@@ -10,7 +10,7 @@ namespace FluentFTP.GnuTLS {
 		// handshake_hook_func(gnutls_session_t session, unsigned int htype, unsigned when, unsigned int incoming, const gnutls_datum_t* msg)
 		public static int HandshakeHook(IntPtr session, uint htype, uint post, uint incoming, IntPtr msg) {
 
-			if (session == null) {
+			if (session == (IntPtr)0) {
 				return 0;
 			}
 
