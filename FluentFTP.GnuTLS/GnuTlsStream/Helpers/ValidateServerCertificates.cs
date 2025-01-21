@@ -13,8 +13,6 @@ namespace FluentFTP.GnuTLS {
 
 		private void ValidateServerCertificates(CustomRemoteCertificateValidationCallback customRemoteCertificateValidation) {
 
-			CertificateStatusT serverCertificateStatus;
-
 			// Set Certificate Verification Profile and Flags
 			// If no profile is set (uppermost 8 bits), it is taken from the priority string, please
 			// read the GnuTLS docs on "priority strings".
@@ -27,7 +25,7 @@ namespace FluentFTP.GnuTLS {
 			//
 			// Perform the GnuTls internal validation, it is part of the handshake process
 			//
-			GnuTls.GnuTlsCertificateVerifyPeers3(sess, hostname, out serverCertificateStatus);
+			GnuTls.GnuTlsCertificateVerifyPeers3(sess, hostname, out CertificateStatusT serverCertificateStatus);
 
 			string serverCertificateStatusText = serverCertificateStatus.ToString("G");
 			if (serverCertificateStatusText == "0") {
@@ -125,7 +123,7 @@ namespace FluentFTP.GnuTLS {
 				}
 
 				string s = "Certificate type: X.509, list contains " + numData + " certificate";
-				if (numData > 1) { s = s + "s";	}
+				if (numData > 1) { s += "s"; }
 				Logging.LogGnuFunc(GnuMessage.X509, s);
 
 				IntPtr cert = IntPtr.Zero;

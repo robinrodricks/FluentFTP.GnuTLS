@@ -52,8 +52,7 @@ namespace FluentFTP.GnuTLS {
 					SessionFlagsT flags = GnuTls.GnuTlsSessionGetFlags(session);
 					if (flags.HasFlag(SessionFlagsT.GNUTLS_SFLAGS_SESSION_TICKET)) {
 						Logging.LogGnuFunc(GnuMessage.Handshake, "Session resume: use received session ticket");
-						DatumT resumeDataTLS;
-						GnuTls.GnuTlsSessionGetData2(session, out resumeDataTLS);
+						GnuTls.GnuTlsSessionGetData2(session, out DatumT resumeDataTLS);
 						GnuTls.GnuTlsSessionSetData(session, resumeDataTLS);
 						GnuTls.GnuTlsFree(resumeDataTLS.ptr);
 					}
