@@ -264,7 +264,7 @@ namespace FluentFTP.GnuTLS {
 					}
 					else {
 						/* Small delay before repeat */
-						Thread.Sleep(1000);
+						Thread.Sleep(100);
 					}
 
 					switch (result) {
@@ -295,7 +295,7 @@ namespace FluentFTP.GnuTLS {
 				throw new ArgumentException("GnuTlsInternalStream.Write: offset + count go beyond buffer length");
 			}
 
-			GnuMessage gnm = weAreControlConnection ? GnuMessage.ReadControl : GnuMessage.ReadData;
+			GnuMessage gnm = weAreControlConnection ? GnuMessage.WriteControl : GnuMessage.WriteData;
 
 			byte[] buf = new byte[count];
 
@@ -337,7 +337,7 @@ namespace FluentFTP.GnuTLS {
 						}
 						else {
 							/* Small delay before repeat */
-							Thread.Sleep(1000);
+							Thread.Sleep(100);
 						}
 
 						switch (result) {
