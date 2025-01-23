@@ -295,7 +295,7 @@ namespace FluentFTP.GnuTLS {
 				throw new ArgumentException("GnuTlsInternalStream.Write: offset + count go beyond buffer length");
 			}
 
-			GnuMessage gnm = weAreControlConnection ? GnuMessage.ReadControl : GnuMessage.ReadData;
+			GnuMessage gnm = weAreControlConnection ? GnuMessage.WriteControl : GnuMessage.WriteData;
 
 			byte[] buf = new byte[count];
 
