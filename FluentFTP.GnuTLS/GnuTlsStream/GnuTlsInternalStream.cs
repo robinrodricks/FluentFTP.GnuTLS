@@ -264,7 +264,7 @@ namespace FluentFTP.GnuTLS {
 					}
 					else {
 						/* Small delay before repeat */
-						Thread.Sleep(1000);
+						Thread.Sleep(100);
 					}
 
 					switch (result) {
@@ -337,7 +337,7 @@ namespace FluentFTP.GnuTLS {
 						}
 						else {
 							/* Small delay before repeat */
-							Thread.Sleep(1000);
+							Thread.Sleep(100);
 						}
 
 						switch (result) {
