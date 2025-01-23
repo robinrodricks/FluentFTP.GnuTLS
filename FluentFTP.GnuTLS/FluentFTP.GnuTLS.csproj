@@ -17,6 +17,7 @@
         <LangVersion>10.0</LangVersion>
         <RepositoryUrl>https://github.com/robinrodricks/FluentFTP.GnuTLS</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
+		<Nullable>annotations</Nullable>
 	</PropertyGroup>
 
     <PropertyGroup>

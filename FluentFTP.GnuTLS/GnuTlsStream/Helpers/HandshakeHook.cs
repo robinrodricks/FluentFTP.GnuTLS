@@ -10,7 +10,7 @@ namespace FluentFTP.GnuTLS {
 		// handshake_hook_func(gnutls_session_t session, unsigned int htype, unsigned when, unsigned int incoming, const gnutls_datum_t* msg)
 		public static int HandshakeHook(IntPtr session, uint htype, uint post, uint incoming, IntPtr msg) {
 
-			if (session == null) {
+			if (session == (IntPtr)0) {
 				return 0;
 			}
 
@@ -52,8 +52,7 @@ namespace FluentFTP.GnuTLS {
 					SessionFlagsT flags = GnuTls.GnuTlsSessionGetFlags(session);
 					if (flags.HasFlag(SessionFlagsT.GNUTLS_SFLAGS_SESSION_TICKET)) {
 						Logging.LogGnuFunc(GnuMessage.Handshake, "Session resume: use received session ticket");
-						DatumT resumeDataTLS;
-						GnuTls.GnuTlsSessionGetData2(session, out resumeDataTLS);
+						GnuTls.GnuTlsSessionGetData2(session, out DatumT resumeDataTLS);
 						GnuTls.GnuTlsSessionSetData(session, resumeDataTLS);
 						GnuTls.GnuTlsFree(resumeDataTLS.ptr);
 					}
