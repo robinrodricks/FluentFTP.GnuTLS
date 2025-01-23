@@ -160,7 +160,7 @@ namespace FluentFTP.GnuTLS {
 
 			// Setup Session Resume
 			if (streamToResumeFrom != null) {
-				Logging.LogGnuFunc(GnuMessage.Handshake, "Session resume: Use session data from control connection");
+				Logging.LogGnuFunc(GnuMessage.Handshake, "Session resume - Using session data from control connection");
 				DatumT resumeDataTLS;
 				GnuTls.GnuTlsSessionGetData2(streamToResumeFrom.sess, out resumeDataTLS);
 				GnuTls.GnuTlsSessionSetData(sess, resumeDataTLS);
