@@ -26,8 +26,8 @@ namespace FluentFTP.GnuTLS {
 				GnuTls.GnuTlsPrioritySetDirect(sess, priority);
 			}
 
-			// Bits for Diffie-Hellman prime
-			GnuTls.GnuTlsDhSetPrimeBits(sess, 1024);
+			// Bits for Diffie-Hellman prime - since 3.1.7 this function is deprecated
+			// GnuTls.GnuTlsDhSetPrimeBits(sess, 1024);
 
 			// Allocate and link credential object
 			GnuTls.GnuTlsCredentialsSet(cred, sess);
