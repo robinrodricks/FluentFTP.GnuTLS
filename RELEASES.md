@@ -1,6 +1,9 @@
 # Release Notes
 
-#### 1.0.32
+#### 1.0.34
+ - Fix E_AGAIN code for BYE and HANDSHAKE also
+
+#### 1.0.33
  - Remove deprecated gnutls_dh_set_prime_bits() function call
 
 #### 1.0.32
