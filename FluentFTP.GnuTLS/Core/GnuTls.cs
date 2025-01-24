@@ -711,6 +711,7 @@ namespace FluentFTP.GnuTLS.Core {
 			return GnuUtils.Check(gcm, gnutls_set_default_priority_append_h(session.ptr, priorities, out errPos, 0));
 		}
 
+		// Since 3.1.7 this function is deprecated
 		// void gnutls_dh_set_prime_bits (gnutls_session_t session, unsigned int bits)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int gnutls_dh_set_prime_bits_(IntPtr session, uint bits);
