@@ -1,6 +1,9 @@
 # Release Notes
 
 #### 1.0.32
+ - Remove deprecated gnutls_dh_set_prime_bits() function call
+
+#### 1.0.32
   - Improve E_AGAIN logic to accomodate fast clients with slow servers
   - Config: Setting CommTimeout did not work
 
