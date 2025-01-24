@@ -563,15 +563,12 @@ namespace FluentFTP.GnuTLS.Core {
 				if (needRepeat) {
 					repeatCount++;
 
-					Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " repeat due to " + Enum.GetName(typeof(EC.en), result));
+					if (repeatCount <= 2 || repeatCount % 100 == 0) {
+						Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " repeat due to " + Enum.GetName(typeof(EC.en), result));
+					}
 
-					if (repeatCount <= 2) {
-						/* Immediate repeat */
-					}
-					else {
-						/* Small delay before repeat */
-						Thread.Sleep(1000);
-					}
+					/* Small delay before repeat */
+					Thread.Sleep(0);
 
 					switch (result) {
 						case (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED:
@@ -633,15 +630,12 @@ namespace FluentFTP.GnuTLS.Core {
 				if (needRepeat) {
 					repeatCount++;
 
-					Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " repeat due to " + Enum.GetName(typeof(EC.en), result));
+					if (repeatCount <= 2 || repeatCount % 100 == 0) {
+						Logging.LogGnuFunc(GnuMessage.Handshake, gcm + " repeat due to " + Enum.GetName(typeof(EC.en), result));
+					}
 
-					if (repeatCount <= 2) {
-						/* Immediate repeat */
-					}
-					else {
-						/* Small delay before repeat */
-						Thread.Sleep(1000);
-					}
+					/* Small delay before repeat */
+					Thread.Sleep(0);
 				}
 			} while (needRepeat);
 
