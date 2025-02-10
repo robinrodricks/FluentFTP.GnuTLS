@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.35
+ - Fix E_INVALID_SESSION for BYE
+
 #### 1.0.34
  - Fix E_AGAIN code for BYE and HANDSHAKE also
 
@@ -95,7 +98,7 @@
   - Logging improvements
 
 #### 1.0.11
-  - Set up X509 System Trust List: adds the system�s default trusted CAs
+  - Set up X509 System Trust List: adds the system s default trusted CAs
     for certificate validation.
 
 #### 1.0.10
