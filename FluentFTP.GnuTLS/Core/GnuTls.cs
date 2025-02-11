@@ -522,8 +522,6 @@ namespace FluentFTP.GnuTLS.Core {
 		delegate bool gnutls_error_is_fatal_(int error);
 		static gnutls_error_is_fatal_ gnutls_error_is_fatal_h;
 		public static bool GnuTlsErrorIsFatal(int error) {
-			string gcm = GnuUtils.GetCurrentMethod();
-			Logging.LogGnuFunc(gcm);
 
 			return gnutls_error_is_fatal_h(error);
 		}
