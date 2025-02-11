@@ -14,7 +14,7 @@ namespace FluentFTP.GnuTLS.Core {
 			return Check(methodName, result, true, resultsAllowed);
 		}
 
-		public static int Check(string methodName, int result, bool noDebugLog, params int[] resultsAllowed) {
+		public static int Check(string methodName, int result, bool debugLog, params int[] resultsAllowed) {
 
 			if (result >= 0) {
 				return result;
@@ -37,8 +37,8 @@ namespace FluentFTP.GnuTLS.Core {
 
 			Logging.LogNoQueue(ex.Message);
 
-			if (!noDebugLog) {
-								Logging.LogNoQueue("Debug   : Last " + Logging.logQueueMaxSize + " GnuTLS buffered debug messages follow:");
+			if (debugLog) {
+				Logging.LogNoQueue("Debug   : Last " + Logging.logQueueMaxSize + " GnuTLS buffered debug messages follow:");
 
 				foreach (string s in Logging.logQueue) {
 					Logging.LogNoQueue("Debug   : " + s);

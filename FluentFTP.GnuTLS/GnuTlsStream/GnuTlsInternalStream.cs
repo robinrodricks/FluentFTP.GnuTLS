@@ -281,7 +281,7 @@ namespace FluentFTP.GnuTLS {
 
 			stopWatch.Stop();
 
-			return GnuUtils.Check("*GnuTlsRecordRecv(...)", result);
+			return GnuUtils.Check("*GnuTlsRecordRecv(...)", result, false);
 		}
 
 		public override void Write(byte[] buffer, int offset, int count) {
