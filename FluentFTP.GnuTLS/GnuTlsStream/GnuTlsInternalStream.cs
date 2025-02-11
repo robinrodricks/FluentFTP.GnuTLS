@@ -242,7 +242,7 @@ namespace FluentFTP.GnuTLS {
 			do {
 				long msElapsed = stopWatch.ElapsedMilliseconds;
 				if (msElapsed > ctimeout) {
-					GnuUtils.Check("*GnuTlsRecordRecv(...)", (int)EC.en.GNUTLS_E_SOCKET);
+					GnuUtils.Check("*GnuTlsRecordRecv(...)", (int)EC.en.GNUTLS_E_SOCKET, false);
 					return 0;
 				}
 
@@ -313,7 +313,7 @@ namespace FluentFTP.GnuTLS {
 				do {
 					long msElapsed = stopWatch.ElapsedMilliseconds;
 					if (msElapsed > ctimeout) {
-						GnuUtils.Check("*GnuTlsRecordSend(...)", (int)EC.en.GNUTLS_E_SOCKET);
+						GnuUtils.Check("*GnuTlsRecordSend(...)", (int)EC.en.GNUTLS_E_SOCKET, false);
 						return;
 					}
 
@@ -360,7 +360,7 @@ namespace FluentFTP.GnuTLS {
 
 			stopWatch.Stop();
 
-			GnuUtils.Check("*GnuTlsRecordSend(...)", result);
+			GnuUtils.Check("*GnuTlsRecordSend(...)", result, false);
 		}
 
 		public override bool CanRead {
