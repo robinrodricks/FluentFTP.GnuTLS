@@ -25,7 +25,7 @@ namespace FluentFTP.GnuTLS {
 		public int MaxRecordSize { get; private set; } = 8192;
 
 		public bool IsResumed { get; private set; } = false;
-		public bool IsSessionInitComplete { get; private set; } = false;
+		public bool IsSessionUsable { get; private set; } = false;
 
 		// Logging call back to our user.
 		public delegate void GnuStreamLogCBFunc(string message);
@@ -156,7 +156,7 @@ namespace FluentFTP.GnuTLS {
 			// Setup handshake hook
 			GnuTls.GnuTlsHandshakeSetHookFunction(sess, (uint)HandshakeDescriptionT.GNUTLS_HANDSHAKE_ANY, (int)HandshakeHookT.GNUTLS_HOOK_BOTH, handshakeHookFunc);
 
-			IsSessionInitComplete = true;
+			IsSessionUsable = true;
 
 			// Setup Session Resume
 			if (streamToResumeFrom != null) {
@@ -186,11 +186,11 @@ namespace FluentFTP.GnuTLS {
 		protected override void Dispose(bool disposing) {
 			if (disposing) {
 				if (sess != null) {
-					if (IsSessionInitComplete) {
+					if (IsSessionUsable) {
 						int count = GnuTls.GnuTlsRecordCheckPending(sess);
 						if (count > 0) {
 							byte[] buf = new byte[count];
-							this.Read(buf, 0, count);
+							Read(buf, 0, count);
 						}
 						GnuTls.GnuTlsBye(sess, CloseRequestT.GNUTLS_SHUT_RDWR, ctimeout);
 					}
@@ -281,6 +281,10 @@ namespace FluentFTP.GnuTLS {
 
 			stopWatch.Stop();
 
+			if (GnuTls.GnuTlsErrorIsFatal(result)) {
+				IsSessionUsable = false;
+			}
+
 			return GnuUtils.Check("*GnuTlsRecordRecv(...)", result, false);
 		}
 
@@ -360,18 +364,22 @@ namespace FluentFTP.GnuTLS {
 
 			stopWatch.Stop();
 
+			if (GnuTls.GnuTlsErrorIsFatal(result)) {
+				IsSessionUsable = false;
+			}
+
 			GnuUtils.Check("*GnuTlsRecordSend(...)", result, false);
 		}
 
 		public override bool CanRead {
 			get {
-				return IsSessionInitComplete;
+				return IsSessionUsable;
 			}
 		}
 
 		public override bool CanWrite {
 			get {
-				return IsSessionInitComplete;
+				return IsSessionUsable;
 			}
 		}
 
