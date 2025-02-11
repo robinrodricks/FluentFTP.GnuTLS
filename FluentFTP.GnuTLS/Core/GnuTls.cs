@@ -643,7 +643,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 			stopWatch.Stop();
 
-			return GnuUtils.Check(gcm, result, new int[] { -53 });
+			return GnuUtils.Check(gcm, result, new int[] { (int)EC.en.GNUTLS_E_INVALID_SESSION, (int)EC.en.GNUTLS_E_PUSH_ERROR });
 		}
 
 		// void gnutls_handshake_set_timeout (gnutls_session_t session, unsigned int ms)
