@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.37
+  - No Logging of GnuTlsErrorIsFatal(...)
+
 #### 1.0.36
   - Streamline session termination after unexpected session drop
 
