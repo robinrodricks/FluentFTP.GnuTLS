@@ -86,7 +86,7 @@ namespace FluentFTP.GnuTLS {
 		/// In case of a catastrophic failure, how many messages at maximum
 		/// verbosity should be output prior to termination.
 		/// </summary>
-		public int LogLength { get; set; } = 150;
+		public int LogLength { get; set; } = 50;
 
 	}
 }
