@@ -25,7 +25,7 @@ namespace FluentFTP.GnuTLS {
 		public int MaxRecordSize { get; private set; } = 8192;
 
 		public bool IsResumed { get; private set; } = false;
-		public bool IsSessionOk { get; private set; } = false;
+		public bool IsSessionInitComplete { get; private set; } = false;
 
 		// Logging call back to our user.
 		public delegate void GnuStreamLogCBFunc(string message);
@@ -156,7 +156,7 @@ namespace FluentFTP.GnuTLS {
 			// Setup handshake hook
 			GnuTls.GnuTlsHandshakeSetHookFunction(sess, (uint)HandshakeDescriptionT.GNUTLS_HANDSHAKE_ANY, (int)HandshakeHookT.GNUTLS_HOOK_BOTH, handshakeHookFunc);
 
-			IsSessionOk = true;
+			IsSessionInitComplete = true;
 
 			// Setup Session Resume
 			if (streamToResumeFrom != null) {
@@ -186,7 +186,7 @@ namespace FluentFTP.GnuTLS {
 		protected override void Dispose(bool disposing) {
 			if (disposing) {
 				if (sess != null) {
-					if (IsSessionOk) {
+					if (IsSessionInitComplete) {
 						int count = GnuTls.GnuTlsRecordCheckPending(sess);
 						if (count > 0) {
 							byte[] buf = new byte[count];
@@ -365,13 +365,13 @@ namespace FluentFTP.GnuTLS {
 
 		public override bool CanRead {
 			get {
-				return IsSessionOk;
+				return IsSessionInitComplete;
 			}
 		}
 
 		public override bool CanWrite {
 			get {
-				return IsSessionOk;
+				return IsSessionInitComplete;
 			}
 		}
 
