@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.36
+  - Streamline session termination after unexpected session drop
+
 #### 1.0.35
  - Fix E_INVALID_SESSION for BYE
 
