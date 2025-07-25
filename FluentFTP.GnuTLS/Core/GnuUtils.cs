@@ -1,9 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace FluentFTP.GnuTLS.Core {
-	internal class GnuUtils {
+	internal static class GnuUtils {
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static string GetCurrentMethod([CallerMemberName] string memberName = "") {

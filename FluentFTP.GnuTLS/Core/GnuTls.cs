@@ -1,4 +1,5 @@
 ﻿using FluentFTP.GnuTLS.Enums;
+
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -10,129 +11,73 @@ namespace FluentFTP.GnuTLS.Core {
 	// If GnuTlsGlobalDeInit is called the same number of times as GnuTlsGlobalInit, the library is freed and true is returned
 	internal static class GnuTls {
 
-		public static bool platformIsLinux;
+		public static bool IsLinux { get; } = (int)Environment.OSVersion.Platform == 4 || (int)Environment.OSVersion.Platform == 6 || (int)Environment.OSVersion.Platform == 128;
+		public static bool IsMono { get; } = Type.GetType("Mono.Runtime") != null;
 
 		public static string loadLibraryDllNamePrefix = string.Empty;
 
 		#region FunctionLoader
+		private const string dllNameLinuxUtil = @"libdl.so.2";
+		private const string dllNameMonoUtil = @"libdl";
+		private const string dllNameWindowsUtil = @"Kernel32.dll";
+
 		private static IntPtr dllPtr = IntPtr.Zero;
 		private static bool functionsAreLoaded = false;
 
-		private static class FunctionLoader {
+		private interface FunctionLoader {
+			void Load(string dllPath, bool storePointer = true);
+			Delegate LoadFunction<T>(string entryName, bool exportIsValueType = false);
+			void Free();
+			bool SetDllPath(string dllPath);
+		}
 
-			// Linux
-			private const string dllNameLinUtil = @"libdl.so.2";
-			[DllImport(dllNameLinUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+		private class FunctionLoaderLinux : FunctionLoader {
+
+			[DllImport(dllNameLinuxUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern IntPtr dlerror();
-			[DllImport(dllNameLinUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			[DllImport(dllNameLinuxUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern IntPtr dlopen([MarshalAs(UnmanagedType.LPStr)] string filename, int flags);
-			[DllImport(dllNameLinUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			[DllImport(dllNameLinuxUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern IntPtr dlsym(IntPtr handle, [MarshalAs(UnmanagedType.LPStr)] string symbol);
-			[DllImport(dllNameLinUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			[DllImport(dllNameLinuxUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern int dlclose(IntPtr handle);
 
-			// Windows
-			[System.Flags]
-			private enum ErrorModes : uint {
-				SYSTEM_DEFAULT = 0x0,
-				SEM_FAILCRITICALERRORS = 0x0001,
-				SEM_NOALIGNMENTFAULTEXCEPT = 0x0004,
-				SEM_NOGPFAULTERRORBOX = 0x0002,
-				SEM_NOOPENFILEERRORBOX = 0x8000
-			}
-			private const string dllNameWinUtil = @"Kernel32.dll";
-			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
-			private static extern ErrorModes SetErrorMode(ErrorModes uMode);
-			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
-			private static extern bool SetDllDirectory([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
-			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
-			private static extern uint GetLastError();
-			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
-			private static extern int FormatMessage(uint dwFlags, IntPtr lpSource, uint dwMessageId, uint dwLanguageId, ref IntPtr lpBuffer, uint dwSize, IntPtr parms);
-			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
-			private static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
-			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
-			private static extern IntPtr GetProcAddress(IntPtr hModule, [MarshalAs(UnmanagedType.LPStr)] string lpProcName);
-			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
-			[return: MarshalAs(UnmanagedType.Bool)]
-			private static extern bool FreeLibrary(IntPtr hModule);
-
-			public static bool SetDllPath(string dllPath) {
-				return SetDllDirectory(dllPath);
-			}
-
-			public static void Load(string dllPath, bool storePointer = true) {
+			public void Load(string dllPath, bool storePointer = true) {
 				IntPtr hModule;
 				IntPtr errMsgPtr = IntPtr.Zero;
 				string errMsg = string.Empty;
-				if (platformIsLinux) {
-					_ = dlerror();
-					hModule = dlopen(dllPath, 2);
 
-					if (hModule == IntPtr.Zero) {
-						errMsgPtr = dlerror();
-						if (errMsgPtr != IntPtr.Zero) {
-							errMsg = Marshal.PtrToStringAnsi(errMsgPtr);
-						}
-						throw new GnuTlsException("Could not load " + dllPath + ", " + errMsg);
-					}
-				}
-				else {
-					_ = SetErrorMode(ErrorModes.SEM_FAILCRITICALERRORS | ErrorModes.SEM_NOGPFAULTERRORBOX | ErrorModes.SEM_NOOPENFILEERRORBOX);
-					_ = GetLastError();
-					hModule = LoadLibrary(dllPath);
+				_ = dlerror();
+				hModule = dlopen(dllPath, 2);
 
-					if (hModule == IntPtr.Zero) {
-						uint err = (uint)Marshal.GetLastWin32Error();
-//						uint err = GetLastError();
-						if (err != 0) {
-							_ = FormatMessage(0x00001300, IntPtr.Zero, err, 0, ref errMsgPtr, 256, IntPtr.Zero);
-						}
-						if (errMsgPtr != IntPtr.Zero) {
-							errMsg = Marshal.PtrToStringAnsi(errMsgPtr).TrimEnd(Environment.NewLine.ToCharArray());
-						}
-						throw new GnuTlsException("Could not load " + dllPath + ", (" + err + ") " + errMsg);
+				if (hModule == IntPtr.Zero) {
+					errMsgPtr = dlerror();
+					if (errMsgPtr != IntPtr.Zero) {
+						errMsg = Marshal.PtrToStringAnsi(errMsgPtr);
 					}
+					throw new GnuTlsException("Could not load " + dllPath + ", " + errMsg);
 				}
+
 				if (storePointer) {
 					dllPtr = hModule;
 				}
 				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Loaded: " + dllPath + ")");
 			}
 
-			public static Delegate LoadFunction<T>(string entryName, bool exportIsValueType = false) {
+			public Delegate LoadFunction<T>(string entryName, bool exportIsValueType = false) {
 				IntPtr pFunc;
 				IntPtr errMsgPtr = IntPtr.Zero;
 				string errMsg = string.Empty;
 
-				if (platformIsLinux) {
-					_ = dlerror();
-					pFunc = dlsym(dllPtr, entryName);
+				_ = dlerror();
+				pFunc = dlsym(dllPtr, entryName);
 
-					if (pFunc == IntPtr.Zero) {
-						errMsgPtr = dlerror();
-						if (errMsgPtr != IntPtr.Zero) {
-							errMsg = Marshal.PtrToStringAnsi(errMsgPtr);
-						}
-						throw new GnuTlsException("Could not find entry " + entryName + ", " + errMsg);
+				if (pFunc == IntPtr.Zero) {
+					errMsgPtr = dlerror();
+					if (errMsgPtr != IntPtr.Zero) {
+						errMsg = Marshal.PtrToStringAnsi(errMsgPtr);
 					}
-				}
-				else {
-					_ = SetErrorMode(ErrorModes.SEM_FAILCRITICALERRORS | ErrorModes.SEM_NOGPFAULTERRORBOX | ErrorModes.SEM_NOOPENFILEERRORBOX);
-					_ = GetLastError();
-					pFunc = GetProcAddress(dllPtr, entryName);
-
-					if (pFunc == IntPtr.Zero) {
-						uint err = (uint)Marshal.GetLastWin32Error();
-//						uint err = GetLastError();
-						if (err != 0) {
-							_ = FormatMessage(0x00001300, IntPtr.Zero, err, 0, ref errMsgPtr, 256, IntPtr.Zero);
-						}
-						if (errMsgPtr != IntPtr.Zero) {
-							errMsg = Marshal.PtrToStringAnsi(errMsgPtr).TrimEnd(Environment.NewLine.ToCharArray());
-						}
-						throw new GnuTlsException("Could not find entry " + entryName + ", (" + err + ") " + errMsg);
-					}
+					throw new GnuTlsException("Could not find entry " + entryName + ", " + errMsg);
 				}
 
 				if (exportIsValueType) {
@@ -141,57 +86,249 @@ namespace FluentFTP.GnuTLS.Core {
 					pFunc = (IntPtr)Marshal.PtrToStructure(pFunc, typeof(IntPtr));
 				}
 
-				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*LoadFunction (Found entry '" + entryName+ "')");
+				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*LoadFunction (Found entry '" + entryName + "')");
 
 				return Marshal.GetDelegateForFunctionPointer(pFunc, typeof(T));
 			}
 
-			public static void Free() {
+			public void Free() {
 				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Free (Unload .dll libraries");
 
 				IntPtr errMsgPtr = IntPtr.Zero;
 				string errMsg = string.Empty;
-				if (platformIsLinux) {
-					_ = dlerror();
-					int result = dlclose(dllPtr);
 
-					if (result != 1) {
-						errMsgPtr = dlerror();
-						if (errMsgPtr != IntPtr.Zero) {
-							errMsg = Marshal.PtrToStringAnsi(errMsgPtr);
-						}
-						throw new GnuTlsException("Could not free library, " + errMsg);
+				_ = dlerror();
+				int result = dlclose(dllPtr);
+
+				if (result != 1) {
+					errMsgPtr = dlerror();
+					if (errMsgPtr != IntPtr.Zero) {
+						errMsg = Marshal.PtrToStringAnsi(errMsgPtr);
 					}
+					throw new GnuTlsException("Could not free library, " + errMsg);
 				}
-				else {
-					_ = SetErrorMode(ErrorModes.SEM_FAILCRITICALERRORS | ErrorModes.SEM_NOGPFAULTERRORBOX | ErrorModes.SEM_NOOPENFILEERRORBOX);
-					_ = GetLastError();
-					bool result = FreeLibrary(dllPtr);
 
-					if (!result) {
-						uint err = (uint)Marshal.GetLastWin32Error();
-//						uint err = GetLastError();
-						if (err != 0) {
-							_ = FormatMessage(0x00001300, IntPtr.Zero, err, 0, ref errMsgPtr, 256, IntPtr.Zero);
-						}
-						if (errMsgPtr != IntPtr.Zero) {
-							errMsg = Marshal.PtrToStringAnsi(errMsgPtr).TrimEnd(Environment.NewLine.ToCharArray());
-						}
-						throw new GnuTlsException("Could not free library, (" + err + ") " + errMsg);
-					}
+				dllPtr = IntPtr.Zero;
 
-					dllPtr = IntPtr.Zero;
-
-					functionsAreLoaded = false;
-				}
+				functionsAreLoaded = false;
 			}
-			#endregion
+
+			public bool SetDllPath(string dllPath) {
+				return true;
+			}
 		}
 
+		private class FunctionLoaderMono : FunctionLoader {
+
+			[DllImport(dllNameMonoUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			private static extern IntPtr dlerror();
+			[DllImport(dllNameMonoUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			private static extern IntPtr dlopen([MarshalAs(UnmanagedType.LPStr)] string filename, int flags);
+			[DllImport(dllNameMonoUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			private static extern IntPtr dlsym(IntPtr handle, [MarshalAs(UnmanagedType.LPStr)] string symbol);
+			[DllImport(dllNameMonoUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			private static extern int dlclose(IntPtr handle);
+
+			public void Load(string dllPath, bool storePointer = true) {
+				IntPtr hModule;
+				IntPtr errMsgPtr = IntPtr.Zero;
+				string errMsg = string.Empty;
+
+				_ = dlerror();
+				hModule = dlopen(dllPath, 2);
+
+				if (hModule == IntPtr.Zero) {
+					errMsgPtr = dlerror();
+					if (errMsgPtr != IntPtr.Zero) {
+						errMsg = Marshal.PtrToStringAnsi(errMsgPtr);
+					}
+					throw new GnuTlsException("Could not load " + dllPath + ", " + errMsg);
+				}
+
+				if (storePointer) {
+					dllPtr = hModule;
+				}
+				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Loaded: " + dllPath + ")");
+			}
+
+			public Delegate LoadFunction<T>(string entryName, bool exportIsValueType = false) {
+				IntPtr pFunc;
+				IntPtr errMsgPtr = IntPtr.Zero;
+				string errMsg = string.Empty;
+
+				_ = dlerror();
+				pFunc = dlsym(dllPtr, entryName);
+
+				if (pFunc == IntPtr.Zero) {
+					errMsgPtr = dlerror();
+					if (errMsgPtr != IntPtr.Zero) {
+						errMsg = Marshal.PtrToStringAnsi(errMsgPtr);
+					}
+					throw new GnuTlsException("Could not find entry " + entryName + ", " + errMsg);
+				}
+
+				if (exportIsValueType) {
+					// If the entry point is exported as a value, DllImport would handle it incorrectly.
+					// It then needs an additional dereference to work correctly.
+					pFunc = (IntPtr)Marshal.PtrToStructure(pFunc, typeof(IntPtr));
+				}
+
+				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*LoadFunction (Found entry '" + entryName + "')");
+
+				return Marshal.GetDelegateForFunctionPointer(pFunc, typeof(T));
+			}
+
+			public void Free() {
+				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Free (Unload .dll libraries");
+
+				IntPtr errMsgPtr = IntPtr.Zero;
+				string errMsg = string.Empty;
+
+				_ = dlerror();
+				int result = dlclose(dllPtr);
+
+				if (result != 1) {
+					errMsgPtr = dlerror();
+					if (errMsgPtr != IntPtr.Zero) {
+						errMsg = Marshal.PtrToStringAnsi(errMsgPtr);
+					}
+					throw new GnuTlsException("Could not free library, " + errMsg);
+				}
+
+				dllPtr = IntPtr.Zero;
+
+				functionsAreLoaded = false;
+			}
+
+			public bool SetDllPath(string dllPath) {
+				return true;
+			}
+		}
+
+		private class FunctionLoaderWindows : FunctionLoader {
+
+			[System.Flags]
+			private enum ErrorModes : uint {
+				SYSTEM_DEFAULT = 0x0,
+				SEM_FAILCRITICALERRORS = 0x0001,
+				SEM_NOALIGNMENTFAULTEXCEPT = 0x0004,
+				SEM_NOGPFAULTERRORBOX = 0x0002,
+				SEM_NOOPENFILEERRORBOX = 0x8000
+			}
+
+			[DllImport(dllNameWindowsUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			private static extern ErrorModes SetErrorMode(ErrorModes uMode);
+			[DllImport(dllNameWindowsUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			private static extern bool SetDllDirectory([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
+			[DllImport(dllNameWindowsUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			private static extern uint GetLastError();
+			[DllImport(dllNameWindowsUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			private static extern int FormatMessage(uint dwFlags, IntPtr lpSource, uint dwMessageId, uint dwLanguageId, ref IntPtr lpBuffer, uint dwSize, IntPtr parms);
+			[DllImport(dllNameWindowsUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			private static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
+			[DllImport(dllNameWindowsUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			private static extern IntPtr GetProcAddress(IntPtr hModule, [MarshalAs(UnmanagedType.LPStr)] string lpProcName);
+			[DllImport(dllNameWindowsUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			[return: MarshalAs(UnmanagedType.Bool)]
+			private static extern bool FreeLibrary(IntPtr hModule);
+
+			public bool SetDllPath(string dllPath) {
+				return SetDllDirectory(dllPath);
+			}
+
+			public void Load(string dllPath, bool storePointer = true) {
+				IntPtr hModule;
+				IntPtr errMsgPtr = IntPtr.Zero;
+				string errMsg = string.Empty;
+
+				_ = SetErrorMode(ErrorModes.SEM_FAILCRITICALERRORS | ErrorModes.SEM_NOGPFAULTERRORBOX | ErrorModes.SEM_NOOPENFILEERRORBOX);
+				_ = GetLastError();
+				hModule = LoadLibrary(dllPath);
+
+				if (hModule == IntPtr.Zero) {
+					uint err = (uint)Marshal.GetLastWin32Error();
+					//						uint err = GetLastError();
+					if (err != 0) {
+						_ = FormatMessage(0x00001300, IntPtr.Zero, err, 0, ref errMsgPtr, 256, IntPtr.Zero);
+					}
+					if (errMsgPtr != IntPtr.Zero) {
+						errMsg = Marshal.PtrToStringAnsi(errMsgPtr).TrimEnd(Environment.NewLine.ToCharArray());
+					}
+					throw new GnuTlsException("Could not load " + dllPath + ", (" + err + ") " + errMsg);
+				}
+
+				if (storePointer) {
+					dllPtr = hModule;
+				}
+				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Loaded: " + dllPath + ")");
+			}
+
+			public Delegate LoadFunction<T>(string entryName, bool exportIsValueType = false) {
+				IntPtr pFunc;
+				IntPtr errMsgPtr = IntPtr.Zero;
+				string errMsg = string.Empty;
+
+				_ = SetErrorMode(ErrorModes.SEM_FAILCRITICALERRORS | ErrorModes.SEM_NOGPFAULTERRORBOX | ErrorModes.SEM_NOOPENFILEERRORBOX);
+				_ = GetLastError();
+				pFunc = GetProcAddress(dllPtr, entryName);
+
+				if (pFunc == IntPtr.Zero) {
+					uint err = (uint)Marshal.GetLastWin32Error();
+					//						uint err = GetLastError();
+					if (err != 0) {
+						_ = FormatMessage(0x00001300, IntPtr.Zero, err, 0, ref errMsgPtr, 256, IntPtr.Zero);
+					}
+					if (errMsgPtr != IntPtr.Zero) {
+						errMsg = Marshal.PtrToStringAnsi(errMsgPtr).TrimEnd(Environment.NewLine.ToCharArray());
+					}
+					throw new GnuTlsException("Could not find entry " + entryName + ", (" + err + ") " + errMsg);
+				}
+
+				if (exportIsValueType) {
+					// If the entry point is exported as a value, DllImport would handle it incorrectly.
+					// It then needs an additional dereference to work correctly.
+					pFunc = (IntPtr)Marshal.PtrToStructure(pFunc, typeof(IntPtr));
+				}
+
+				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*LoadFunction (Found entry '" + entryName + "')");
+
+				return Marshal.GetDelegateForFunctionPointer(pFunc, typeof(T));
+			}
+
+			public void Free() {
+				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Free (Unload .dll libraries");
+
+				IntPtr errMsgPtr = IntPtr.Zero;
+				string errMsg = string.Empty;
+
+				_ = SetErrorMode(ErrorModes.SEM_FAILCRITICALERRORS | ErrorModes.SEM_NOGPFAULTERRORBOX | ErrorModes.SEM_NOOPENFILEERRORBOX);
+				_ = GetLastError();
+				bool result = FreeLibrary(dllPtr);
+
+				if (!result) {
+					uint err = (uint)Marshal.GetLastWin32Error();
+					//						uint err = GetLastError();
+					if (err != 0) {
+						_ = FormatMessage(0x00001300, IntPtr.Zero, err, 0, ref errMsgPtr, 256, IntPtr.Zero);
+					}
+					if (errMsgPtr != IntPtr.Zero) {
+						errMsg = Marshal.PtrToStringAnsi(errMsgPtr).TrimEnd(Environment.NewLine.ToCharArray());
+					}
+					throw new GnuTlsException("Could not free library, (" + err + ") " + errMsg);
+				}
+
+				dllPtr = IntPtr.Zero;
+
+				functionsAreLoaded = false;
+			}
+		}
+
+		#endregion
+
 		static GnuTls() {
-
+			//
 			// Nothing needed here currently. Kept as a place holder in case ever needed
-
+			//
 		}
 
 		internal static void SetLoadLibraryDllNamePrefix(string pfx) {
@@ -201,46 +338,47 @@ namespace FluentFTP.GnuTLS.Core {
 		private static void LoadAllFunctions() {
 			if (functionsAreLoaded) return;
 
-			Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load.dll libraries)");
-
 			string useDllName;
 
-			// Determine the platform we are running under
+			FunctionLoader functionLoader;
 
-			#region Platform
-			PlatformID platformID = Environment.OSVersion.Platform;
-
-			if ((int)platformID == 4 || (int)platformID == 6 || (int)platformID == 128) {
-				platformIsLinux = true;
-				useDllName = @"libgnutls.so.30";
+			if (IsLinux) {
+				if (IsMono) {
+					useDllName = @"libgnutls";
+					functionLoader = new FunctionLoaderMono();
+					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for mono)");
+				}
+				else {
+					useDllName = @"libgnutls.so.30";
+					functionLoader = new FunctionLoaderLinux();
+					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for linux)");
+				}
 			}
 			else {
-				platformIsLinux = false;
 				useDllName = @"libgnutls-30.dll";
+				functionLoader = new FunctionLoaderWindows();
+				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for windows)");
 			}
-			#endregion
 
-			// Initialize the function loader
-
-			if (platformIsLinux || loadLibraryDllNamePrefix == string.Empty) {
-				FunctionLoader.Load(useDllName);
+			if (IsLinux || loadLibraryDllNamePrefix == string.Empty) {
+				functionLoader.Load(useDllName);
 			}
 			else {
 				if (loadLibraryDllNamePrefix == "ClickOnceSingleFile") {
 					string strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 					string strWorkPath = System.IO.Path.GetDirectoryName(strExeFilePath);
 					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Adding ClickOnce single file temp dir to search list)");
-					_ = FunctionLoader.SetDllPath(strWorkPath);
-					FunctionLoader.Load(useDllName);
+					_ = functionLoader.SetDllPath(strWorkPath);
+					functionLoader.Load(useDllName);
 				}
 				else {
 					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Using the given .dll name prefix)");
-					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgcc_s_seh-1.dll", false);
-					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libgmp-10.dll", false);
-					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libnettle-8.dll", false);
-					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libwinpthread-1.dll", false);
-					FunctionLoader.Load(loadLibraryDllNamePrefix + @"libhogweed-6.dll", false);
-					FunctionLoader.Load(loadLibraryDllNamePrefix + useDllName);
+					functionLoader.Load(loadLibraryDllNamePrefix + @"libgcc_s_seh-1.dll", false);
+					functionLoader.Load(loadLibraryDllNamePrefix + @"libgmp-10.dll", false);
+					functionLoader.Load(loadLibraryDllNamePrefix + @"libnettle-8.dll", false);
+					functionLoader.Load(loadLibraryDllNamePrefix + @"libwinpthread-1.dll", false);
+					functionLoader.Load(loadLibraryDllNamePrefix + @"libhogweed-6.dll", false);
+					functionLoader.Load(loadLibraryDllNamePrefix + useDllName);
 				}
 			}
 
@@ -249,62 +387,62 @@ namespace FluentFTP.GnuTLS.Core {
 			// gnutls_func_name_ is the delegate, gnutls_func_name_h is the handler.
 
 			#region Global
-			gnutls_check_version_h = (gnutls_check_version_)FunctionLoader.LoadFunction<gnutls_check_version_>(@"gnutls_check_version");
-			gnutls_global_set_log_function_h = (gnutls_global_set_log_function_)FunctionLoader.LoadFunction<gnutls_global_set_log_function_>(@"gnutls_global_set_log_function");
-			gnutls_global_set_log_level_h = (gnutls_global_set_log_level_)FunctionLoader.LoadFunction<gnutls_global_set_log_level_>(@"gnutls_global_set_log_level");
-			gnutls_global_init_h = (gnutls_global_init_)FunctionLoader.LoadFunction<gnutls_global_init_>(@"gnutls_global_init");
-			gnutls_global_deinit_h = (gnutls_global_deinit_)FunctionLoader.LoadFunction<gnutls_global_deinit_>(@"gnutls_global_deinit");
+			gnutls_check_version_h = (gnutls_check_version_)functionLoader.LoadFunction<gnutls_check_version_>(@"gnutls_check_version");
+			gnutls_global_set_log_function_h = (gnutls_global_set_log_function_)functionLoader.LoadFunction<gnutls_global_set_log_function_>(@"gnutls_global_set_log_function");
+			gnutls_global_set_log_level_h = (gnutls_global_set_log_level_)functionLoader.LoadFunction<gnutls_global_set_log_level_>(@"gnutls_global_set_log_level");
+			gnutls_global_init_h = (gnutls_global_init_)functionLoader.LoadFunction<gnutls_global_init_>(@"gnutls_global_init");
+			gnutls_global_deinit_h = (gnutls_global_deinit_)functionLoader.LoadFunction<gnutls_global_deinit_>(@"gnutls_global_deinit");
 			// gnutls_free is (for reasons beyond my comprehension) exported from libgnutls marked as a value, not an entry point.
-			gnutls_free_h = (gnutls_free_)FunctionLoader.LoadFunction<gnutls_free_>(@"gnutls_free", true);
+			gnutls_free_h = (gnutls_free_)functionLoader.LoadFunction<gnutls_free_>(@"gnutls_free", true);
 			#endregion
 
 			#region Session
-			gnutls_init_h = (gnutls_init_)FunctionLoader.LoadFunction<gnutls_init_>(@"gnutls_init");
-			gnutls_deinit_h = (gnutls_deinit_)FunctionLoader.LoadFunction<gnutls_deinit_>(@"gnutls_deinit");
-			gnutls_db_set_cache_expiration_h = (gnutls_db_set_cache_expiration_)FunctionLoader.LoadFunction<gnutls_db_set_cache_expiration_>(@"gnutls_db_set_cache_expiration");
-			gnutls_session_get_desc_h = (gnutls_session_get_desc_)FunctionLoader.LoadFunction<gnutls_session_get_desc_>(@"gnutls_session_get_desc");
-			gnutls_protocol_get_name_h = (gnutls_protocol_get_name_)FunctionLoader.LoadFunction<gnutls_protocol_get_name_>(@"gnutls_protocol_get_name");
-			gnutls_protocol_get_version_h = (gnutls_protocol_get_version_)FunctionLoader.LoadFunction<gnutls_protocol_get_version_>(@"gnutls_protocol_get_version");
-			gnutls_record_get_max_size_h = (gnutls_record_get_max_size_)FunctionLoader.LoadFunction<gnutls_record_get_max_size_>(@"gnutls_record_get_max_size");
-			gnutls_alert_get_h = (gnutls_alert_get_)FunctionLoader.LoadFunction<gnutls_alert_get_>(@"gnutls_alert_get");
-			gnutls_alert_get_name_h = (gnutls_alert_get_name_)FunctionLoader.LoadFunction<gnutls_alert_get_name_>(@"gnutls_alert_get_name");
-			gnutls_error_is_fatal_h = (gnutls_error_is_fatal_)FunctionLoader.LoadFunction<gnutls_error_is_fatal_>(@"gnutls_error_is_fatal");
-			gnutls_handshake_h = (gnutls_handshake_)FunctionLoader.LoadFunction<gnutls_handshake_>(@"gnutls_handshake");
-			gnutls_handshake_set_hook_function_h = (gnutls_handshake_set_hook_function_)FunctionLoader.LoadFunction<gnutls_handshake_set_hook_function_>(@"gnutls_handshake_set_hook_function");
-			gnutls_bye_h = (gnutls_bye_)FunctionLoader.LoadFunction<gnutls_bye_>(@"gnutls_bye");
-			gnutls_handshake_set_timeout_h = (gnutls_handshake_set_timeout_)FunctionLoader.LoadFunction<gnutls_handshake_set_timeout_>(@"gnutls_handshake_set_timeout");
-			gnutls_record_check_pending_h = (gnutls_record_check_pending_)FunctionLoader.LoadFunction<gnutls_record_check_pending_>(@"gnutls_record_check_pending");
-			gnutls_set_default_priority_h = (gnutls_set_default_priority_)FunctionLoader.LoadFunction<gnutls_set_default_priority_>(@"gnutls_set_default_priority");
-			gnutls_priority_set_direct_h = (gnutls_priority_set_direct_)FunctionLoader.LoadFunction<gnutls_priority_set_direct_>(@"gnutls_priority_set_direct");
-			gnutls_set_default_priority_append_h = (gnutls_set_default_priority_append_)FunctionLoader.LoadFunction<gnutls_set_default_priority_append_>(@"gnutls_set_default_priority_append");
-			gnutls_dh_set_prime_bits_h = (gnutls_dh_set_prime_bits_)FunctionLoader.LoadFunction<gnutls_dh_set_prime_bits_>(@"gnutls_dh_set_prime_bits");
-			gnutls_transport_set_ptr_h = (gnutls_transport_set_ptr_)FunctionLoader.LoadFunction<gnutls_transport_set_ptr_>(@"gnutls_transport_set_ptr");
-			gnutls_record_recv_h = (gnutls_record_recv_)FunctionLoader.LoadFunction<gnutls_record_recv_>(@"gnutls_record_recv");
-			gnutls_record_send_h = (gnutls_record_send_)FunctionLoader.LoadFunction<gnutls_record_send_>(@"gnutls_record_send");
-			gnutls_session_is_resumed_h = (gnutls_session_is_resumed_)FunctionLoader.LoadFunction<gnutls_session_is_resumed_>(@"gnutls_session_is_resumed");
-			gnutls_session_get_data2_h = (gnutls_session_get_data2_)FunctionLoader.LoadFunction<gnutls_session_get_data2_>(@"gnutls_session_get_data2");
-			gnutls_session_set_data_h = (gnutls_session_set_data_)FunctionLoader.LoadFunction<gnutls_session_set_data_>(@"gnutls_session_set_data");
-			gnutls_session_get_flags_h = (gnutls_session_get_flags_)FunctionLoader.LoadFunction<gnutls_session_get_flags_>(@"gnutls_session_get_flags");
-			gnutls_alpn_set_protocols_h = (gnutls_alpn_set_protocols_)FunctionLoader.LoadFunction<gnutls_alpn_set_protocols_>(@"gnutls_alpn_set_protocols");
-			gnutls_alpn_get_selected_protocol_h = (gnutls_alpn_get_selected_protocol_)FunctionLoader.LoadFunction<gnutls_alpn_get_selected_protocol_>(@"gnutls_alpn_get_selected_protocol");
+			gnutls_init_h = (gnutls_init_)functionLoader.LoadFunction<gnutls_init_>(@"gnutls_init");
+			gnutls_deinit_h = (gnutls_deinit_)functionLoader.LoadFunction<gnutls_deinit_>(@"gnutls_deinit");
+			gnutls_db_set_cache_expiration_h = (gnutls_db_set_cache_expiration_)functionLoader.LoadFunction<gnutls_db_set_cache_expiration_>(@"gnutls_db_set_cache_expiration");
+			gnutls_session_get_desc_h = (gnutls_session_get_desc_)functionLoader.LoadFunction<gnutls_session_get_desc_>(@"gnutls_session_get_desc");
+			gnutls_protocol_get_name_h = (gnutls_protocol_get_name_)functionLoader.LoadFunction<gnutls_protocol_get_name_>(@"gnutls_protocol_get_name");
+			gnutls_protocol_get_version_h = (gnutls_protocol_get_version_)functionLoader.LoadFunction<gnutls_protocol_get_version_>(@"gnutls_protocol_get_version");
+			gnutls_record_get_max_size_h = (gnutls_record_get_max_size_)functionLoader.LoadFunction<gnutls_record_get_max_size_>(@"gnutls_record_get_max_size");
+			gnutls_alert_get_h = (gnutls_alert_get_)functionLoader.LoadFunction<gnutls_alert_get_>(@"gnutls_alert_get");
+			gnutls_alert_get_name_h = (gnutls_alert_get_name_)functionLoader.LoadFunction<gnutls_alert_get_name_>(@"gnutls_alert_get_name");
+			gnutls_error_is_fatal_h = (gnutls_error_is_fatal_)functionLoader.LoadFunction<gnutls_error_is_fatal_>(@"gnutls_error_is_fatal");
+			gnutls_handshake_h = (gnutls_handshake_)functionLoader.LoadFunction<gnutls_handshake_>(@"gnutls_handshake");
+			gnutls_handshake_set_hook_function_h = (gnutls_handshake_set_hook_function_)functionLoader.LoadFunction<gnutls_handshake_set_hook_function_>(@"gnutls_handshake_set_hook_function");
+			gnutls_bye_h = (gnutls_bye_)functionLoader.LoadFunction<gnutls_bye_>(@"gnutls_bye");
+			gnutls_handshake_set_timeout_h = (gnutls_handshake_set_timeout_)functionLoader.LoadFunction<gnutls_handshake_set_timeout_>(@"gnutls_handshake_set_timeout");
+			gnutls_record_check_pending_h = (gnutls_record_check_pending_)functionLoader.LoadFunction<gnutls_record_check_pending_>(@"gnutls_record_check_pending");
+			gnutls_set_default_priority_h = (gnutls_set_default_priority_)functionLoader.LoadFunction<gnutls_set_default_priority_>(@"gnutls_set_default_priority");
+			gnutls_priority_set_direct_h = (gnutls_priority_set_direct_)functionLoader.LoadFunction<gnutls_priority_set_direct_>(@"gnutls_priority_set_direct");
+			gnutls_set_default_priority_append_h = (gnutls_set_default_priority_append_)functionLoader.LoadFunction<gnutls_set_default_priority_append_>(@"gnutls_set_default_priority_append");
+			gnutls_dh_set_prime_bits_h = (gnutls_dh_set_prime_bits_)functionLoader.LoadFunction<gnutls_dh_set_prime_bits_>(@"gnutls_dh_set_prime_bits");
+			gnutls_transport_set_ptr_h = (gnutls_transport_set_ptr_)functionLoader.LoadFunction<gnutls_transport_set_ptr_>(@"gnutls_transport_set_ptr");
+			gnutls_record_recv_h = (gnutls_record_recv_)functionLoader.LoadFunction<gnutls_record_recv_>(@"gnutls_record_recv");
+			gnutls_record_send_h = (gnutls_record_send_)functionLoader.LoadFunction<gnutls_record_send_>(@"gnutls_record_send");
+			gnutls_session_is_resumed_h = (gnutls_session_is_resumed_)functionLoader.LoadFunction<gnutls_session_is_resumed_>(@"gnutls_session_is_resumed");
+			gnutls_session_get_data2_h = (gnutls_session_get_data2_)functionLoader.LoadFunction<gnutls_session_get_data2_>(@"gnutls_session_get_data2");
+			gnutls_session_set_data_h = (gnutls_session_set_data_)functionLoader.LoadFunction<gnutls_session_set_data_>(@"gnutls_session_set_data");
+			gnutls_session_get_flags_h = (gnutls_session_get_flags_)functionLoader.LoadFunction<gnutls_session_get_flags_>(@"gnutls_session_get_flags");
+			gnutls_alpn_set_protocols_h = (gnutls_alpn_set_protocols_)functionLoader.LoadFunction<gnutls_alpn_set_protocols_>(@"gnutls_alpn_set_protocols");
+			gnutls_alpn_get_selected_protocol_h = (gnutls_alpn_get_selected_protocol_)functionLoader.LoadFunction<gnutls_alpn_get_selected_protocol_>(@"gnutls_alpn_get_selected_protocol");
 			#endregion
 
 			#region Credentials
-			gnutls_certificate_allocate_credentials_h = (gnutls_certificate_allocate_credentials_)FunctionLoader.LoadFunction<gnutls_certificate_allocate_credentials_>(@"gnutls_certificate_allocate_credentials");
-			gnutls_certificate_free_credentials_h = (gnutls_certificate_free_credentials_)FunctionLoader.LoadFunction<gnutls_certificate_free_credentials_>(@"gnutls_certificate_free_credentials");
-			gnutls_credentials_set_h = (gnutls_credentials_set_)FunctionLoader.LoadFunction<gnutls_credentials_set_>(@"gnutls_credentials_set");
-			gnutls_certificate_client_get_request_status_h = (gnutls_certificate_client_get_request_status_)FunctionLoader.LoadFunction<gnutls_certificate_client_get_request_status_>(@"gnutls_certificate_client_get_request_status");
-			gnutls_certificate_verify_peers3_h = (gnutls_certificate_verify_peers3_)FunctionLoader.LoadFunction<gnutls_certificate_verify_peers3_>(@"gnutls_certificate_verify_peers3");
-			gnutls_certificate_type_get2_h = (gnutls_certificate_type_get2_)FunctionLoader.LoadFunction<gnutls_certificate_type_get2_>(@"gnutls_certificate_type_get2");
-			gnutls_certificate_get_peers_h = (gnutls_certificate_get_peers_)FunctionLoader.LoadFunction<gnutls_certificate_get_peers_>(@"gnutls_certificate_get_peers");
-			gnutls_certificate_set_x509_system_trust_h = (gnutls_certificate_set_x509_system_trust_)FunctionLoader.LoadFunction<gnutls_certificate_set_x509_system_trust_>(@"gnutls_certificate_set_x509_system_trust");
-			gnutls_certificate_set_x509_key_mem2_h = (gnutls_certificate_set_x509_key_mem2_)FunctionLoader.LoadFunction<gnutls_certificate_set_x509_key_mem2_>(@"gnutls_certificate_set_x509_key_mem2");
-			gnutls_x509_crt_init_h = (gnutls_x509_crt_init_)FunctionLoader.LoadFunction<gnutls_x509_crt_init_>(@"gnutls_x509_crt_init");
-			gnutls_x509_crt_deinit_h = (gnutls_x509_crt_deinit_)FunctionLoader.LoadFunction<gnutls_x509_crt_deinit_>(@"gnutls_x509_crt_deinit");
-			gnutls_x509_crt_import_h = (gnutls_x509_crt_import_)FunctionLoader.LoadFunction<gnutls_x509_crt_import_>(@"gnutls_x509_crt_import");
-			gnutls_x509_crt_print_h = (gnutls_x509_crt_print_)FunctionLoader.LoadFunction<gnutls_x509_crt_print_>(@"gnutls_x509_crt_print");
-			gnutls_x509_crt_export2_h = (gnutls_x509_crt_export2_)FunctionLoader.LoadFunction<gnutls_x509_crt_export2_>(@"gnutls_x509_crt_export2");
-			gnutls_pcert_import_rawpk_raw_h = (gnutls_pcert_import_rawpk_raw_)FunctionLoader.LoadFunction<gnutls_pcert_import_rawpk_raw_>(@"gnutls_pcert_import_rawpk_raw");
+			gnutls_certificate_allocate_credentials_h = (gnutls_certificate_allocate_credentials_)functionLoader.LoadFunction<gnutls_certificate_allocate_credentials_>(@"gnutls_certificate_allocate_credentials");
+			gnutls_certificate_free_credentials_h = (gnutls_certificate_free_credentials_)functionLoader.LoadFunction<gnutls_certificate_free_credentials_>(@"gnutls_certificate_free_credentials");
+			gnutls_credentials_set_h = (gnutls_credentials_set_)functionLoader.LoadFunction<gnutls_credentials_set_>(@"gnutls_credentials_set");
+			gnutls_certificate_client_get_request_status_h = (gnutls_certificate_client_get_request_status_)functionLoader.LoadFunction<gnutls_certificate_client_get_request_status_>(@"gnutls_certificate_client_get_request_status");
+			gnutls_certificate_verify_peers3_h = (gnutls_certificate_verify_peers3_)functionLoader.LoadFunction<gnutls_certificate_verify_peers3_>(@"gnutls_certificate_verify_peers3");
+			gnutls_certificate_type_get2_h = (gnutls_certificate_type_get2_)functionLoader.LoadFunction<gnutls_certificate_type_get2_>(@"gnutls_certificate_type_get2");
+			gnutls_certificate_get_peers_h = (gnutls_certificate_get_peers_)functionLoader.LoadFunction<gnutls_certificate_get_peers_>(@"gnutls_certificate_get_peers");
+			gnutls_certificate_set_x509_system_trust_h = (gnutls_certificate_set_x509_system_trust_)functionLoader.LoadFunction<gnutls_certificate_set_x509_system_trust_>(@"gnutls_certificate_set_x509_system_trust");
+			gnutls_certificate_set_x509_key_mem2_h = (gnutls_certificate_set_x509_key_mem2_)functionLoader.LoadFunction<gnutls_certificate_set_x509_key_mem2_>(@"gnutls_certificate_set_x509_key_mem2");
+			gnutls_x509_crt_init_h = (gnutls_x509_crt_init_)functionLoader.LoadFunction<gnutls_x509_crt_init_>(@"gnutls_x509_crt_init");
+			gnutls_x509_crt_deinit_h = (gnutls_x509_crt_deinit_)functionLoader.LoadFunction<gnutls_x509_crt_deinit_>(@"gnutls_x509_crt_deinit");
+			gnutls_x509_crt_import_h = (gnutls_x509_crt_import_)functionLoader.LoadFunction<gnutls_x509_crt_import_>(@"gnutls_x509_crt_import");
+			gnutls_x509_crt_print_h = (gnutls_x509_crt_print_)functionLoader.LoadFunction<gnutls_x509_crt_print_>(@"gnutls_x509_crt_print");
+			gnutls_x509_crt_export2_h = (gnutls_x509_crt_export2_)functionLoader.LoadFunction<gnutls_x509_crt_export2_>(@"gnutls_x509_crt_export2");
+			gnutls_pcert_import_rawpk_raw_h = (gnutls_pcert_import_rawpk_raw_)functionLoader.LoadFunction<gnutls_pcert_import_rawpk_raw_>(@"gnutls_pcert_import_rawpk_raw");
 			#endregion
 
 			functionsAreLoaded = true;
