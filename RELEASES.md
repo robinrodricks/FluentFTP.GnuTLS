@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.38-beta
+  - Detection of Mono
+
 #### 1.0.37
   - No Logging of GnuTlsErrorIsFatal(...)
 
