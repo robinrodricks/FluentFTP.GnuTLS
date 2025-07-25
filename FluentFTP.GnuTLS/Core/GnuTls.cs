@@ -338,8 +338,6 @@ namespace FluentFTP.GnuTLS.Core {
 		private static void LoadAllFunctions() {
 			if (functionsAreLoaded) return;
 
-			Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load.dll libraries)");
-
 			string useDllName;
 
 			FunctionLoader functionLoader;
@@ -348,15 +346,18 @@ namespace FluentFTP.GnuTLS.Core {
 				if (IsMono) {
 					useDllName = @"libgnutls";
 					functionLoader = new FunctionLoaderMono();
+					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for mono)");
 				}
 				else {
 					useDllName = @"libgnutls.so.30";
 					functionLoader = new FunctionLoaderLinux();
+					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for linux)");
 				}
 			}
 			else {
 				useDllName = @"libgnutls-30.dll";
 				functionLoader = new FunctionLoaderWindows();
+				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for windows)");
 			}
 
 			if (IsLinux || loadLibraryDllNamePrefix == string.Empty) {
