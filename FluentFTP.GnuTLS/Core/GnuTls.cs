@@ -17,14 +17,14 @@ namespace FluentFTP.GnuTLS.Core {
 		public static string loadLibraryDllNamePrefix = string.Empty;
 
 		#region FunctionLoader
-		private const string dllNameLinUtil = @"libdl.so.2";
-		private const string dllNameMonUtil = @"libdl";
-		private const string dllNameWinUtil = @"Kernel32.dll";
+		private const string dllNameLinuxUtil = @"libdl.so.2";
+		private const string dllNameMonoUtil = @"libdl";
+		private const string dllNameWindowsUtil = @"Kernel32.dll";
 
 		private static IntPtr dllPtr = IntPtr.Zero;
 		private static bool functionsAreLoaded = false;
 
-		interface FunctionLoader {
+		private interface FunctionLoader {
 			void Load(string dllPath, bool storePointer = true);
 			Delegate LoadFunction<T>(string entryName, bool exportIsValueType = false);
 			void Free();
@@ -33,13 +33,13 @@ namespace FluentFTP.GnuTLS.Core {
 
 		private class FunctionLoaderLinux : FunctionLoader {
 
-			[DllImport(dllNameLinUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			[DllImport(dllNameLinuxUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern IntPtr dlerror();
-			[DllImport(dllNameLinUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			[DllImport(dllNameLinuxUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern IntPtr dlopen([MarshalAs(UnmanagedType.LPStr)] string filename, int flags);
-			[DllImport(dllNameLinUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			[DllImport(dllNameLinuxUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern IntPtr dlsym(IntPtr handle, [MarshalAs(UnmanagedType.LPStr)] string symbol);
-			[DllImport(dllNameLinUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			[DllImport(dllNameLinuxUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern int dlclose(IntPtr handle);
 
 			public void Load(string dllPath, bool storePointer = true) {
@@ -120,13 +120,13 @@ namespace FluentFTP.GnuTLS.Core {
 
 		private class FunctionLoaderMono : FunctionLoader {
 
-			[DllImport(dllNameMonUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			[DllImport(dllNameMonoUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern IntPtr dlerror();
-			[DllImport(dllNameMonUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			[DllImport(dllNameMonoUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern IntPtr dlopen([MarshalAs(UnmanagedType.LPStr)] string filename, int flags);
-			[DllImport(dllNameMonUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			[DllImport(dllNameMonoUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern IntPtr dlsym(IntPtr handle, [MarshalAs(UnmanagedType.LPStr)] string symbol);
-			[DllImport(dllNameMonUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+			[DllImport(dllNameMonoUtil, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
 			private static extern int dlclose(IntPtr handle);
 
 			public void Load(string dllPath, bool storePointer = true) {
@@ -216,19 +216,19 @@ namespace FluentFTP.GnuTLS.Core {
 				SEM_NOOPENFILEERRORBOX = 0x8000
 			}
 
-			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			[DllImport(dllNameWindowsUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
 			private static extern ErrorModes SetErrorMode(ErrorModes uMode);
-			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			[DllImport(dllNameWindowsUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
 			private static extern bool SetDllDirectory([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
-			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			[DllImport(dllNameWindowsUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
 			private static extern uint GetLastError();
-			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			[DllImport(dllNameWindowsUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
 			private static extern int FormatMessage(uint dwFlags, IntPtr lpSource, uint dwMessageId, uint dwLanguageId, ref IntPtr lpBuffer, uint dwSize, IntPtr parms);
-			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			[DllImport(dllNameWindowsUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
 			private static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
-			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			[DllImport(dllNameWindowsUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
 			private static extern IntPtr GetProcAddress(IntPtr hModule, [MarshalAs(UnmanagedType.LPStr)] string lpProcName);
-			[DllImport(dllNameWinUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+			[DllImport(dllNameWindowsUtil, CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
 			[return: MarshalAs(UnmanagedType.Bool)]
 			private static extern bool FreeLibrary(IntPtr hModule);
 
@@ -326,9 +326,9 @@ namespace FluentFTP.GnuTLS.Core {
 		#endregion
 
 		static GnuTls() {
-
+			//
 			// Nothing needed here currently. Kept as a place holder in case ever needed
-
+			//
 		}
 
 		internal static void SetLoadLibraryDllNamePrefix(string pfx) {
@@ -341,8 +341,6 @@ namespace FluentFTP.GnuTLS.Core {
 			Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load.dll libraries)");
 
 			string useDllName;
-
-			// Initialize the function loader
 
 			FunctionLoader functionLoader;
 
