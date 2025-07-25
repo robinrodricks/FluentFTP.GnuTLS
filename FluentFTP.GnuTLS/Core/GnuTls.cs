@@ -65,6 +65,7 @@ namespace FluentFTP.GnuTLS.Core {
 				IntPtr hModule;
 				IntPtr errMsgPtr = IntPtr.Zero;
 				string errMsg = string.Empty;
+
 				if (platformIsLinux) {
 					_ = dlerror();
 					hModule = dlopen(dllPath, 2);
@@ -94,6 +95,7 @@ namespace FluentFTP.GnuTLS.Core {
 						throw new GnuTlsException("Could not load " + dllPath + ", (" + err + ") " + errMsg);
 					}
 				}
+
 				if (storePointer) {
 					dllPtr = hModule;
 				}
@@ -151,6 +153,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 				IntPtr errMsgPtr = IntPtr.Zero;
 				string errMsg = string.Empty;
+
 				if (platformIsLinux) {
 					_ = dlerror();
 					int result = dlclose(dllPtr);
@@ -185,8 +188,8 @@ namespace FluentFTP.GnuTLS.Core {
 					functionsAreLoaded = false;
 				}
 			}
-			#endregion
 		}
+		#endregion
 
 		static GnuTls() {
 
