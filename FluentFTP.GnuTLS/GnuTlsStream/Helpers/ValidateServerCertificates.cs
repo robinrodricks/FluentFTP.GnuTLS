@@ -60,7 +60,7 @@ namespace FluentFTP.GnuTLS {
 
 				case CertificateTypeT.GNUTLS_CRT_RAWPK:
 
-					// Extract Raw Publick Key "certificate(s)"
+					// Extract Raw Public Key "certificate(s)"
 					GetCertInfoRAWPK();
 
 					break;
@@ -72,7 +72,7 @@ namespace FluentFTP.GnuTLS {
 
 			//
 			// TODO: **** DONE
-			// Convert the servers certificate, which is available now a PEM format in
+			// Convert the servers certificate, which is available now in a PEM format in
 			// a string, to the .NET certificate type. This is then passed to the callback
 			// in the same format as it is in the SslStream validation callback, for coding
 			// compatibility.
