@@ -99,20 +99,20 @@ namespace FluentFTP.GnuTLS.Core {
 			switch (type) {
 				case RepeatType.Read:
 					return result == (int)EC.en.GNUTLS_E_AGAIN ||
-								   result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-								   result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+						   result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+						   result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
 						   result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED;
 
 				case RepeatType.Write:
 					return result == (int)EC.en.GNUTLS_E_AGAIN ||
-									result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-									result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+				           result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+						   result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
 						   result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED;
 
 				case RepeatType.Handshake:
 					return result == (int)EC.en.GNUTLS_E_AGAIN ||
-										result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-										result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+						   result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+						   result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
 					       result == (int)EC.en.GNUTLS_E_GOT_APPLICATION_DATA;
 
 				case RepeatType.Bye:
