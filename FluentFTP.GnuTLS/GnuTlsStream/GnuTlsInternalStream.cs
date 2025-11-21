@@ -22,7 +22,7 @@ namespace FluentFTP.GnuTLS {
 		public string CipherSuite { get; private set; } = "None";
 		public string? AlpnProtocol { get; private set; } = null;
 		public SslProtocols SslProtocol { get; private set; } = SslProtocols.None;
-		public int MaxRecordSize { get; private set; } = 8192;
+		public int MaxRecordSize { get; private set; } = DefaultMaxRecordSize;
 
 		public bool IsResumed { get; private set; } = false;
 		public bool IsSessionUsable { get; private set; } = false;
@@ -82,6 +82,14 @@ namespace FluentFTP.GnuTLS {
 		// GnuTlsStream and ALL streams resumed from it
 		// One for all of these, therefore static
 		private CertificateCredentials cred;
+
+		//
+		// Constants
+		//
+
+		private const int DefaultMaxRecordSize = 8192;
+		private const int LogRepeatInterval = 100;
+		private const int MaxInitialRepeats = 2;
 
 		//
 		// Constructor
@@ -257,7 +265,7 @@ namespace FluentFTP.GnuTLS {
 				if (needRepeat) {
 					repeatCount++;
 
-					if (repeatCount <= 2 || repeatCount % 100 == 0) {
+					if (repeatCount <= MaxInitialRepeats || repeatCount % LogRepeatInterval == 0) {
 						Logging.LogGnuFunc(gnm, "*GnuTlsRecordRecv(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
 					}
 
@@ -331,7 +339,7 @@ namespace FluentFTP.GnuTLS {
 					if (needRepeat) {
 						repeatCount++;
 
-						if (repeatCount <= 2 || repeatCount % 100 == 0) {
+						if (repeatCount <= MaxInitialRepeats || repeatCount % LogRepeatInterval == 0) {
 							Logging.LogGnuFunc(gnm, "*GnuTlsRecordSend(...) repeat due to " + Enum.GetName(typeof(EC.en), result));
 						}
 
