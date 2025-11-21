@@ -6,17 +6,38 @@ using System.Runtime.CompilerServices;
 namespace FluentFTP.GnuTLS.Core {
 	internal static class GnuUtils {
 
+		/// <summary>
+		/// Gets a formatted string representing the current method name.
+		/// </summary>
+		/// <param name="memberName">The caller member name (auto-populated).</param>
+		/// <returns>A string in the format "*MethodName(...)".</returns>
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		public static string GetCurrentMethod([CallerMemberName] string memberName = "") {
-			return "*" + memberName + "(...)";
+			return $"*{memberName}(...)";
 		}
 
+		/// <summary>
+		/// Checks the result of a GnuTLS operation and throws an exception if it's an error.
+		/// </summary>
+		/// <param name="methodName">The name of the method that produced the result.</param>
+		/// <param name="result">The result code from the GnuTLS operation.</param>
+		/// <param name="resultsAllowed">Optional allowed error codes that should not throw.</param>
+		/// <returns>The result if valid or allowed.</returns>
+		/// <exception cref="GnuTlsException">Thrown if the result indicates an error.</exception>
 		public static int Check(string methodName, int result, params int[] resultsAllowed) {
 			return Check(methodName, result, true, resultsAllowed);
 		}
 
+		/// <summary>
+		/// Checks the result of a GnuTLS operation and throws an exception if it's an error, with optional debug logging.
+		/// </summary>
+		/// <param name="methodName">The name of the method that produced the result.</param>
+		/// <param name="result">The result code from the GnuTLS operation.</param>
+		/// <param name="debugLog">Whether to include debug logs in the exception.</param>
+		/// <param name="resultsAllowed">Optional allowed error codes that should not throw.</param>
+		/// <returns>The result if valid or allowed.</returns>
+		/// <exception cref="GnuTlsException">Thrown if the result indicates an error.</exception>
 		public static int Check(string methodName, int result, bool debugLog, params int[] resultsAllowed) {
-
 			if (result >= 0) {
 				return result;
 			}
@@ -25,13 +46,14 @@ namespace FluentFTP.GnuTLS.Core {
 				return result;
 			}
 
-			// Consider also checking GnuTls.GnuTlsErrorIsFatal(result)
+			// Check if the error is fatal (if available)
+			if (GnuTls.GnuTlsErrorIsFatal(result)) {
+				// Handle fatal errors differently if needed (e.g., log or escalate)
+			}
 
 			GnuTlsException ex;
-
 			string errTxt = GnuTlsErrorText(result);
-
-			ex = new GnuTlsException("Error   : " + methodName + " failed: (" + result + ") " + errTxt);
+			ex = new GnuTlsException($"Error   : {methodName} failed: ({result}) {errTxt}");
 			ex.ExMethod = methodName;
 			ex.ExResult = result;
 			ex.ExMeaning = errTxt;
@@ -39,10 +61,10 @@ namespace FluentFTP.GnuTLS.Core {
 			Logging.LogNoQueue(ex.Message);
 
 			if (debugLog) {
-				Logging.LogNoQueue("Debug   : Last " + Logging.logQueueMaxSize + " GnuTLS buffered debug messages follow:");
+				Logging.LogNoQueue($"Debug   : Last {Logging.logQueueMaxSize} GnuTLS buffered debug messages follow:");
 
 				foreach (string s in Logging.logQueue) {
-					Logging.LogNoQueue("Debug   : " + s);
+					Logging.LogNoQueue($"Debug   : {s}");
 				}
 
 				Logging.LogNoQueue("Debug   : End of buffered debug messages");
@@ -51,9 +73,13 @@ namespace FluentFTP.GnuTLS.Core {
 			throw ex;
 		}
 
+		/// <summary>
+		/// Gets the human-readable text for a GnuTLS error code.
+		/// </summary>
+		/// <param name="errorCode">The error code.</param>
+		/// <returns>The error text, or "Unknown error" if not found.</returns>
 		public static string GnuTlsErrorText(int errorCode) {
-			if (!EC.ec.TryGetValue(errorCode, out string errText)) errText = "Unknown error";
-			return errText;
+			return EC.ec.TryGetValue(errorCode, out string errText) ? errText : "Unknown error";
 		}
 
 		public enum RepeatType {
@@ -63,24 +89,30 @@ namespace FluentFTP.GnuTLS.Core {
 			Bye,
 		}
 
+		/// <summary>
+		/// Determines if a GnuTLS operation needs to be repeated based on the result.
+		/// </summary>
+		/// <param name="type">The type of operation.</param>
+		/// <param name="result">The result code.</param>
+		/// <returns>True if the operation should be repeated.</returns>
 		public static bool NeedRepeat(RepeatType type, int result) {
 			switch (type) {
 				case RepeatType.Read:
 					return result == (int)EC.en.GNUTLS_E_AGAIN ||
-						   result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-						   result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+								   result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+								   result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
 						   result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED;
 
 				case RepeatType.Write:
 					return result == (int)EC.en.GNUTLS_E_AGAIN ||
-						   result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-						   result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+									result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+									result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
 						   result == (int)EC.en.GNUTLS_E_FATAL_ALERT_RECEIVED;
 
 				case RepeatType.Handshake:
 					return result == (int)EC.en.GNUTLS_E_AGAIN ||
-						   result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
-					       result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
+										result == (int)EC.en.GNUTLS_E_INTERRUPTED ||
+										result == (int)EC.en.GNUTLS_E_WARNING_ALERT_RECEIVED ||
 					       result == (int)EC.en.GNUTLS_E_GOT_APPLICATION_DATA;
 
 				case RepeatType.Bye:
@@ -90,10 +122,18 @@ namespace FluentFTP.GnuTLS.Core {
 			return false;
 		}
 
+		/// <summary>
+		/// Gets the version of the current library assembly.
+		/// </summary>
+		/// <returns>The assembly version as a string.</returns>
 		public static string GetLibVersion() {
 			return Assembly.GetAssembly(MethodBase.GetCurrentMethod().DeclaringType).GetName().Version.ToString();
 		}
 
+		/// <summary>
+		/// Gets the target framework moniker (TFM) for the current build.
+		/// </summary>
+		/// <returns>The TFM description.</returns>
 		public static string GetLibTarget() {
 			// Return the library target version chosen by the build process of
 			// the user of this library, useful when multitargeted Nuget package
