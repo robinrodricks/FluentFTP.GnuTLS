@@ -1,7 +1,10 @@
 # Release Notes
 
-#### 1.0.38-beta
-  - Detection of Mono
+#### 1.0.38
+    This release now works for Windows, Linux, Mono and MacOS (OSX)
+  - Detection of Mono, fix lib path
+  - MacOS (OSX), fix lib path
+  - Support for FTP CCC command - fall back to plain text
 
 #### 1.0.37
   - No Logging of GnuTlsErrorIsFatal(...)
