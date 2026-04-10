@@ -13,12 +13,19 @@ namespace FluentFTP.GnuTLS.Core {
 		}
 
 		public void Dispose() {
-			if (ptr != IntPtr.Zero) {
-				string gcm = GnuUtils.GetCurrentMethod() + ":Session";
-				Logging.LogGnuFunc(gcm);
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
-				GnuTls.GnuTlsDeinit(ptr);
-				ptr = IntPtr.Zero;
+		protected virtual void Dispose(bool disposing) {
+			if (disposing) {
+				if (ptr != IntPtr.Zero) {
+					string gcm = GnuUtils.GetCurrentMethod() + ":Session";
+					Logging.LogGnuFunc(gcm);
+
+					GnuTls.GnuTlsDeinit(ptr);
+					ptr = IntPtr.Zero;
+				}
 			}
 		}
 	}

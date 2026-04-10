@@ -189,6 +189,10 @@ namespace FluentFTP.GnuTLS {
 		}
 
 		// Dispose
+		public void Dispose() {
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
 		protected override void Dispose(bool disposing) {
 			if (disposing) {

@@ -1,5 +1,8 @@
 # Release Notes
 
+#### 1.0.39.beta
+  - Fix memory leaks
+
 #### 1.0.38
     This release now works for Windows, Linux, Mono and MacOS (OSX)
   - Detection of Mono, fix lib path
