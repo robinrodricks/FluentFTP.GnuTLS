@@ -12,6 +12,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 			_ = GnuUtils.Check(gcm, GnuTls.GnuTlsInit(ref ptr, flags));
 		}
+
 		protected virtual void Dispose(bool disposing) {
 			if (!_disposed) {
 				if (disposing) {
