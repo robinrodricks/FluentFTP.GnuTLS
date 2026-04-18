@@ -1354,4 +1354,5 @@ namespace FluentFTP.GnuTLS.Core {
 //libnativedep.so.6 1
 //nativedep.so.6.so
 //libnativedep.so.6.so 1
+
 //1 Path is checked only if the library name does not contain a directory separator character
