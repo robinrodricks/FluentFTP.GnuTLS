@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+
 using FluentFTP.GnuTLS.Core;
 using FluentFTP.GnuTLS.Enums;
 
@@ -128,53 +129,62 @@ namespace FluentFTP.GnuTLS {
 				if (numData > 1) { s += "s"; }
 				Logging.LogGnuFunc(GnuMessage.X509, s);
 
-				IntPtr cert = IntPtr.Zero;
-				DatumT pinfo = new();
-				DatumT cinfo = new();
-
 				for (uint i = 0; i < numData; i++) {
 
 					if (weAreControlConnection) {
 						Logging.LogGnuFunc(GnuMessage.X509, "Certificate #" + (i + 1));
 					}
 
-					int result;
+					IntPtr cert = IntPtr.Zero;
+					DatumT pinfo = new();
+					DatumT cinfo = new();
 
-					result = GnuTls.GnuTlsX509CrtInit(ref cert);
+					int result = GnuTls.GnuTlsX509CrtInit(ref cert);
+
 					if (result < 0) {
 						Logging.LogGnuFunc(GnuMessage.X509, "Error allocating Memory");
-						return;
+						continue;
 					}
 
-					result = GnuTls.GnuTlsX509CrtImport(cert, ref data[i], X509CrtFmtT.GNUTLS_X509_FMT_DER);
-					if (result < 0) {
-						Logging.LogGnuFunc(GnuMessage.X509, "Error decoding: " + GnuUtils.GnuTlsErrorText(result));
-						return;
-					}
-
-					CertificatePrintFormatsT flag = CertificatePrintFormatsT.GNUTLS_CRT_PRINT_FULL;
-					result = GnuTls.GnuTlsX509CrtPrint(cert, flag, ref pinfo);
-					if (result == 0) {
-						string pOutput = Marshal.PtrToStringAnsi(pinfo.ptr);
-						if (weAreControlConnection) {
-							Logging.LogGnuFunc(GnuMessage.ShowClientCertificateInfo, pOutput);
+					try {
+						result = GnuTls.GnuTlsX509CrtImport(cert, ref data[i], X509CrtFmtT.GNUTLS_X509_FMT_DER);
+						if (result < 0) {
+							Logging.LogGnuFunc(GnuMessage.X509, "Error decoding: " + GnuUtils.GnuTlsErrorText(result));
+							continue;
 						}
-						GnuTls.GnuTlsFree(cinfo.ptr);
-					}
 
-					result = GnuTls.GnuTlsX509CrtExport2(cert, X509CrtFmtT.GNUTLS_X509_FMT_PEM, ref cinfo);
-					if (result == 0) {
-						string cOutput = Marshal.PtrToStringAnsi(cinfo.ptr);
-						if (weAreControlConnection) {
-							Logging.LogGnuFunc(GnuMessage.ShowClientCertificatePEM, "X.509 Certificate (PEM)" + Environment.NewLine + cOutput);
+						CertificatePrintFormatsT flag = CertificatePrintFormatsT.GNUTLS_CRT_PRINT_FULL;
+						result = GnuTls.GnuTlsX509CrtPrint(cert, flag, ref pinfo);
+						if (result == 0) {
+							try {
+								string pOutput = Marshal.PtrToStringAnsi(pinfo.ptr);
+								if (weAreControlConnection) {
+									Logging.LogGnuFunc(GnuMessage.ShowClientCertificateInfo, pOutput);
+								}
+							}
+							finally {
+								GnuTls.GnuTlsFree(pinfo.ptr);
+							}
 						}
-						pCertS = cOutput;
-						GnuTls.GnuTlsFree(pinfo.ptr);
-					}
 
+						result = GnuTls.GnuTlsX509CrtExport2(cert, X509CrtFmtT.GNUTLS_X509_FMT_PEM, ref cinfo);
+						if (result == 0) {
+							try {
+								string cOutput = Marshal.PtrToStringAnsi(cinfo.ptr);
+								if (weAreControlConnection) {
+									Logging.LogGnuFunc(GnuMessage.ShowClientCertificatePEM, "X.509 Certificate (PEM)" + Environment.NewLine + cOutput);
+								}
+								pCertS = cOutput;
+							}
+							finally {
+								GnuTls.GnuTlsFree(cinfo.ptr);
+							}
+						}
+					}
+					finally {
+						GnuTls.GnuTlsX509CrtDeinit(cert);
+					}
 				}
-
-				GnuTls.GnuTlsX509CrtDeinit(cert);
 
 				return;
 			}

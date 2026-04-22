@@ -41,7 +41,7 @@ namespace FluentFTP.GnuTLS {
 			if (incoming != 0 && post != 0) { // receive processed") 
 
 				//
-				// TLS1.2 : If the session ticket extension is active, a session ticke may appear
+				// TLS1.2 : If the session ticket extension is active, a session ticket may appear
 				//          ProFTPd server will do this, for example
 				//          One can forbid this by setting GNUTLS_NO_TICKETS_TLS12 on the init flags
 				//          or by using %NO_TICKETS_TLS12 in the priority string in config
@@ -51,10 +51,16 @@ namespace FluentFTP.GnuTLS {
 				if (htype == (uint)HandshakeDescriptionT.GNUTLS_HANDSHAKE_NEW_SESSION_TICKET) {
 					SessionFlagsT flags = GnuTls.GnuTlsSessionGetFlags(session);
 					if (flags.HasFlag(SessionFlagsT.GNUTLS_SFLAGS_SESSION_TICKET)) {
-						Logging.LogGnuFunc(GnuMessage.Handshake, "Session resume: use received session ticket");
-						GnuTls.GnuTlsSessionGetData2(session, out DatumT resumeDataTLS);
-						GnuTls.GnuTlsSessionSetData(session, resumeDataTLS);
-						GnuTls.GnuTlsFree(resumeDataTLS.ptr);
+						//No need to do anything here, as the session ticket is automatically handled by GnuTLS and
+						//will be used for session resumption on the next connection. We just log that a session ticket was received.
+						//If you wanted to manually handle the session ticket, you could retrieve it using GnuTlsSessionGetData2 and
+						//store it for later use, but in most cases this is not necessary.
+						//GnuTls.GnuTlsSessionGetData2(session, out DatumT resumeDataTLS);
+						//Unneeded here: Store the session ticket data for later use (e.g., for session resumption)
+						//GnuTls.GnuTlsSessionSetData(session, resumeDataTLS);
+						//GnuTls.GnuTlsFree(resumeDataTLS.ptr);
+						Logging.LogGnuFunc(GnuMessage.Handshake, "Session ticket received");
+
 					}
 				}
 
