@@ -1196,17 +1196,14 @@ namespace FluentFTP.GnuTLS.Core {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
 
-			IntPtr datumTAPtr = gnutls_certificate_get_peers_h(session.ptr, ref listSize);
+			IntPtr datumTArrayPtr = gnutls_certificate_get_peers_h(session.ptr, ref listSize);
 
 			if (listSize == 0) { return null; }
-
-			ulong datumTAInt = (ulong)datumTAPtr;
 
 			DatumT[] peers = new DatumT[listSize];
 
 			for (int i = 0; i < listSize; i++) {
-				peers[i] = Marshal.PtrToStructure<DatumT>((IntPtr)datumTAInt);
-				datumTAInt += 16;
+				peers[i] = Marshal.PtrToStructure<DatumT>(datumTArrayPtr + i * 16);
 			}
 
 			return peers;
