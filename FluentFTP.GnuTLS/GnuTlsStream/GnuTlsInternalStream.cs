@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+
 using FluentFTP.GnuTLS.Core;
 using FluentFTP.GnuTLS.Enums;
 
@@ -16,6 +17,7 @@ namespace FluentFTP.GnuTLS {
 	/// for FluentFTP by using a .NET c# wrapper for GnuTLS.
 	/// </summary>
 	internal partial class GnuTlsInternalStream : Stream, IDisposable {
+		private bool _disposed = false;
 
 		// After a successful handshake, the following will be available:
 		public string ProtocolName { get; private set; } = "Unknown";
@@ -62,7 +64,7 @@ namespace FluentFTP.GnuTLS {
 		// GnuTLS Handshake Hook function
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		internal delegate int GnuTlsHandshakeHookFunc(IntPtr session, uint htype, uint post, uint incoming, IntPtr msg);
-		internal GnuTlsHandshakeHookFunc handshakeHookFunc = HandshakeHook;
+		internal static readonly GnuTlsHandshakeHookFunc handshakeHookFunc = HandshakeHook;
 
 		private bool weAreControlConnection = true;
 
@@ -189,13 +191,13 @@ namespace FluentFTP.GnuTLS {
 		}
 
 		// Dispose
-		public void Dispose() {
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
 		protected override void Dispose(bool disposing) {
-			if (disposing) {
+			if (!_disposed) {
+				if (disposing) {
+					// Dispose managed resources here.
+				}
+
+				// Dispose unmanaged resources here.
 				if (sess != null) {
 					if (IsSessionUsable) {
 						int count = GnuTls.GnuTlsRecordCheckPending(sess);
@@ -229,10 +231,23 @@ namespace FluentFTP.GnuTLS {
 						}
 					}
 				}
-			}
 
-			base.Dispose(disposing);
+				_disposed = true;
+			}
 		}
+
+public void Dispose() {
+			Dispose(true);
+
+			// Use SupressFinalize in case a subclass
+			// of this type implements a finalizer.
+			GC.SuppressFinalize(this);
+		}
+
+		~GnuTlsInternalStream() {
+			Dispose(false);
+		}
+
 
 		// Methods overriding base ( = System.IO.Stream )
 

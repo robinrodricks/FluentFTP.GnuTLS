@@ -2,6 +2,7 @@
 
 namespace FluentFTP.GnuTLS.Core {
 	internal abstract class Session : IDisposable {
+		private bool _disposed = false;
 
 		public IntPtr ptr;
 
@@ -12,13 +13,13 @@ namespace FluentFTP.GnuTLS.Core {
 			_ = GnuUtils.Check(gcm, GnuTls.GnuTlsInit(ref ptr, flags));
 		}
 
-		public void Dispose() {
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
 		protected virtual void Dispose(bool disposing) {
-			if (disposing) {
+			if (!_disposed) {
+				if (disposing) {
+					// Free any other managed objects here.
+				}
+
+				// Free any unmanaged objects here.
 				if (ptr != IntPtr.Zero) {
 					string gcm = GnuUtils.GetCurrentMethod() + ":Session";
 					Logging.LogGnuFunc(gcm);
@@ -26,8 +27,24 @@ namespace FluentFTP.GnuTLS.Core {
 					GnuTls.GnuTlsDeinit(ptr);
 					ptr = IntPtr.Zero;
 				}
+
+				// Note that the object has been disposed.
+				_disposed = true;
 			}
 		}
+
+		public void Dispose() {
+			Dispose(true);
+
+			// Use SupressFinalize in case a subclass
+			// of this type implements a finalizer.
+			GC.SuppressFinalize(this);
+		}
+
+		~Session() {
+			Dispose(false);
+		}
+
 	}
 
 	internal class ClientSession : Session {

@@ -4,14 +4,14 @@
 		<PackageId>FluentFTP.GnuTLS</PackageId>
 		<Title>FluentFTP.GnuTLS</Title>
 		<Description>Adds support for TLS1.3 streams into FluentFTP using a .NET wrapper of GnuTLS.</Description>
-		<Authors>Michael Stiemke, Robin Rodricks, FluentFTP Contributors</Authors>
+		<Authors>Michael Stiemke, Robin Rodricks and FluentFTP Contributors</Authors>
 		<PackageProjectUrl>https://github.com/robinrodricks/FluentFTP</PackageProjectUrl>
-		<Copyright>Copyright (c) 2015 Robin Rodricks and FluentFTP Contributors</Copyright>
+		<Copyright>Copyright (c) 2015 Michael Stiemke, Robin Rodricks and FluentFTP Contributors</Copyright>
 		<PackageTags>FluentFTP, FluentFTP.GnuTLS, ftp, tls13, gnutls</PackageTags>
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\FluentFTP.GnuTLS.xml</DocumentationFile>
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
-		<Version>1.0.39.beta</Version>
+		<Version>1.0.39-beta</Version>
 		<PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
 		<PackageIcon>logo-nuget.png</PackageIcon>
         <LangVersion>10.0</LangVersion>

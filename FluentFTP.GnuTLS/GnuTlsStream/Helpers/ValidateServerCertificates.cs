@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+
 using FluentFTP.GnuTLS.Core;
 using FluentFTP.GnuTLS.Enums;
 
@@ -42,7 +43,7 @@ namespace FluentFTP.GnuTLS {
 			//
 
 			//
-			// Determine the type of the servers certificate(s)/key and get the data out
+			// Determine the type of the servers certificate(s)/key and get the certList out
 			// from them.
 			//
 			CertificateTypeT certificateType = GnuTls.GnuTlsCertificateTypeGet2(sess, CtypeTargetT.GNUTLS_CTYPE_PEERS);
@@ -114,67 +115,75 @@ namespace FluentFTP.GnuTLS {
 
 				pCertS = string.Empty;
 
-				DatumT[] data;
-				uint numData = 0;
+				DatumT[] certList;
+				uint certListLength = 0;
 
 				// Get the servers list of X.509 certificates, these will be in DER format
-				data = GnuTls.GnuTlsCertificateGetPeers(sess, ref numData);
-				if (numData == 0) {
+				certList = GnuTls.GnuTlsCertificateGetPeers(sess, ref certListLength);
+				if (certListLength == 0) {
 					Logging.LogGnuFunc(GnuMessage.X509, "No certificates found");
 					return;
 				}
 
-				string s = "Certificate type: X.509, list contains " + numData + " certificate";
-				if (numData > 1) { s += "s"; }
+				string s = "Certificate type: X.509, list contains " + certListLength + " certificate" + (certListLength > 1 ? "s" : "");
 				Logging.LogGnuFunc(GnuMessage.X509, s);
 
-				IntPtr cert = IntPtr.Zero;
-				DatumT pinfo = new();
-				DatumT cinfo = new();
-
-				for (uint i = 0; i < numData; i++) {
+				for (uint i = 0; i < certListLength; i++) {
 
 					if (weAreControlConnection) {
 						Logging.LogGnuFunc(GnuMessage.X509, "Certificate #" + (i + 1));
 					}
 
-					int result;
+					IntPtr cert = IntPtr.Zero;
 
-					result = GnuTls.GnuTlsX509CrtInit(ref cert);
+					int result = GnuTls.GnuTlsX509CrtInit(ref cert);
+
 					if (result < 0) {
 						Logging.LogGnuFunc(GnuMessage.X509, "Error allocating Memory");
-						return;
+						continue;
 					}
 
-					result = GnuTls.GnuTlsX509CrtImport(cert, ref data[i], X509CrtFmtT.GNUTLS_X509_FMT_DER);
-					if (result < 0) {
-						Logging.LogGnuFunc(GnuMessage.X509, "Error decoding: " + GnuUtils.GnuTlsErrorText(result));
-						return;
-					}
-
-					CertificatePrintFormatsT flag = CertificatePrintFormatsT.GNUTLS_CRT_PRINT_FULL;
-					result = GnuTls.GnuTlsX509CrtPrint(cert, flag, ref pinfo);
-					if (result == 0) {
-						string pOutput = Marshal.PtrToStringAnsi(pinfo.ptr);
-						if (weAreControlConnection) {
-							Logging.LogGnuFunc(GnuMessage.ShowClientCertificateInfo, pOutput);
+					try {
+						result = GnuTls.GnuTlsX509CrtImport(cert, ref certList[i], X509CrtFmtT.GNUTLS_X509_FMT_DER);
+						if (result < 0) {
+							Logging.LogGnuFunc(GnuMessage.X509, "Error decoding: " + GnuUtils.GnuTlsErrorText(result));
+							continue;
 						}
-						GnuTls.GnuTlsFree(cinfo.ptr);
-					}
 
-					result = GnuTls.GnuTlsX509CrtExport2(cert, X509CrtFmtT.GNUTLS_X509_FMT_PEM, ref cinfo);
-					if (result == 0) {
-						string cOutput = Marshal.PtrToStringAnsi(cinfo.ptr);
-						if (weAreControlConnection) {
-							Logging.LogGnuFunc(GnuMessage.ShowClientCertificatePEM, "X.509 Certificate (PEM)" + Environment.NewLine + cOutput);
+						DatumT pinfo = new();
+						CertificatePrintFormatsT flag = CertificatePrintFormatsT.GNUTLS_CRT_PRINT_FULL;
+						result = GnuTls.GnuTlsX509CrtPrint(cert, flag, ref pinfo);
+						if (result == 0) {
+							try {
+								string pOutput = Marshal.PtrToStringAnsi(pinfo.ptr);
+								if (weAreControlConnection) {
+									Logging.LogGnuFunc(GnuMessage.ShowClientCertificateInfo, pOutput);
+								}
+							}
+							finally {
+								GnuTls.GnuTlsFree(pinfo.ptr);
+							}
 						}
-						pCertS = cOutput;
-						GnuTls.GnuTlsFree(pinfo.ptr);
-					}
 
+						DatumT cinfo = new();
+						result = GnuTls.GnuTlsX509CrtExport2(cert, X509CrtFmtT.GNUTLS_X509_FMT_PEM, ref cinfo);
+						if (result == 0) {
+							try {
+								string cOutput = Marshal.PtrToStringAnsi(cinfo.ptr);
+								if (weAreControlConnection) {
+									Logging.LogGnuFunc(GnuMessage.ShowClientCertificatePEM, "X.509 Certificate (PEM)" + Environment.NewLine + cOutput);
+								}
+								pCertS = cOutput;
+							}
+							finally {
+								GnuTls.GnuTlsFree(cinfo.ptr);
+							}
+						}
+					}
+					finally {
+						GnuTls.GnuTlsX509CrtDeinit(cert);
+					}
 				}
-
-				GnuTls.GnuTlsX509CrtDeinit(cert);
 
 				return;
 			}
@@ -187,56 +196,58 @@ namespace FluentFTP.GnuTLS {
 
 			void GetCertInfoRAWPK() {
 
-				DatumT[] data;
-				uint numData = 0;
+				DatumT[] certList;
+				uint certListLength = 0;
 
 				// Get the servers list of Raw Public Key certificates, these will be in DER format
-				data = GnuTls.GnuTlsCertificateGetPeers(sess, ref numData);
-				if (numData == 0) {
+				certList = GnuTls.GnuTlsCertificateGetPeers(sess, ref certListLength);
+				if (certListLength == 0) {
 					Logging.LogGnuFunc(GnuMessage.RAWPK, "No certificates found");
 					return;
 				}
 
-				//Logging.LogGnuFunc("Certificate type: Raw Public Key, list contains " + numData);
+				//Logging.LogGnuFunc("Certificate type: Raw Public Key, list contains " + certListLength);
 
 				IntPtr cert = IntPtr.Zero;
 				// PkAlgorithmT algo;
 				// DatumT cinfo = new();
 
-				int result;
+				try {
+					int result = GnuTls.GnuTlsPcertImportRawpkRaw(cert, ref certList[0], X509CrtFmtT.GNUTLS_X509_FMT_DER, 0, 0);
+					if (result < 0) {
+						Logging.LogGnuFunc(GnuMessage.RAWPK, "Error decoding: " + GnuUtils.GnuTlsErrorText(result));
+						return;
+					}
 
-				result = GnuTls.GnuTlsPcertImportRawpkRaw(cert, ref data[0], X509CrtFmtT.GNUTLS_X509_FMT_DER, 0, 0);
-				if (result < 0) {
-					Logging.LogGnuFunc(GnuMessage.RAWPK, "Error decoding: " + GnuUtils.GnuTlsErrorText(result));
-					return;
+					if (weAreControlConnection) {
+
+						//
+						// TODO:
+						//
+						//pk_algo = gnutls_pubkey_get_pk_algorithm(pk_cert.pubkey, NULL);
+
+						//log_msg(out, "- Raw pk info:\n");
+						//log_msg(out, " - PK algo: %s\n", gnutls_pk_algorithm_get_name(pk_algo));
+
+						//if (print_cert) {
+						//	gnutls_datum_t pem;
+
+						//	ret = gnutls_pubkey_export2(pk_cert.pubkey, GNUTLS_X509_FMT_PEM, &pem);
+						//	if (ret < 0) {
+						//		fprintf(stderr, "Encoding error: %s\n",
+						//			gnutls_strerror(ret));
+						//		return;
+						//	}
+
+						//	log_msg(out, "\n%s\n", (char*)pem.certList);
+
+					}
+
+					//	gnutls_free(pem.certList);
+					//}
 				}
-
-				if (weAreControlConnection) {
-
-					//
-					// TODO:
-					//
-					//pk_algo = gnutls_pubkey_get_pk_algorithm(pk_cert.pubkey, NULL);
-
-					//log_msg(out, "- Raw pk info:\n");
-					//log_msg(out, " - PK algo: %s\n", gnutls_pk_algorithm_get_name(pk_algo));
-
-					//if (print_cert) {
-					//	gnutls_datum_t pem;
-
-					//	ret = gnutls_pubkey_export2(pk_cert.pubkey, GNUTLS_X509_FMT_PEM, &pem);
-					//	if (ret < 0) {
-					//		fprintf(stderr, "Encoding error: %s\n",
-					//			gnutls_strerror(ret));
-					//		return;
-					//	}
-
-					//	log_msg(out, "\n%s\n", (char*)pem.data);
-
+				finally {
 				}
-
-				//	gnutls_free(pem.data);
-				//}
 
 				return;
 			}

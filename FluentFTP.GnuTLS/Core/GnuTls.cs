@@ -651,8 +651,6 @@ namespace FluentFTP.GnuTLS.Core {
 
 			gnutls_global_deinit_h();
 
-			// FunctionLoader.Free();
-
 			return;
 		}
 
@@ -702,7 +700,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// Info
 
-		// char* gnutls_session_get_desc(gnutls_session_t session)
+		// char * gnutls_session_get_desc(gnutls_session_t session)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate IntPtr gnutls_session_get_desc_(IntPtr session);
 		static gnutls_session_get_desc_ gnutls_session_get_desc_h;
@@ -727,7 +725,6 @@ namespace FluentFTP.GnuTLS.Core {
 
 			IntPtr namePtr = gnutls_protocol_get_name_h(version);
 			string name = Marshal.PtrToStringAnsi(namePtr);
-			// gnutls_free_h(namePtr); strangely enough, this free seems unneeded
 
 			return name;
 		}
@@ -775,7 +772,6 @@ namespace FluentFTP.GnuTLS.Core {
 
 			IntPtr namePtr = gnutls_alert_get_name_h(alert);
 			string name = Marshal.PtrToStringAnsi(namePtr);
-			// gnutls_free_h(namePtr); strangely enough, this free seems unneeded
 
 			return name;
 		}
@@ -1106,7 +1102,10 @@ namespace FluentFTP.GnuTLS.Core {
 
 			_ = GnuUtils.Check(gcm, gnutls_alpn_get_selected_protocol_h(session.ptr, data), (int)EC.errNo.GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE);
 
-			return Marshal.PtrToStringAnsi(data.ptr);
+			string result = Marshal.PtrToStringAnsi(data.ptr);
+			GnuTlsFree(data.ptr);
+
+			return result;
 		}
 
 		#endregion
@@ -1197,17 +1196,14 @@ namespace FluentFTP.GnuTLS.Core {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
 
-			IntPtr datumTAPtr = gnutls_certificate_get_peers_h(session.ptr, ref listSize);
+			IntPtr datumTArrayPtr = gnutls_certificate_get_peers_h(session.ptr, ref listSize);
 
 			if (listSize == 0) { return null; }
-
-			ulong datumTAInt = (ulong)datumTAPtr;
 
 			DatumT[] peers = new DatumT[listSize];
 
 			for (int i = 0; i < listSize; i++) {
-				peers[i] = Marshal.PtrToStructure<DatumT>((IntPtr)datumTAInt);
-				datumTAInt += 16;
+				peers[i] = Marshal.PtrToStructure<DatumT>(datumTArrayPtr + i * 16);
 			}
 
 			return peers;
@@ -1355,4 +1351,5 @@ namespace FluentFTP.GnuTLS.Core {
 //libnativedep.so.6 1
 //nativedep.so.6.so
 //libnativedep.so.6.so 1
+
 //1 Path is checked only if the library name does not contain a directory separator character
