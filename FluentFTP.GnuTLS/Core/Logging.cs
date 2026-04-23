@@ -119,7 +119,7 @@ namespace FluentFTP.GnuTLS.Core {
 		// Setup GnuTls logging to overall log
 		public static void AttachGnuTlsLogging() {
 			GnuTls.GnuTlsGlobalSetLogFunction(gnuTlsLogCBFunc);
-			GnuTls.GnuTlsGlobalSetLogLevel(99);
+			GnuTls.GnuTlsGlobalSetLogLevel(logMaxLevel);
 		}
 	}
 }
