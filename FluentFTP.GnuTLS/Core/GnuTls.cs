@@ -1136,11 +1136,11 @@ namespace FluentFTP.GnuTLS.Core {
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 		delegate int gnutls_credentials_set_(IntPtr session, CredentialsTypeT type, IntPtr cred);
 		static gnutls_credentials_set_ gnutls_credentials_set_h;
-		public static int GnuTlsCredentialsSet(Credentials credentials, Session session) {
+		public static int GnuTlsCredentialsSet(Session session, CredentialsTypeT type, Credentials credentials) {
 			string gcm = GnuUtils.GetCurrentMethod();
 			Logging.LogGnuFunc(gcm);
 
-			return GnuUtils.Check(gcm, gnutls_credentials_set_h(session.ptr, CredentialsTypeT.GNUTLS_CRD_CERTIFICATE, credentials.ptr));
+			return GnuUtils.Check(gcm, gnutls_credentials_set_h(session.ptr, type, credentials.ptr));
 		}
 
 		// Info

@@ -1,9 +1,10 @@
-﻿using static FluentFTP.GnuTLS.GnuTlsInternalStream;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+
 using FluentFTP.GnuTLS.Enums;
+
+using static FluentFTP.GnuTLS.GnuTlsInternalStream;
 
 namespace FluentFTP.GnuTLS.Core {
 	internal static class Logging {
@@ -11,9 +12,9 @@ namespace FluentFTP.GnuTLS.Core {
 		public static Queue<string> logQueue;
 		public static int logQueueMaxSize;
 
-		static int logMaxLevel;
-		static GnuMessage logDebugInformation;
-		static GnuStreamLogCBFunc logCBFunc;
+		private static int logMaxLevel;
+		private static GnuMessage logDebugInformation;
+		private static GnuStreamLogCBFunc logCBFunc;
 
 		public static int LogMaxLevel {
 			get { return logMaxLevel; }
@@ -43,7 +44,7 @@ namespace FluentFTP.GnuTLS.Core {
 			}
 		}
 
-		private static object logQueueLock = new object();
+		private static readonly object logQueueLock = new object();
 
 		// Common log routine for "Interop" and "Internal" messages.
 		// These are buffered regardless of loglevel settings.
@@ -103,7 +104,7 @@ namespace FluentFTP.GnuTLS.Core {
 		public delegate void GnuTlsLogCBFunc(int level, IntPtr message);
 
 		// Avoid garbage collection failure of this callback
-		private static GnuTlsLogCBFunc gnuTlsLogCBFunc = Log;
+		private static readonly GnuTlsLogCBFunc gnuTlsLogCBFunc = Log;
 
 		// Setup logging overall
 		public static void InitLogging(GnuStreamLogCBFunc logCBFunc, int logMaxLevel, GnuMessage logDebugInformation, int logQueueMaxSize) {
@@ -118,7 +119,7 @@ namespace FluentFTP.GnuTLS.Core {
 		// Setup GnuTls logging to overall log
 		public static void AttachGnuTlsLogging() {
 			GnuTls.GnuTlsGlobalSetLogFunction(gnuTlsLogCBFunc);
-			GnuTls.GnuTlsGlobalSetLogLevel(99);
+			GnuTls.GnuTlsGlobalSetLogLevel(logMaxLevel);
 		}
 	}
 }
