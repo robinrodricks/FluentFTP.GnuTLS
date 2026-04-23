@@ -30,7 +30,7 @@ namespace FluentFTP.GnuTLS {
 			// GnuTls.GnuTlsDhSetPrimeBits(sess, 1024);
 
 			// Allocate and link credential object
-			GnuTls.GnuTlsCredentialsSet(cred, sess);
+			GnuTls.GnuTlsCredentialsSet(sess, CredentialsTypeT.GNUTLS_CRD_CERTIFICATE,  cred);
 
 			// Application Layer Protocol Negotiation (ALPN)
 			// (always AFTER credential allocation and setup
