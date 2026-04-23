@@ -1,7 +1,16 @@
 # Release Notes
 
-#### 1.0.39.beta
+#### 1.0.39
   - Fix memory leaks
+	  Many thanks to <rob-hendrickx-c4t> (See: https://github.com/robinrodricks/FluentFTP/issues/1579). His
+	  investigation and testing has been invaluable in tracking down the source memory leaks in the library.
+	  The leaks were primarily due to the fact that the GnuTLS library was not being properly de-initialized after use,
+	  which meant that memory allocated by GnuTLS was not being freed. 
+	  Although there are still some memory leaks that I have not yet been able to track down, this release
+	  should significantly reduce the memory leak issue.
+	  I will continue to investigate the remaining leaks and will release a further update when I (or others)
+	  have identified and fixed them.
+  - Refactoring
 
 #### 1.0.38
     This release now works for Windows, Linux, Mono and MacOS (OSX)
