@@ -11,15 +11,16 @@ namespace FluentFTP.GnuTLS.Core {
 	// If GnuTlsGlobalDeInit is called the same number of times as GnuTlsGlobalInit, the library is freed and true is returned
 	internal static class GnuTls {
 
-		public static bool IsUnix { get; } = (int)Environment.OSVersion.Platform == 4 || (int)Environment.OSVersion.Platform == 6 || (int)Environment.OSVersion.Platform == 128;
 #if NET462
-		public static bool IsLinux { get; } = (int)Environment.OSVersion.Platform == 4 || (int)Environment.OSVersion.Platform == 128;
-		public static bool IsOSX { get; } = (int)Environment.OSVersion.Platform == 6;
+		private static bool IsUnix { get; } = (int)Environment.OSVersion.Platform == 4 || (int)Environment.OSVersion.Platform == 6 || (int)Environment.OSVersion.Platform == 128;
+		private static bool IsLinux { get; } = (int)Environment.OSVersion.Platform == 4 || (int)Environment.OSVersion.Platform == 128;
+		private static bool IsOSX { get; } = (int)Environment.OSVersion.Platform == 6;
 #else
-		public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-		public static bool IsOSX { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+		private static bool IsUnix { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+		private static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+		private static bool IsOSX { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 #endif
-		public static bool IsMono { get; } = Type.GetType("Mono.Runtime") != null;
+		private static bool IsMono { get; } = Type.GetType("Mono.Runtime") != null;
 
 		public static string loadLibraryDllNamePrefix = string.Empty;
 
