@@ -11,21 +11,9 @@ namespace FluentFTP.GnuTLS.Core {
 	// If GnuTlsGlobalDeInit is called the same number of times as GnuTlsGlobalInit, the library is freed and true is returned
 	internal static class GnuTls {
 
-#if NET462
-		private static bool IsUnix { get; } = (int)Environment.OSVersion.Platform == 4 || (int)Environment.OSVersion.Platform == 6 || (int)Environment.OSVersion.Platform == 128;
-		private static bool IsLinux { get; } = (int)Environment.OSVersion.Platform == 4 || (int)Environment.OSVersion.Platform == 128;
-		private static bool IsOSX { get; } = (int)Environment.OSVersion.Platform == 6;
-#else
-		private static bool IsUnix { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-		private static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-		private static bool IsOSX { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-#endif
-		private static bool IsMono { get; } = Type.GetType("Mono.Runtime") != null;
-
 		public static string loadLibraryDllNamePrefix = string.Empty;
 
 		#region FunctionLoader
-		// See DOC #1 at the end of this file for explanation of .NET DllImport search order
 
 		private static IntPtr dllPtr = IntPtr.Zero;
 		private static bool functionsAreLoaded = false;
@@ -436,6 +424,17 @@ namespace FluentFTP.GnuTLS.Core {
 			//
 		}
 
+#if NET462
+		private static bool IsUnix { get; } = (int)Environment.OSVersion.Platform == 4 || (int)Environment.OSVersion.Platform == 6 || (int)Environment.OSVersion.Platform == 128;
+		private static bool IsLinux { get; } = (int)Environment.OSVersion.Platform == 4 || (int)Environment.OSVersion.Platform == 128;
+		private static bool IsOSX { get; } = (int)Environment.OSVersion.Platform == 6;
+#else
+		private static bool IsUnix { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+		private static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+		private static bool IsOSX { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+#endif
+		private static bool IsMono { get; } = Type.GetType("Mono.Runtime") != null;
+
 		internal static void SetLoadLibraryDllNamePrefix(string pfx) {
 			loadLibraryDllNamePrefix = pfx;
 		}
@@ -443,52 +442,56 @@ namespace FluentFTP.GnuTLS.Core {
 		private static void LoadAllFunctions() {
 			if (functionsAreLoaded) return;
 
-			string useDllName;
+			FunctionLoader functionLoader = null;
+			string useDllName = string.Empty;
 
-			FunctionLoader functionLoader;
-
+			// See DOC #1 at the end of this file for explanation of .NET DllImport search order
 			if (IsUnix) {
 				// Unix platforms
-				if (IsMono) {
-					// Mono under Unix (both Linux and OSX)
-					useDllName = @"libgnutls";
-					functionLoader = new FunctionLoaderMono();
-					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for mono)");
-				}
-				else if (IsLinux) {
+				if (IsLinux) {
 					// Linux
-					useDllName = @"libgnutls.so.30";
-					functionLoader = new FunctionLoaderLinux();
-					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for linux)");
-				}
-				else if (IsOSX) {
-					// OSX
-					if (loadLibraryDllNamePrefix == string.Empty) {
-						useDllName = @"/opt/homebrew/lib/libgnutls.30.dylib";
+					if (IsMono) {
+						// Mono under Linux)
+						useDllName = @"libgnutls";
+						functionLoader = new FunctionLoaderMono();
+						Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for Mono/linux)");
 					}
 					else {
-						useDllName = loadLibraryDllNamePrefix + @"libgnutls.30.dylib";
+						useDllName = @"libgnutls.so.30";
+						functionLoader = new FunctionLoaderLinux();
+						Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for linux)");
 					}
-					functionLoader = new FunctionLoaderOSX();
-					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for OSX)");
 				}
-				else {
-					// Unsupported Unix platform
-					throw new GnuTlsException("Unsupported Unix platform");
+				else if (IsOSX) {
+					if (IsMono) {
+						// Mono under OSX
+						throw new GnuTlsException("Unsupported platform: Mono/OSX");
+					}
+					else {
+						// OSX
+						if (loadLibraryDllNamePrefix == string.Empty) ?
+							useDllName = @"/opt/homebrew/lib/libgnutls.30.dylib" :
+							useDllName = loadLibraryDllNamePrefix + @"libgnutls.30.dylib";
+						functionLoader = new FunctionLoaderOSX();
+						Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for OSX)");
+					}
 				}
 			}
 			else {
 				if (IsMono) {
 					// Mono under Windows
-					// Unsupported Unix platform
-					throw new GnuTlsException("Unsupported Windows platform: Mono");
+					throw new GnuTlsException("Unsupported platform: Mono/Windows");
 				}
 				else {
 					// Windows
 					useDllName = @"libgnutls-30.dll";
 					functionLoader = new FunctionLoaderWindows();
-					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for windows)");
+					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for Windows)");
 				}
+			}
+
+			if (functionLoader == null) {
+				throw new GnuTlsException("Unsupported platform");
 			}
 
 			if (IsUnix || loadLibraryDllNamePrefix == string.Empty) {
