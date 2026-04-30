@@ -108,7 +108,7 @@ namespace FluentFTP.GnuTLS.Core {
 				_ = dlerror();
 				int result = dlclose(dllPtr);
 
-				if (result != 1) {
+				if (result != 0) {
 					errMsgPtr = dlerror();
 					if (errMsgPtr != IntPtr.Zero) {
 						errMsg = Marshal.PtrToStringAnsi(errMsgPtr);
@@ -198,7 +198,7 @@ namespace FluentFTP.GnuTLS.Core {
 				_ = dlerror();
 				int result = dlclose(dllPtr);
 
-				if (result != 1) {
+				if (result != 0) {
 					errMsgPtr = dlerror();
 					if (errMsgPtr != IntPtr.Zero) {
 						errMsg = Marshal.PtrToStringAnsi(errMsgPtr);
@@ -288,7 +288,7 @@ namespace FluentFTP.GnuTLS.Core {
 				_ = dlerror();
 				int result = dlclose(dllPtr);
 
-				if (result != 1) {
+				if (result != 0) {
 					errMsgPtr = dlerror();
 					if (errMsgPtr != IntPtr.Zero) {
 						errMsg = Marshal.PtrToStringAnsi(errMsgPtr);
@@ -449,7 +449,13 @@ namespace FluentFTP.GnuTLS.Core {
 
 			if (IsUnix) {
 				// Unix platforms
-				if (IsLinux) {
+				if (IsMono) {
+					// Mono under Unix (both Linux and OSX)
+					useDllName = @"libgnutls";
+					functionLoader = new FunctionLoaderMono();
+					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for mono)");
+				}
+				else if (IsLinux) {
 					// Linux
 					useDllName = @"libgnutls.so.30";
 					functionLoader = new FunctionLoaderLinux();
@@ -460,17 +466,11 @@ namespace FluentFTP.GnuTLS.Core {
 					if (loadLibraryDllNamePrefix == string.Empty) {
 						useDllName = @"/opt/homebrew/lib/libgnutls.30.dylib";
 					}
-					else { 
+					else {
 						useDllName = loadLibraryDllNamePrefix + @"libgnutls.30.dylib";
 					}
 					functionLoader = new FunctionLoaderOSX();
 					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for OSX)");
-				}
-				else if (IsMono) {
-					// Mono
-					useDllName = @"libgnutls";
-					functionLoader = new FunctionLoaderMono();
-					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for mono)");
 				}
 				else {
 					// Unsupported Unix platform
@@ -478,10 +478,17 @@ namespace FluentFTP.GnuTLS.Core {
 				}
 			}
 			else {
-				// Windows
-				useDllName = @"libgnutls-30.dll";
-				functionLoader = new FunctionLoaderWindows();
-				Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for windows)");
+				if (IsMono) {
+					// Mono under Windows
+					// Unsupported Unix platform
+					throw new GnuTlsException("Unsupported Windows platform: Mono");
+				}
+				else {
+					// Windows
+					useDllName = @"libgnutls-30.dll";
+					functionLoader = new FunctionLoaderWindows();
+					Logging.LogGnuFunc(GnuMessage.FunctionLoader, "*Load (Load dll libraries for windows)");
+				}
 			}
 
 			if (IsUnix || loadLibraryDllNamePrefix == string.Empty) {
@@ -644,7 +651,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// void gnutls_global_deinit ()
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int gnutls_global_deinit_();
+		delegate void gnutls_global_deinit_();
 		static gnutls_global_deinit_ gnutls_global_deinit_h;
 		public static void GnuTlsGlobalDeInit() {
 			string gcm = GnuUtils.GetCurrentMethod();
@@ -1093,7 +1100,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 		// int gnutls_alpn_get_selected_protocol (gnutls_session_t session, gnutls_datum_t * protocol)
 		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		delegate int gnutls_alpn_get_selected_protocol_(IntPtr session, DatumT data);
+		delegate int gnutls_alpn_get_selected_protocol_(IntPtr session, out DatumT data);
 		static gnutls_alpn_get_selected_protocol_ gnutls_alpn_get_selected_protocol_h;
 		public static string GnuTlsAlpnGetSelectedProtocol(Session session) {
 			string gcm = GnuUtils.GetCurrentMethod();
@@ -1101,7 +1108,7 @@ namespace FluentFTP.GnuTLS.Core {
 
 			DatumT data = new DatumT();
 
-			_ = GnuUtils.Check(gcm, gnutls_alpn_get_selected_protocol_h(session.ptr, data), (int)EC.errNo.GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE);
+			_ = GnuUtils.Check(gcm, gnutls_alpn_get_selected_protocol_h(session.ptr, out data), (int)EC.errNo.GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE);
 
 			string result = Marshal.PtrToStringAnsi(data.ptr);
 			GnuTlsFree(data.ptr);
