@@ -13,6 +13,12 @@ namespace FluentFTP.GnuTLS.Core {
 			_ = GnuUtils.Check(gcm, GnuTls.GnuTlsInit(ref ptr, flags));
 		}
 
+		public void Dispose() {
+			Dispose(true);
+
+			GC.SuppressFinalize(this);
+		}
+
 		protected virtual void Dispose(bool disposing) {
 			if (!_disposed) {
 				if (disposing) {
@@ -31,14 +37,6 @@ namespace FluentFTP.GnuTLS.Core {
 				// Note that the object has been disposed.
 				_disposed = true;
 			}
-		}
-
-		public void Dispose() {
-			Dispose(true);
-
-			// Use SupressFinalize in case a subclass
-			// of this type implements a finalizer.
-			GC.SuppressFinalize(this);
 		}
 
 		~Session() {
