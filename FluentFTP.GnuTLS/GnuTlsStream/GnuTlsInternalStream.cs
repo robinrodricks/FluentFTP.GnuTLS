@@ -190,8 +190,23 @@ namespace FluentFTP.GnuTLS {
 
 		}
 
+		// Stream already provides the public Dispose() method that
+		// calls Dispose(true) and GC.SuppressFinalize(this)
+		//
+		//public void Dispose() {
+		//	Dispose(true);
+
+		//	// Use SupressFinalize in case a subclass
+		//	// of this type implements a finalizer.
+		//	GC.SuppressFinalize(this);
+		//}
+
+
 		// Dispose
 		protected override void Dispose(bool disposing) {
+			base.Dispose(disposing);
+			Logging.LogGnuFunc(GnuMessage.InteropMsg, "Base stream disposed");
+
 			if (!_disposed) {
 				if (disposing) {
 					// Dispose managed resources here.
@@ -213,14 +228,17 @@ namespace FluentFTP.GnuTLS {
 							}
 						}
 						GnuTls.GnuTlsBye(sess, CloseRequestT.GNUTLS_SHUT_RDWR, ctimeout);
+						Logging.LogGnuFunc(GnuMessage.Handshake, "Sent close notify");
 					}
 					sess.Dispose();
 					sess = null;
+					Logging.LogGnuFunc(GnuMessage.Handshake, "Session disposed");
 				}
 
 				if (cred != null) {
 					cred.Dispose();
 					cred = null;
+					Logging.LogGnuFunc(GnuMessage.InteropMsg, "Credentials disposed");
 				}
 
 				lock (initLock) {
@@ -228,20 +246,16 @@ namespace FluentFTP.GnuTLS {
 						--streamUseCount;
 						if (streamUseCount == 0) {
 							GnuTls.GnuTlsGlobalDeInit();
+							Logging.LogGnuFunc(GnuMessage.InteropMsg, "GnuTLS deinitialized");
+						}
+						else {
+							Logging.LogGnuFunc(GnuMessage.InteropMsg, "GnuTLS not deinitialized, users = " + streamUseCount);
 						}
 					}
 				}
 
 				_disposed = true;
 			}
-		}
-
-		public void Dispose() {
-			Dispose(true);
-
-			// Use SupressFinalize in case a subclass
-			// of this type implements a finalizer.
-			GC.SuppressFinalize(this);
 		}
 
 		~GnuTlsInternalStream() {
