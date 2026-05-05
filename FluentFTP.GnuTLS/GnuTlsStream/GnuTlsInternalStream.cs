@@ -236,7 +236,7 @@ namespace FluentFTP.GnuTLS {
 			}
 		}
 
-public void Dispose() {
+		public void Dispose() {
 			Dispose(true);
 
 			// Use SupressFinalize in case a subclass
