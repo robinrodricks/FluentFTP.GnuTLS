@@ -1,5 +1,10 @@
 # Release Notes
 
+#### 1.0.40
+  - Improve platform and architecture detection for library loading, especially for Linux and MacOS (OSX) and Mono environments.
+  - Improve disposal of GnuTLS session and credential objects as well as the stream itself with more error checking and logging.
+  - Removal of ~session and ~credential finalizers, as these are now properly disposed of in the stream's dispose method.
+
 #### 1.0.39
   - Fix memory leaks
 	  Many thanks to <rob-hendrickx-c4t> (See: https://github.com/robinrodricks/FluentFTP/issues/1579). His
