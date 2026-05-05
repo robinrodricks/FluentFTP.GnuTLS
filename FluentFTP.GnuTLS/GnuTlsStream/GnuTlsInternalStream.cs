@@ -201,12 +201,15 @@ namespace FluentFTP.GnuTLS {
 
 		// Dispose
 		protected override void Dispose(bool disposing) {
-			base.Dispose(disposing);
-			Logging.LogGnuFunc(GnuMessage.InteropMsg, "Base stream disposed");
+			if (_disposed) {
+				base.Dispose(disposing);
+				Logging.LogGnuFunc(GnuMessage.InteropMsg, "Base stream disposed");
+				return;
+			}
 
-			if (!_disposed) {
+			try {
 				if (disposing) {
-					// Dispose managed resources here.
+					// Dispose any managed resources here.
 				}
 
 				// Dispose unmanaged resources here.
@@ -219,6 +222,7 @@ namespace FluentFTP.GnuTLS {
 						catch (Exception ex) {
 							Logging.LogGnuFunc(GnuMessage.InteropMsg, "Exception while checking pending records before close notify: " + ex.Message);
 						}
+
 						if (count > 0) {
 							byte[] buf = new byte[count];
 							DateTime tNow = DateTime.UtcNow;
@@ -242,6 +246,7 @@ namespace FluentFTP.GnuTLS {
 								totalRead += bytesRead;
 							}
 						}
+
 						try {
 							GnuTls.GnuTlsBye(sess, CloseRequestT.GNUTLS_SHUT_RDWR, ctimeout);
 							if (count > 0) {
@@ -264,38 +269,42 @@ namespace FluentFTP.GnuTLS {
 					catch (Exception ex) {
 						Logging.LogGnuFunc(GnuMessage.InteropMsg, "Exception while disposing session: " + ex.Message);
 					}
-
-					if (cred != null) {
-						try {
-							cred.Dispose();
-							cred = null;
-							Logging.LogGnuFunc(GnuMessage.InteropMsg, "Credentials disposed");
-						}
-						catch (Exception ex) {
-							Logging.LogGnuFunc(GnuMessage.InteropMsg, "Exception while disposing credentials: " + ex.Message);
-						}
-					}
-
-					lock (initLock) {
-						if (streamUseCount > 0) {
-							--streamUseCount;
-							if (streamUseCount == 0) {
-								try {
-									GnuTls.GnuTlsGlobalDeInit();
-									Logging.LogGnuFunc(GnuMessage.InteropMsg, "GnuTLS deinitialized");
-								}
-								catch (Exception ex) {
-									Logging.LogGnuFunc(GnuMessage.InteropMsg, "Exception while deinitializing GnuTLS: " + ex.Message);
-								}
-							}
-							else {
-								Logging.LogGnuFunc(GnuMessage.InteropMsg, "GnuTLS not deinitialized, users left = " + streamUseCount);
-							}
-						}
-					}
-
-					_disposed = true;
 				}
+
+				if (cred != null) {
+					try {
+						cred.Dispose();
+						cred = null;
+						Logging.LogGnuFunc(GnuMessage.InteropMsg, "Credentials disposed");
+					}
+					catch (Exception ex) {
+						Logging.LogGnuFunc(GnuMessage.InteropMsg, "Exception while disposing credentials: " + ex.Message);
+					}
+				}
+			}
+			finally {
+				lock (initLock) {
+					if (streamUseCount > 0) {
+						--streamUseCount;
+						if (streamUseCount == 0) {
+							try {
+								GnuTls.GnuTlsGlobalDeInit();
+								Logging.LogGnuFunc(GnuMessage.InteropMsg, "GnuTLS deinitialized");
+							}
+							catch (Exception ex) {
+								Logging.LogGnuFunc(GnuMessage.InteropMsg, "Exception while deinitializing GnuTLS: " + ex.Message);
+							}
+						}
+						else {
+							Logging.LogGnuFunc(GnuMessage.InteropMsg, "GnuTLS not deinitialized, users left = " + streamUseCount);
+						}
+					}
+				}
+
+				_disposed = true;
+
+				base.Dispose(disposing);
+				Logging.LogGnuFunc(GnuMessage.InteropMsg, "Base stream disposed");
 			}
 		}
 
@@ -303,10 +312,21 @@ namespace FluentFTP.GnuTLS {
 			Dispose(false);
 		}
 
+		private void ThrowIfDisposed() {
+#if NET7_0_OR_GREATER
+			ObjectDisposedException.ThrowIf(_disposed, this);
+#else
+			if (_disposed) {
+				throw new ObjectDisposedException(this.GetType().FullName);
+			}
+#endif
+		}
 
 		// Methods overriding base ( = System.IO.Stream )
 
 		public override int Read(byte[] buffer, int offset, int maxCount) {
+			ThrowIfDisposed();
+
 			if (maxCount <= 0) {
 				throw new ArgumentException("GnuTlsInternalStream.Read: maxCount must be greater than zero");
 			}
@@ -377,6 +397,8 @@ namespace FluentFTP.GnuTLS {
 		}
 
 		public override void Write(byte[] buffer, int offset, int count) {
+			ThrowIfDisposed();
+
 			if (count <= 0) {
 				throw new ArgumentException("GnuTlsInternalStream.Write: count must be greater than zero");
 			}
@@ -461,12 +483,14 @@ namespace FluentFTP.GnuTLS {
 
 		public override bool CanRead {
 			get {
+				ThrowIfDisposed();
 				return IsSessionUsable;
 			}
 		}
 
 		public override bool CanWrite {
 			get {
+				ThrowIfDisposed();
 				return IsSessionUsable;
 			}
 		}
@@ -477,6 +501,7 @@ namespace FluentFTP.GnuTLS {
 		public override long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
 		public override void Flush() {
+			ThrowIfDisposed();
 			// Do we need to do anything here? This is actually invoked.
 		}
 
