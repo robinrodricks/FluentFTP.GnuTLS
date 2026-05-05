@@ -218,9 +218,21 @@ namespace FluentFTP.GnuTLS {
 						int count = GnuTls.GnuTlsRecordCheckPending(sess);
 						if (count > 0) {
 							byte[] buf = new byte[count];
+							DateTime tNow = DateTime.UtcNow;
 							int totalRead = 0;
 							while (totalRead < count) {
-								int bytesRead = Read(buf, totalRead, count - totalRead);
+								if ((DateTime.UtcNow - tNow).TotalMilliseconds > ctimeout) {
+									Logging.LogGnuFunc(GnuMessage.InteropMsg, "Timeout while flushing pending records before close notify");
+									break;
+								}
+								int bytesRead = 0;
+								try {
+									bytesRead = Read(buf, totalRead, count - totalRead);
+								}
+								catch (Exception ex) {
+									Logging.LogGnuFunc(GnuMessage.InteropMsg, "Exception while flushing pending records before close notify: " + ex.Message);
+									break;
+								}
 								if (bytesRead <= 0) {
 									break;
 								}
@@ -228,11 +240,18 @@ namespace FluentFTP.GnuTLS {
 							}
 						}
 						GnuTls.GnuTlsBye(sess, CloseRequestT.GNUTLS_SHUT_RDWR, ctimeout);
-						Logging.LogGnuFunc(GnuMessage.Handshake, "Sent close notify");
+						if (count > 0) {
+							Logging.LogGnuFunc(GnuMessage.InteropMsg, "Sent close notify after flushing " + count + " bytes");
+						}
+						else {
+							Logging.LogGnuFunc(GnuMessage.InteropMsg, "Sent close notify");
+						}
 					}
+
 					sess.Dispose();
 					sess = null;
-					Logging.LogGnuFunc(GnuMessage.Handshake, "Session disposed");
+					Logging.LogGnuFunc(GnuMessage.InteropMsg, "Session disposed");
+
 				}
 
 				if (cred != null) {
@@ -249,7 +268,7 @@ namespace FluentFTP.GnuTLS {
 							Logging.LogGnuFunc(GnuMessage.InteropMsg, "GnuTLS deinitialized");
 						}
 						else {
-							Logging.LogGnuFunc(GnuMessage.InteropMsg, "GnuTLS not deinitialized, users = " + streamUseCount);
+							Logging.LogGnuFunc(GnuMessage.InteropMsg, "GnuTLS not deinitialized, users left = " + streamUseCount);
 						}
 					}
 				}

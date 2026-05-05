@@ -23,6 +23,8 @@ namespace FluentFTP.GnuTLS.Core {
 				if (disposing) {
 					// managed resources would be disposed here, but there are none in this class
 				}
+
+				// Free any unmanaged objects here.
 				if (ptr != IntPtr.Zero) {
 					// Free the unmanaged resources
 					string gcm = GnuUtils.GetCurrentMethod() + ":CertificateCredentials";
