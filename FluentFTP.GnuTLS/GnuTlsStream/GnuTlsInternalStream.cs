@@ -212,7 +212,13 @@ namespace FluentFTP.GnuTLS {
 				// Dispose unmanaged resources here.
 				if (sess != null) {
 					if (IsSessionUsable) {
-						int count = GnuTls.GnuTlsRecordCheckPending(sess);
+						int count = 0;
+						try {
+							count = GnuTls.GnuTlsRecordCheckPending(sess);
+						}
+						catch (Exception ex) {
+							Logging.LogGnuFunc(GnuMessage.InteropMsg, "Exception while checking pending records before close notify: " + ex.Message);
+						}
 						if (count > 0) {
 							byte[] buf = new byte[count];
 							DateTime tNow = DateTime.UtcNow;
@@ -236,41 +242,60 @@ namespace FluentFTP.GnuTLS {
 								totalRead += bytesRead;
 							}
 						}
-						GnuTls.GnuTlsBye(sess, CloseRequestT.GNUTLS_SHUT_RDWR, ctimeout);
-						if (count > 0) {
-							Logging.LogGnuFunc(GnuMessage.InteropMsg, "Sent close notify after flushing " + count + " bytes");
+						try {
+							GnuTls.GnuTlsBye(sess, CloseRequestT.GNUTLS_SHUT_RDWR, ctimeout);
+							if (count > 0) {
+								Logging.LogGnuFunc(GnuMessage.InteropMsg, "Sent close notify after flushing " + count + " bytes");
+							}
+							else {
+								Logging.LogGnuFunc(GnuMessage.InteropMsg, "Sent close notify");
+							}
 						}
-						else {
-							Logging.LogGnuFunc(GnuMessage.InteropMsg, "Sent close notify");
+						catch (Exception ex) {
+							Logging.LogGnuFunc(GnuMessage.InteropMsg, "Exception while sending close notify: " + ex.Message);
+						}
+					}
+
+					try {
+						sess.Dispose();
+						sess = null;
+						Logging.LogGnuFunc(GnuMessage.InteropMsg, "Session disposed");
+					}
+					catch (Exception ex) {
+						Logging.LogGnuFunc(GnuMessage.InteropMsg, "Exception while disposing session: " + ex.Message);
+					}
+
+					if (cred != null) {
+						try {
+							cred.Dispose();
+							cred = null;
+							Logging.LogGnuFunc(GnuMessage.InteropMsg, "Credentials disposed");
+						}
+						catch (Exception ex) {
+							Logging.LogGnuFunc(GnuMessage.InteropMsg, "Exception while disposing credentials: " + ex.Message);
 						}
 					}
 
-					sess.Dispose();
-					sess = null;
-					Logging.LogGnuFunc(GnuMessage.InteropMsg, "Session disposed");
-
-				}
-
-				if (cred != null) {
-					cred.Dispose();
-					cred = null;
-					Logging.LogGnuFunc(GnuMessage.InteropMsg, "Credentials disposed");
-				}
-
-				lock (initLock) {
-					if (streamUseCount > 0) {
-						--streamUseCount;
-						if (streamUseCount == 0) {
-							GnuTls.GnuTlsGlobalDeInit();
-							Logging.LogGnuFunc(GnuMessage.InteropMsg, "GnuTLS deinitialized");
-						}
-						else {
-							Logging.LogGnuFunc(GnuMessage.InteropMsg, "GnuTLS not deinitialized, users left = " + streamUseCount);
+					lock (initLock) {
+						if (streamUseCount > 0) {
+							--streamUseCount;
+							if (streamUseCount == 0) {
+								try {
+									GnuTls.GnuTlsGlobalDeInit();
+									Logging.LogGnuFunc(GnuMessage.InteropMsg, "GnuTLS deinitialized");
+								}
+								catch (Exception ex) {
+									Logging.LogGnuFunc(GnuMessage.InteropMsg, "Exception while deinitializing GnuTLS: " + ex.Message);
+								}
+							}
+							else {
+								Logging.LogGnuFunc(GnuMessage.InteropMsg, "GnuTLS not deinitialized, users left = " + streamUseCount);
+							}
 						}
 					}
-				}
 
-				_disposed = true;
+					_disposed = true;
+				}
 			}
 		}
 
