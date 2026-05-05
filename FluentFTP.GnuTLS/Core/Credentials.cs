@@ -14,7 +14,6 @@ namespace FluentFTP.GnuTLS.Core {
 
 		public void Dispose() {
 			Dispose(true);
-
 			GC.SuppressFinalize(this);
 		}
 
@@ -38,11 +37,6 @@ namespace FluentFTP.GnuTLS.Core {
 				_disposed = true;
 			}
 		}
-
-		~Credentials() {
-			Dispose(false);
-		}
-
 	}
 
 	internal class CertificateCredentials : Credentials, IDisposable {
