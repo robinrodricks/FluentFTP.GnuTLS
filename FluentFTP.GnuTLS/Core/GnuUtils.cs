@@ -211,6 +211,8 @@ namespace FluentFTP.GnuTLS.Core {
 			target = ".NET 8.0";
 #elif NET9_0
 			target = ".NET 9.0";
+#elif NET10_0
+			target = ".NET 10.0";
 #elif NET10_0_OR_GREATER
 			target = ".NET 10.0+";
 #endif
