@@ -133,96 +133,91 @@ namespace FluentFTP.GnuTLS.Core {
 		/// <summary>
 		/// Gets the target framework moniker (TFM) for the current build.
 		/// </summary>
-		/// <returns>The TFM description.</returns>
+		/// <returns>The TFM description, or "Unknown" if the current TFM isn't recognized.</returns>
 		public static string GetLibTarget() {
 			// Return the library target version chosen by the build process of
 			// the user of this library, useful when multitargeted Nuget package
 			// is accessed.
-			string target = "Unknown";
 #if NET20
-			target = ".NET Framework 2.0";
+			return ".NET Framework 2.0";
 #elif NET35
-			target = ".NET Framework 3.5";
+			return ".NET Framework 3.5";
 #elif NET40
-			target = ".NET Framework 4.0";
+			return ".NET Framework 4.0";
 #elif NET45
-			target = ".NET Framework 4.5";
+			return ".NET Framework 4.5";
 #elif NET451
-			target = ".NET Framework 4.5.1";
+			return ".NET Framework 4.5.1";
 #elif NET452
-			target = ".NET Framework 4.5.2";
+			return ".NET Framework 4.5.2";
 #elif NET46
-			target = ".NET Framework 4.6";
+			return ".NET Framework 4.6";
 #elif NET461
-			target = ".NET Framework 4.6.1";
+			return ".NET Framework 4.6.1";
 #elif NET462
-			target = ".NET Framework 4.6.2";
+			return ".NET Framework 4.6.2";
 #elif NET47
-			target = ".NET Framework 4.7";
+			return ".NET Framework 4.7";
 #elif NET471
-			target = ".NET Framework 4.7.1";
+			return ".NET Framework 4.7.1";
 #elif NET472
-			target = ".NET Framework 4.7.2";
+			return ".NET Framework 4.7.2";
 #elif NET48
-			target = ".NET Framework 4.8";
+			return ".NET Framework 4.8";
 #elif NET48_OR_GREATER
-			target = ".NET Framework 4.8+";
+			return ".NET Framework 4.8+";
 #elif NETSTANDARD1_0
-			target = ".NET Standard 1.0";
+			return ".NET Standard 1.0";
 #elif NETSTANDARD1_1
-			target = ".NET Standard 1.1";
+			return ".NET Standard 1.1";
 #elif NETSTANDARD1_2
-			target = ".NET Standard 1.2";
+			return ".NET Standard 1.2";
 #elif NETSTANDARD1_3
-			target = ".NET Standard 1.3";
+			return ".NET Standard 1.3";
 #elif NETSTANDARD1_4
-			target = ".NET Standard 1.4";
+			return ".NET Standard 1.4";
 #elif NETSTANDARD1_5
-			target = ".NET Standard 1.5";
+			return ".NET Standard 1.5";
 #elif NETSTANDARD1_6
-			target = ".NET Standard 1.6";
+			return ".NET Standard 1.6";
 #elif NETSTANDARD2_0
-			target = ".NET Standard 2.0";
+			return ".NET Standard 2.0";
 #elif NETSTANDARD2_1
-			target = ".NET Standard 2.1";
+			return ".NET Standard 2.1";
 #elif NETSTANDARD2_1_OR_GREATER
-			target = ".NET Standard 2.1+";
+			return ".NET Standard 2.1+";
 #elif NETCOREAPP1_0
-			target = ".NET Core 1.0";
+			return ".NET Core 1.0";
 #elif NETCOREAPP1_1
-			target = ".NET Core 1.1";
+			return ".NET Core 1.1";
 #elif NETCOREAPP2_0
-			target = ".NET Core 2.0";
+			return ".NET Core 2.0";
 #elif NETCOREAPP2_1
-			target = ".NET Core 2.1";
+			return ".NET Core 2.1";
 #elif NETCOREAPP2_2
-			target = ".NET Core 2.2";
+			return ".NET Core 2.2";
 #elif NETCOREAPP3_0
-			target = ".NET Core 3.0";
+			return ".NET Core 3.0";
 #elif NETCOREAPP3_1
-			target = ".NET Core 3.1";
+			return ".NET Core 3.1";
 #elif NET5_0
-			target = ".NET 5.0";
+			return ".NET 5.0";
 #elif NET6_0
-			target = ".NET 6.0";
+			return ".NET 6.0";
 #elif NET7_0
-			target = ".NET 7.0";
+			return ".NET 7.0";
 #elif NET8_0
-			target = ".NET 8.0";
+			return ".NET 8.0";
 #elif NET9_0
-			target = ".NET 9.0";
+			return ".NET 9.0";
 #elif NET10_0
-			target = ".NET 10.0";
+			return ".NET 10.0";
 #elif NET10_0_OR_GREATER
-			target = ".NET 10.0+";
-#endif
-
-#if NET7_0 || NET8_0 || NET9_0 || NETSTANDARD2_0 || NETSTANDARD2_1 || NET462 || NET472
+			return ".NET 10.0+";
 #else
-#error .csproj: TFM must be either net7.0, net8.0, net9.0, netstandard2.0, netstandard2.1, net462 or net472
+#warning GnuUtils.GetLibTarget(): unrecognized TFM, add a branch for it.
+			return "Unknown";
 #endif
-			return target;
 		}
-
 	}
 }
