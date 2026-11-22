@@ -1,11 +1,22 @@
 #!/bin/bash
 
-TUSER=/root
+TUSER=/home/????
 
-TPFX=$TUSER/mkgnutls/builds/gnutls/client64 
+TBLD=x86_64-pc-linux-gnu
 
+# Target x86_64/W64
+# sudo apt install binutils-x86_64-w64-mingw32 gcc-x86_64-w64-mingw32
 THOST=x86_64-w64-mingw32
-TBLD=x86_64-pc-linux
+TPFX=$TUSER/mkgnutls/builds/gnutls/x86_64-w64
+TCC=x86_64-w64-mingw32-gcc
+
+# Target ARM64/Win64
+# sudo apt install binutils-aarch64-w64-mingw32 gcc-aarch64-w64-mingw32
+#THOST=aarch64-w64-mingw32
+#TPFX=$TUSER/mkgnutls/builds/gnutls/aarch64-w64
+#TCC=aarch64-w64-mingw32-gcc
+
+######################
 
 export THOST=$THOST
 export TBLD=$TBLD
@@ -34,12 +45,12 @@ cd sources
 rm -rf gmp-6.2.1
 rm gmp-6.2.1.tar.lz
 
-wget https://gmplib.org/download/gmp/gmp-6.2.1.tar.lz
+wget https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.lz
 tar xvf gmp-6.2.1.tar.lz
 
 cd gmp-6.2.1
 
-CC_FOR_BUILD=gcc ./configure --host=$THOST --prefix="$TPFX" --disable-static --enable-shared --enable-fat CFLAGS="-Wno-attributes"
+CC_FOR_BUILD=gcc CC=$TCC ./configure --host=$THOST --prefix="$TPFX" --disable-static --enable-shared --enable-fat CFLAGS="-Wno-attributes"
 
 make && make install
 

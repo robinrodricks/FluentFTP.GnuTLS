@@ -1,11 +1,22 @@
 #!/bin/bash
 
-TUSER=/root
+TUSER=/home/????
 
-TPFX=$TUSER/mkgnutls/builds/gnutls/client64 
+TBLD=x86_64-pc-linux-gnu
 
+# Target x86_64/W64
+# sudo apt install binutils-x86_64-w64-mingw32 gcc-x86_64-w64-mingw32
 THOST=x86_64-w64-mingw32
-TBLD=x86_64-pc-linux
+TPFX=$TUSER/mkgnutls/builds/gnutls/x86_64-w64
+TCC=x86_64-w64-mingw32-gcc
+
+# Target ARM64/Win64
+# sudo apt install binutils-aarch64-w64-mingw32 gcc-aarch64-w64-mingw32
+#THOST=aarch64-w64-mingw32
+#TPFX=$TUSER/mkgnutls/builds/gnutls/aarch64-w64
+#TCC=aarch64-w64-mingw32-gcc
+
+######################
 
 export THOST=$THOST
 export TBLD=$TBLD
@@ -41,7 +52,7 @@ cd gnutls-3.8.0
 
 autoreconf -f -i
 
-./configure \
+CC_FOR_BUILD=gcc CC=$TCC ./configure \
 --build=$TBLD \
 --host=$THOST \
 --prefix="$TPFX" \
