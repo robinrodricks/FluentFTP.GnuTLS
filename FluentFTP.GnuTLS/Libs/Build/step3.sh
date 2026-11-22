@@ -1,11 +1,20 @@
 #!/bin/bash
 
-TUSER=/root
+TUSER=/home/????
 
-TPFX=$TUSER/mkgnutls/builds/gnutls/client64 
+TBLD=x86_64-pc-linux-gnu
 
+# Target x86_64/W64
 THOST=x86_64-w64-mingw32
-TBLD=x86_64-pc-linux
+TPFX=$TUSER/mkgnutls/builds/gnutls/x86_64-w64
+TCC=x86_64-w64-mingw32-gcc
+
+# For other targets
+#THOST=?
+#TPFX=$TUSER/mkgnutls/builds/gnutls/?
+#TCC=?
+
+######################
 
 export THOST=$THOST
 export TBLD=$TBLD
