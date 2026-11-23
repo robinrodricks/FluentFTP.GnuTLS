@@ -5,6 +5,7 @@ TUSER=/home/????
 TBLD=x86_64-pc-linux-gnu
 
 # Target x86_64/W64
+# sudo apt install binutils-x86_64-w64-mingw32 gcc-x86_64-w64-mingw32
 THOST=x86_64-w64-mingw32
 TPFX=$TUSER/mkgnutls/builds/gnutls/x86_64-w64
 TCC=x86_64-w64-mingw32-gcc
